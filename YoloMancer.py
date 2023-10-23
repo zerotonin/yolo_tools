@@ -6,6 +6,9 @@ class YoloMancer:
     This Master class acts as a central point for configuring and managing YOLO model 
     training and refinement. It keeps track of class labels, paths to model and training 
     data, and provides methods to initiate training, validation, and other tasks.
+
+    Author: Dr. Bart Geurten
+    Date: 23rd October 2023
     """
 
     def __init__(self, class_dict=None, model_paths=None, img_train_set_paths=None):
