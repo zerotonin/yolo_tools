@@ -1,4 +1,6 @@
-## DDetection Pipeline Flow
+# Detection Pipeline 
+
+## Flow
 
 Inputs                        Movie Preprocessing           Detection               trajec. analysis     Database Management
 
@@ -9,7 +11,7 @@ movie with multiple arenas -> multiple movies of 1 arena -> mult trajectories ->
 Status:                     meta: open | data: done          data: done           data: work             db: done | handler: open
 
 
-### Meta Data needed to run the pipeline
+## Meta Data needed to run the pipeline
 
 - Experimenter
     - name = Column(String), user input cross checked with database
@@ -63,3 +65,34 @@ Status:                     meta: open | data: done          data: done         
     - stimuli_attribute_3 = Column(String), user input cross checked with database
     - stimuli_attribute_4 = Column(String), user input cross checked with database
     - stimuli_attribute_5 = Column(String), user input cross checked with database
+
+## Input Stimuli
+
+ENTER NEW STIMULUS
+    Step 1: Show all Stimuli with IDs
+    Step 2: Ask for novel Stimuli
+    Step 3: User enters values into form
+
+ENTER STIMULUS LIST FOR ARENA:
+    Repeat until break or length list is 10:
+        Step 1: Show all Stimuli with IDs
+        Step 2: If stimulus not present -> ENTER NEW STIMULUS
+
+PATTERN UNIFORM:
+    Step 1: ENTER STIMULUS LIST FOR ARENA
+    Step 2: Assign Stimulus list to all arenas
+
+PATTERN CHECKERBOARD:
+    Step 1: ENTER STIMULUS LIST FOR ARENA
+    Step 2: Assign stimulus list to all even numbered arenas
+    Step 3: Assign inverse stimulus list to all odd numbered arenas
+
+PATTERN INDIVIDUAL:
+    Iterate through arena_list:
+        Step 1: ENTER STIMULUS LIST FOR ARENA
+        Step 2: Assign stimulus list to current arena
+
+
+ENTER STIMULI FOR EXPERIMENT:
+    Step1: User chooses pattern from (horizontal_split, vertical_split, checkerboard, uniform, individual)
+    Step2: 
