@@ -58,7 +58,7 @@ Data handling:
 - The database is maintained through sqlite3 and sqlalchemy. 
 
 
-## Detection Pipeline
+## Detection Pipeline Flow
 
 Inputs                        Movie Preprocessing           Detection               trajec. analysis     Database Management
 
@@ -67,4 +67,3 @@ file with meta data        -> multiple meta data files   -----------------------
 movie with multiple arenas -> multiple movies of 1 arena -> mult trajectories -> mult. decision data ->    -------------
 
 Status:                     meta: open | data: done          data: done           data: work             db: done | handler: open
-
