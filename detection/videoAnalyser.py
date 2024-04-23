@@ -1,9 +1,9 @@
-import YoloWrapper
+import training_tools.YoloWrapper as YoloWrapper
 import os, cv2
 import numpy as np
 from tqdm import tqdm
 from itertools import chain
-import trajectoryAnalyser
+import trajectory_analysis.trajectoryAnalyser as trajectoryAnalyser
 
 
 def _tracking_result_to_cpu(results,frame_no):
