@@ -1,0 +1,17 @@
+#conda env create -f yolov8.yml
+name: yolov8  # Give your environment a name
+channels:
+  - pytorch  # Prioritize PyTorch channel
+  - conda-forge 
+dependencies:
+  - python>=3.8 
+  - numpy
+  - opencv=*=*py3*  # Specifying this format often is best for compatibility
+  - pandas 
+  - matplotlib
+  - scikit-learn
+  - pytorch  # Install PyTorch and its dependencies 
+  - torchvision 
+  - ultralytics  
+  - fuzzywuzzy
+  - tabulate 
