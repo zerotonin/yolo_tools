@@ -160,7 +160,7 @@ class FlyManager:
                 self.enter_new_fly()
             elif user_input == 'no':
                 print("Exiting program...")
-                return assignments
+                return self.flies
             else:
                 print("Invalid input, please type 'yes' or 'no'.")
 
@@ -271,20 +271,16 @@ class FlyDistributionManager:
 # Usage example:
 db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
 db_handler = DatabaseHandler(db_url)
-fly_manager = FlyManager(db_handler)
+# fly_manager = FlyManager(db_handler)
 
-# To start entering stimuli for an experiment:
-assignments = fly_manager.enter_flies_for_experiment()
-save_flies_to_json('./test_flies.json',assignments)
+# # To start entering stimuli for an experiment:
+# assignments = fly_manager.enter_flies_for_experiment()
+# save_flies_to_json('./test_flies.json',assignments)
 
 # # Example usage:
-# fly_distribution_manager = FlyDistributionManager()
-# flies = [
-#     {'is_female': True, 'genotype_id': 1, 'age_day_after_eclosion': 5, 'attribute_ids': [1, 2]},
-#     # Add more flies as needed
-# ]
-# fly_distribution_manager.load_flies(flies)
-# total_arenas = 54  # Example arena count
-# fly_distribution_manager.enter_flies_for_experiment(total_arenas)
-# arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with rows and cols
-# fly_distribution_manager.show_arena_assignments(arenas)
+flies = load_flies_from_json('./test_flies.json')
+fly_distribution_manager = FlyDistributionManager(flies)
+total_arenas = 54  # Example arena count
+fly_distribution_manager.enter_flies_for_experiment(total_arenas)
+arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with rows and cols
+fly_distribution_manager.show_arena_assignments(arenas)
