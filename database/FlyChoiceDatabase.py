@@ -425,18 +425,16 @@ class DatabaseHandler:
     def get_records(self, model, filters=None):
         """
         Retrieves records from the database based on the model and filters provided.
-
-        Args:
-            model (Base): The model class to query.
-            filters (dict, optional): Conditions to filter the query.
-
-        Returns:
-            Query result as a list of model instances.
         """
         query = self.session.query(model)
         if filters:
-            query = query.filter_by(**filters)
+            for attr, value in filters.items():
+                if isinstance(value, set):
+                    query = query.filter(getattr(model, attr).in_(value))
+                else:
+                    query = query.filter(getattr(model, attr) == value)
         return query.all()
+
 
     def update_records(self, model, filters, updates):
         """
