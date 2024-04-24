@@ -38,7 +38,6 @@ class ArenaAttribute(Base):
     # Relationship back to Arena
     arenas = relationship("Arena", secondary=arena_attributes_association, back_populates="attributes")
 
-
 class Arena(Base):
     """Represents an arena where experiments are conducted.
     
@@ -62,6 +61,8 @@ class Arena(Base):
     arena_attribute_4 = Column(Integer, ForeignKey('arena_attribute.id'), nullable=True)
     arena_attribute_5 = Column(Integer, ForeignKey('arena_attribute.id'), nullable=True)
     # New relationship to ArenaAttribute
+    attributes = relationship("ArenaAttribute", secondary=arena_attributes_association, back_populates="arenas")
+    trials = relationship("Trial", back_populates="arena")  # Reciprocal relationship
 
 
 class StimuliAttribute(Base):
@@ -77,7 +78,6 @@ class StimuliAttribute(Base):
     name = Column(String)
     # Relationship back to Stimulus
     stimuli = relationship("Stimulus", secondary=stimulus_attributes_association, back_populates="attributes")
-
 
 class Stimulus(Base):
     """Represents a stimulus used in trials of an experiment.
@@ -103,10 +103,8 @@ class Stimulus(Base):
     stimuli_attribute_4 = Column(Integer, ForeignKey('stimuli_attribute.id'), nullable=True)
     stimuli_attribute_5 = Column(Integer, ForeignKey('stimuli_attribute.id'), nullable=True)
     # Relationship to Experiment
-    experiments = relationship("Experiment", secondary=trial_stimuli_association, back_populates="stimuli")
+    trials = relationship("Trial", secondary=trial_stimuli_association, back_populates="stimuli")
     attributes = relationship("StimuliAttribute", secondary=stimulus_attributes_association, back_populates="stimuli")
-
-
 
 class Experimenter(Base):
     """Represents an experimenter who conducts experiments.
@@ -144,6 +142,7 @@ class Experiment(Base):
     fps = Column(Float)
     video_file_path = Column(String)
     experiment_type = Column(Integer, ForeignKey('choice_experiment_type.id'))
+    experimenter_id = Column(Integer, ForeignKey('experimenter.id')) 
     number_of_arenas = Column(Integer)
     number_of_arena_rows = Column(Integer)
     number_of_arena_columns = Column(Integer)
@@ -177,7 +176,6 @@ class FlyAttribute(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     flies = relationship("Fly", secondary=fly_attributes_association, back_populates="attributes")
-
 
 class Genotype(Base):
     """Represents a genotype of a fly.
@@ -218,6 +216,7 @@ class Fly(Base):
     # Establishing the relationship to the Genotype table
     genotype = relationship("Genotype", back_populates="flies")
     attributes = relationship("FlyAttribute", secondary=fly_attributes_association, back_populates="flies")
+    trials = relationship("Trial", back_populates="fly")  # Reciprocal relationship
 
 class Trial(Base):
     """Represents a trial within an experiment, including associated stimuli.
@@ -253,11 +252,11 @@ class Trial(Base):
     # Relationship to Experiment
     experiment = relationship("Experiment", back_populates="trials")
     # Relationship to Fly
-    fly = relationship("Fly")
+    fly = relationship("Fly", back_populates="trials")
     # Relationship to Arena
-    arena = relationship("Arena")
+    arena = relationship("Arena", back_populates="trials")
     # New relationship to Stimulus
-    stimuli = relationship("Stimulus", secondary=trial_stimuli_association)
+    stimuli = relationship("Stimulus", secondary=trial_stimuli_association, back_populates="trials")
     locomotor_data = relationship("Locomotor", back_populates="trial", uselist=False)
     two_choice_decision = relationship("TwoChoiceDecision", back_populates="trial", uselist=False)
     trajectories = relationship("Trajectories", back_populates="trial")
@@ -363,24 +362,6 @@ class DatabaseHandler:
             db_path = connection_string.replace('sqlite:///', '')
             if not os.path.exists(db_path):
                 self.create_database()
-
-    def create_database(self):
-        """
-        Creates the database tables and prints an ASCII art message indicating creation.
-        """
-        Base.metadata.create_all(self.engine)
-        print(r"""
-        *********************************************
-        *                                           *
-        *     New Database Created Successfully!    *
-        *                                           *
-        *********************************************
-        """)
-
-    def __enter__(self):
-        self.session = self.Session()
-        return self
-
     def __enter__(self):
         """
         Enters a runtime context related to this object. The with statement will bind this method’s return
@@ -399,6 +380,20 @@ class DatabaseHandler:
             exc_tb: The traceback of the exception.
         """
         self.session.close()
+
+    def create_database(self):
+        """
+        Creates the database tables and prints an ASCII art message indicating creation.
+        """
+        Base.metadata.create_all(self.engine)
+        print(r"""
+        *********************************************
+        *                                           *
+        *     New Database Created Successfully!    *
+        *                                           *
+        *********************************************
+        """)
+
 
     def execute_query(self, query, params=None):
         """
