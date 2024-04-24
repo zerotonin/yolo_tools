@@ -106,11 +106,12 @@ class StimulusManager:
         pattern_functions = {
             'uniform': self.pattern_uniform,
             'horizontal': self.pattern_horizontal,
+            'vertical': self.pattern_vetrical,
             # other patterns mapped to their respective functions
         }
 
         if pattern in pattern_functions:
-            assignments = pattern_functions[pattern](number_of_arenas)
+            assignments = pattern_functions[pattern](number_of_arenas, number_of_arena_rows,number_of_arena_columns)
             self.display_stimuli_grid(assignments, number_of_arena_rows, number_of_arena_columns)
             return assignments
         else:
@@ -164,7 +165,7 @@ class StimulusManager:
 
 
 
-    def pattern_uniform(self, number_of_arenas):
+    def pattern_uniform(self, number_of_arenas,_,__):
         """
         Assigns a uniform pattern of stimuli across all arenas.
         """
@@ -172,7 +173,7 @@ class StimulusManager:
         assignments = [stimulus_list for i in range(number_of_arenas)]
         return assignments
     
-    def pattern_horizontal(self, number_of_arenas):
+    def pattern_horizontal(self, number_of_arenas,_,__):
         """
         Assigns a uniform pattern of stimuli across all arenas.
         """
@@ -181,6 +182,24 @@ class StimulusManager:
         assignments += [stimulus_list[::-1] for _ in range(int(number_of_arenas/2))]
         return assignments
 
+    def pattern_vetrical(self, number_of_arenas,rows,cols):
+        """
+        Assigns a uniform pattern of stimuli across all arenas.
+        """
+        stimulus_list = self.enter_stimulus_list_for_arena()
+        assignments = list()
+        counter = 0
+        for i in range(number_of_arenas):
+            if counter < cols/2:
+                assignments.append(stimulus_list)
+            elif counter >= cols/2 and counter < cols:
+                assignments.append(stimulus_list[::-1])
+            else:
+                assignments.append(stimulus_list)
+                counter = 0
+            counter += 1
+
+        return assignments
 
 
 class StimulusAttributeManager:
