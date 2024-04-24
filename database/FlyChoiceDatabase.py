@@ -64,7 +64,6 @@ class Arena(Base):
     attributes = relationship("ArenaAttribute", secondary=arena_attributes_association, back_populates="arenas")
     trials = relationship("Trial", back_populates="arena")  # Reciprocal relationship
 
-
 class StimuliAttribute(Base):
     """Represents an attribute that can be assigned to stimuli, describing their characteristics.
     
