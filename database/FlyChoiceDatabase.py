@@ -344,8 +344,10 @@ class Trajectories(Base):
     # Relationship to Trial
     trial = relationship("Trial", back_populates="trajectories")
 
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 class DatabaseHandler:
     def __init__(self, connection_string):
@@ -357,6 +359,27 @@ class DatabaseHandler:
         """
         self.engine = create_engine(connection_string)
         self.Session = sessionmaker(bind=self.engine)
+        if connection_string.startswith('sqlite:///'):
+            db_path = connection_string.replace('sqlite:///', '')
+            if not os.path.exists(db_path):
+                self.create_database()
+
+    def create_database(self):
+        """
+        Creates the database tables and prints an ASCII art message indicating creation.
+        """
+        Base.metadata.create_all(self.engine)
+        print(r"""
+        *********************************************
+        *                                           *
+        *     New Database Created Successfully!    *
+        *                                           *
+        *********************************************
+        """)
+
+    def __enter__(self):
+        self.session = self.Session()
+        return self
 
     def __enter__(self):
         """
