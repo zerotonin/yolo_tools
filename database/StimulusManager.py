@@ -1,5 +1,6 @@
 from FlyChoiceDatabase import *
-
+from prettytable import PrettyTable
+import os 
 class StimulusManager:
     def __init__(self, db_handler):
         """
@@ -16,9 +17,12 @@ class StimulusManager:
         """
         with self.db_handler as db:
             stimuli = db.get_records(Stimulus)
+            table = PrettyTable()
+            table.field_names = ["ID", "Name", "Type", "Amplitude", "Unit"]
             for stimulus in stimuli:
-                print(f"ID: {stimulus.id}, Name: {stimulus.name}, Type: {stimulus.type}, Amplitude: {stimulus.amplitude} {stimulus.amplitude_unit}")
-
+                table.add_row([stimulus.id, stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit])
+            print(table)
+            
     def enter_new_stimulus(self):
         """
         Guides the user to enter a new stimulus into the databasun.
