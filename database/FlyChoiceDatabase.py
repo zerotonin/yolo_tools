@@ -343,3 +343,123 @@ class Trajectories(Base):
 
     # Relationship to Trial
     trial = relationship("Trial", back_populates="trajectories")
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+class DatabaseHandler:
+    def __init__(self, connection_string):
+        """
+        Initializes the database handler with a connection string.
+        
+        Args:
+            connection_string (str): The database connection string.
+        """
+        self.engine = create_engine(connection_string)
+        self.Session = sessionmaker(bind=self.engine)
+
+    def __enter__(self):
+        """
+        Enters a runtime context related to this object. The with statement will bind this method’s return
+        value to the target specified in the as clause of the statement.
+        """
+        self.session = self.Session()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Exits the runtime context and optionally handles an exception.
+        
+        Args:
+            exc_type: The type of the exception.
+            exc_val: The value of the exception.
+            exc_tb: The traceback of the exception.
+        """
+        self.session.close()
+
+    def execute_query(self, query, params=None):
+        """
+        Executes a SQL query directly.
+
+        Args:
+            query (str): The SQL query to execute.
+            params (dict, optional): Parameters to pass to the SQL query.
+
+        Returns:
+            The result of the query execution.
+        """
+        if params is None:
+            result = self.session.execute(query)
+        else:
+            result = self.session.execute(query, params)
+        return result
+
+    def add_record(self, record):
+        """
+        Adds a new record to the session.
+
+        Args:
+            record (Base): The record (instance of a mapped class) to add.
+        """
+        self.session.add(record)
+        self.session.commit()
+
+    def get_records(self, model, filters=None):
+        """
+        Retrieves records from the database based on the model and filters provided.
+
+        Args:
+            model (Base): The model class to query.
+            filters (dict, optional): Conditions to filter the query.
+
+        Returns:
+            Query result as a list of model instances.
+        """
+        query = self.session.query(model)
+        if filters:
+            query = query.filter_by(**filters)
+        return query.all()
+
+    def update_records(self, model, filters, updates):
+        """
+        Updates records based on the model, filters, and updates provided.
+
+        Args:
+            model (Base): The model class to update.
+            filters (dict): Conditions to filter the records to update.
+            updates (dict): Dictionary of fields to update.
+        """
+        records = self.session.query(model).filter_by(**filters).update(updates)
+        self.session.commit()
+        return records
+
+    def delete_records(self, model, filters):
+        """
+        Deletes records based on the model and filters provided.
+
+        Args:
+            model (Base): The model class from which to delete records.
+            filters (dict): Conditions to filter the records to delete.
+        """
+        records = self.session.query(model).filter_by(**filters).delete()
+        self.session.commit()
+        return records
+
+'''
+# Assuming you have a model defined as `MyModel` and SQLAlchemy setup done.
+db_url = 'sqlite:///your_database.db'
+with DatabaseHandler(db_url) as db:
+    # Adding a new record
+    new_record = MyModel(name="New Record")
+    db.add_record(new_record)
+
+    # Querying records
+    records = db.get_records(MyModel, filters={'name': 'New Record'})
+
+    # Updating records
+    db.update_records(MyModel, filters={'name': 'New Record'}, updates={'name': 'Updated Record'})
+
+    # Deleting records
+    db.delete_records(MyModel, filters={'name': 'Updated Record'})
+
+'''
