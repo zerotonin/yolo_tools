@@ -105,6 +105,7 @@ class StimulusManager:
         pattern = input("Choose a pattern (uniform, checkerboard, horizontal, vertical, individual): ").lower()
         pattern_functions = {
             'uniform': self.pattern_uniform,
+            'horizontal': self.pattern_horizontal,
             # other patterns mapped to their respective functions
         }
 
@@ -170,6 +171,16 @@ class StimulusManager:
         stimulus_list = self.enter_stimulus_list_for_arena()
         assignments = [stimulus_list for i in range(number_of_arenas)]
         return assignments
+    
+    def pattern_horizontal(self, number_of_arenas):
+        """
+        Assigns a uniform pattern of stimuli across all arenas.
+        """
+        stimulus_list = self.enter_stimulus_list_for_arena()
+        assignments = [stimulus_list for _ in range(int(number_of_arenas/2))]
+        assignments += [stimulus_list[::-1] for _ in range(int(number_of_arenas/2))]
+        return assignments
+
 
 
 class StimulusAttributeManager:
