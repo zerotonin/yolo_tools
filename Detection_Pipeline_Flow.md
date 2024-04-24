@@ -34,17 +34,6 @@ e.g.
     - number_of_arena_rows = Column(Integer)
     - number_of_arena_columns = Column(Integer)
 
-- Arena (per arena, check for duplicates)
-    - name = Column(String), user input cross checked with database
-    - size_width_mm = Column(Float), user input new if not in db
-    - size_height_mm = Column(Float), user input new if not in db
-    - size_radius_mm = Column(Float), user input new if not in db
-    - arena_attribute_1 = Column(String), user input new if not in db
-    - arena_attribute_2 = Column(String), user input new if not in db
-    - arena_attribute_3 = Column(String), user input new if not in db
-    - arena_attribute_4 = Column(String), user input new if not in db
-    - arena_attribute_5 = Column(String), user input new if not in db
-
 - Fly (per arena)     
     - is_female = Column(Boolean), user input
     - genotype_id = Column(String), user input cross checked with database
@@ -56,6 +45,19 @@ e.g.
 
 
 ### Done
+
+
+- Arena (per arena, check for duplicates)
+    - name = Column(String), user input cross checked with database
+    - size_width_mm = Column(Float), user input new if not in db
+    - size_height_mm = Column(Float), user input new if not in db
+    - size_radius_mm = Column(Float), user input new if not in db
+    - arena_attribute_1 = Column(String), user input new if not in db
+    - arena_attribute_2 = Column(String), user input new if not in db
+    - arena_attribute_3 = Column(String), user input new if not in db
+    - arena_attribute_4 = Column(String), user input new if not in db
+    - arena_attribute_5 = Column(String), user input new if not in db
+
 
 
 - Trial
