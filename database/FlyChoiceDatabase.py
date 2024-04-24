@@ -131,9 +131,12 @@ class Experiment(Base):
         video_file_path (String): File path to the video recording of the experiment.
         experiment_type_id (Integer): Foreign key to `ChoiceExperimentType`.
         experimenter_id (Integer): Foreign key to `Experimenter`.
-        experimenter (relationship): Many-to-one relationship to `Experimenter`.
-        choice_experiment_type (relationship): Many-to-one relationship to `ChoiceExperimentType`.
-        trials (relationship): One-to-many relationship to `Trial`.
+        number_of_arenas (Integer): The total number of arenas used in the experiment.
+        number_of_arena_rows (Integer): The number of rows of arenas in the setup.
+        number_of_arena_columns (Integer): The number of columns of arenas in the setup.
+        experimenter (relationship): Many-to-one relationship to `Experimenter`, linking to the experimenter managing the experiment.
+        choice_experiment_type (relationship): Many-to-one relationship to `ChoiceExperimentType`, indicating the type of experiment conducted.
+        trials (relationship): One-to-many relationship to `Trial`, linking to the trials conducted as part of this experiment.
     """
     __tablename__ = 'experiment'
     id = Column(Integer, primary_key=True)
@@ -141,6 +144,9 @@ class Experiment(Base):
     fps = Column(Float)
     video_file_path = Column(String)
     experiment_type = Column(Integer, ForeignKey('choice_experiment_type.id'))
+    number_of_arenas = Column(Integer)
+    number_of_arena_rows = Column(Integer)
+    number_of_arena_columns = Column(Integer)
     # Relationships
     experimenter = relationship("Experimenter", back_populates="experiments")
     choice_experiment_type = relationship("ChoiceExperimentType", back_populates="experiments")
