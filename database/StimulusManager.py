@@ -1,6 +1,8 @@
 from FlyChoiceDatabase import *
 from prettytable import PrettyTable
 import os 
+
+
 class StimulusManager:
     def __init__(self, db_handler):
         """
@@ -20,51 +22,79 @@ class StimulusManager:
 
     def show_stimuli(self):
         """
-        Prints all stimuli with their IDs for selection.
+        Prints all stimuli with their IDs and associated attributes for selection.
         """
         with self.db_handler as db:
             stimuli = db.get_records(Stimulus)
             table = PrettyTable()
-            table.field_names = ["ID", "Name", "Type", "Amplitude", "Unit"]
+            table.field_names = ["ID", "Name", "Type", "Amplitude", "Unit", "Attributes"]
             for stimulus in stimuli:
-                table.add_row([stimulus.id, stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit])
+                # Fetching attributes for each stimulus
+                attributes = ', '.join([attr.name for attr in stimulus.attributes])
+                table.add_row([stimulus.id, stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit, attributes])
             print(table)
 
     def enter_new_stimulus(self):
         """
-        Guides the user to enter a new stimulus into the databasun.
+        Guides the user to enter a new stimulus into the database, including attributes.
         """
+        self._clear_screen()
         self.show_stimuli()
         name = input("Enter the name of the new stimulus: ")
-        type_ = input("Enter the type of the new stimulus (e.g., 'chemical', 'light'): ") 
+        type_ = input("Enter the type of the new stimulus (e.g., 'chemical', 'light'): ")
         amplitude = float(input("Enter the amplitude of the new stimulus: "))
         amplitude_unit = input("Enter the unit of amplitude (e.g., 'mV', 'lux'): ")
 
-        new_stimulus = Stimulus(name=name, type=type_, amplitude=amplitude, amplitude_unit=amplitude_unit)
+        attribute_manager = StimulusAttributeManager(self.db_handler)
+        attributes = []
+        for _ in range(5):  # Allows entry for up to 5 attributes
+            attribute = attribute_manager.select_or_create_attribute()
+            if attribute:  # Ensure attribute is not None
+                attributes.append(attribute)
+            if input("Add more? (y/n): ").lower() != 'y' or not attribute:
+                break
+
+        new_stimulus = Stimulus(name=name, type=type_, amplitude=amplitude, amplitude_unit=amplitude_unit, attributes=attributes)
         with self.db_handler as db:
             db.add_record(new_stimulus)
         print("New stimulus added successfully.")
 
     def enter_stimulus_list_for_arena(self):
         """
-        Collects a list of stimuli for an arena, adding new stimuli if necessary.
+        Collects a list of stimuli for an arena, adding new stimuli if necessary, and shows chosen IDs.
         """
         stimuli_list = []
         while len(stimuli_list) < 10:
             self._clear_screen()
             self.show_stimuli()
+            # Display currently selected stimulus IDs
+            if stimuli_list:
+                print("Currently selected Stimulus IDs:", ', '.join(map(str, stimuli_list)))
+            
             stimulus_id = input("Enter stimulus ID or 'new' to add a new stimulus: ")
             if stimulus_id.lower() == 'new':
                 self.enter_new_stimulus()
+                continue  # After adding new stimulus, show updated list
             else:
-                with self.db_handler as db:
-                    stimulus = db.get_records(Stimulus, filters={'id': int(stimulus_id)})
-                    if stimulus:
-                        stimuli_list.append(stimulus[0].id)
-                    else:
-                        print("Stimulus not found.")
+                try:
+                    stimulus_id = int(stimulus_id)  # Ensure it's an integer
+                    with self.db_handler as db:
+                        stimulus = db.get_records(Stimulus, filters={'id': stimulus_id})
+                        if stimulus:
+                            stimuli_list.append(stimulus[0].id)
+                            print(f"Added Stimulus ID {stimulus[0].id}.")
+                        else:
+                            print("Stimulus not found.")
+                except ValueError:
+                    print("Please enter a valid numeric ID.")
+            
+            if len(stimuli_list) >= 10:
+                print("Maximum of 10 stimuli reached.")
+                break
+            
             if input("Add more? (y/n): ").lower() != 'y':
                 break
+
         return stimuli_list
 
     def enter_stimuli_for_experiment(self, number_of_arenas, number_of_arena_rows, number_of_arena_columns):
@@ -101,7 +131,9 @@ class StimulusManager:
             # Filters to fetch only relevant stimuli
             filtered_stimuli = db.get_records(Stimulus, filters={'id': unique_stimulus_ids})
             for stimulus in filtered_stimuli:
-                stimuli_details[stimulus.id] = (stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit)
+                # Fetch attribute names and create a comma-separated string
+                attribute_names = ', '.join([attr.name for attr in stimulus.attributes])
+                stimuli_details[stimulus.id] = (stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit, attribute_names)
 
         table = PrettyTable()
         table.field_names = [f"Column {i+1}" for i in range(cols)]
@@ -120,12 +152,12 @@ class StimulusManager:
         self._clear_screen()
         print(table)
         
-        # Print the legend with detailed stimulus information
+        # Print the legend with detailed stimulus information including attributes
         print("\nLegend:")
         print("Each cell represents the stimulus IDs assigned to an arena. 'None' indicates no assignment.")
         for stimulus_id, details in stimuli_details.items():
-            name, type_, amplitude, unit = details
-            print(f"ID: {stimulus_id}, Name: {name}, Type: {type_}, Amplitude: {amplitude} {unit}")
+            name, type_, amplitude, unit, attributes = details
+            print(f"ID: {stimulus_id}, Name: {name}, Type: {type_}, Amplitude: {amplitude} {unit}, Attributes: {attributes}")
         print('')
         _=input("Press Enter to continue...")
 
@@ -138,6 +170,41 @@ class StimulusManager:
         stimulus_list = self.enter_stimulus_list_for_arena()
         assignments = [stimulus_list for i in range(number_of_arenas)]
         return assignments
+
+
+class StimulusAttributeManager:
+    def __init__(self, db_handler):
+        self.db_handler = db_handler
+
+    def select_or_create_attribute(self):
+        """
+        Allows the user to select an existing attribute or create a new one.
+        Returns the selected or newly created attribute.
+        """
+        with self.db_handler as db:
+            attributes = db.get_records(StimuliAttribute)
+            print("\nExisting Attributes:")
+            for attr in attributes:
+                print(f"ID: {attr.id}, Name: {attr.name}")
+
+            choice = input("Enter attribute ID to select or 'new' to create a new attribute: ")
+            if choice.lower() == 'new':
+                return self.create_new_attribute()
+            else:
+                # Make sure to return a single StimuliAttribute object
+                attribute = db.get_records(StimuliAttribute, filters={'id': int(choice)})
+                return attribute[0] if attribute else None
+            
+    def create_new_attribute(self):
+        """
+        Guides the user to create a new stimulus attribute.
+        """
+        name = input("Enter the name of the new attribute: ")
+        new_attribute = StimuliAttribute(name=name)
+        with self.db_handler as db:
+            db.add_record(new_attribute)
+        return new_attribute
+
 
 # Usage example:
 db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
