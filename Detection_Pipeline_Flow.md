@@ -117,7 +117,7 @@ PATTERN HORIZONTAL:
 PATTERN VERTICAL:
     set counter to zero
     Iterate through arena_list:
-        if counter is smaller than floor(number_of_arena_colunns/2):
+        if counter is smaller than floor or equal to(number_of_arena_colunns/2):
             Assign stimulus list to arena
         elif counter is larger than floor(number_of_arena_colunns/2) but smaller than or equal to  number_of_arena_colunns:
             Assign inverse stimulus list to arena
@@ -135,4 +135,6 @@ PATTERN INDIVIDUAL:
 ENTER STIMULI FOR EXPERIMENT:
     Step1: User chooses pattern from (horizontal_split, vertical_split, checkerboard, uniform, individual)
     Step2: RUN chosen PATTERN Function
+    Step3: Show graphic for verification
+    Step4: Return a list of tuples. where the number of tuples is the number of arenas, and the entries in the tuple are either the stimuli ids  of the stimulus table or None if this stimulus is undefined
 
