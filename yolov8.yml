@@ -15,3 +15,6 @@ dependencies:
   - ultralytics  
   - fuzzywuzzy
   - tabulate 
+  - pip
+  - pip:
+      - pretty tables
