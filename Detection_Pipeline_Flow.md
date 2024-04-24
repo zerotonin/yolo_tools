@@ -20,6 +20,8 @@ e.g.
 
 ## Meta Data needed to run the pipeline
 
+
+### ToDo
 - Experimenter
     - name = Column(String), user input cross checked with database
 
@@ -52,6 +54,10 @@ e.g.
     - fly_attribute_4 = Column(String), user input cross checked with database
     - fly_attribute_5 = Column(String), user input cross checked with database
 
+
+### Done
+
+
 - Trial
     - arena_number = Column(Integer), user input
     - stimuli_01 = Column(Integer Foreign Key Stimuli table), automated
@@ -76,65 +82,4 @@ e.g.
     - stimuli_attribute_4 = Column(String), user input cross checked with database
     - stimuli_attribute_5 = Column(String), user input cross checked with database
 
-## Input Stimuli
-
-ENTER NEW STIMULUS
-    Step 1: Show all Stimuli with IDs
-    Step 2: Ask for novel Stimuli
-    Step 3: User enters values into form
-
-ENTER STIMULUS LIST FOR ARENA:
-    Repeat until break or length list is 10:
-        Step 1: Show all Stimuli with IDs
-        Step 2: If stimulus not present -> ENTER NEW STIMULUS
-
-PATTERN UNIFORM:
-    Step 1: ENTER STIMULUS LIST FOR ARENA
-    Step 2: Assign Stimulus list to all arenas
-
-PATTERN CHECKERBOARD:
-    Step 1: ENTER STIMULUS LIST FOR ARENA
-    For each arena_row in range(number_of_arena_rows)
-        For each arena_col in range(number_of_arena_columns)
-            if arena_row is even:
-                if arena_col is even:
-                    Assign stimulus list to arena
-                else:
-                    Assign inverse stimulus list to arena
-            else:
-                if arena_col is odd:
-                    Assign stimulus list to arena
-                else:
-                    Assign inverse stimulus list to arena
-
-PATTERN HORIZONTAL:
-    Iterate through arena_list:
-        if arena number smaller than floor(number_of_arenas/2):
-            Assign stimulus list to arena
-        else:
-            Assign inverse stimulus list to arena
-
-PATTERN VERTICAL:
-    set counter to zero
-    Iterate through arena_list:
-        if counter is smaller than floor or equal to(number_of_arena_colunns/2):
-            Assign stimulus list to arena
-        elif counter is larger than floor(number_of_arena_colunns/2) but smaller than or equal to  number_of_arena_colunns:
-            Assign inverse stimulus list to arena
-        else:
-            Assign stimulus list to arena
-            set counter to zero
-        increase counter by one
-
-PATTERN INDIVIDUAL:
-    Iterate through arena_list:
-        Step 1: ENTER STIMULUS LIST FOR ARENA
-        Step 2: Assign stimulus list to current arena
-
-
-ENTER STIMULI FOR EXPERIMENT:
-    Step1: User chooses pattern from (horizontal_split, vertical_split, checkerboard, uniform, individual)
-    Step2: RUN chosen PATTERN Function
-    Step3: Show graphic for verification
-    Step4: Return a list of tuples. where the number of tuples is the number of arenas, and the entries in the tuple are either the stimuli ids  of the stimulus table or None if this stimulus is undefined
 
