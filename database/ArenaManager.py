@@ -68,7 +68,7 @@ class ArenaManager:
         while len(arenas_list) < number_of_arenas:
             self.show_arenas()
             if arenas_list:
-                print("Currently selected Arena IDs:", ', '.join(str(arena.id) for arena in arenas_list))
+                print("Currently selected Arena IDs:", ', '.join(str(arena) for arena in arenas_list))
 
             arena_id = input("Enter arena ID or 'new' to add a new arena: ")
             if arena_id.lower() == 'new':
