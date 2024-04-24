@@ -10,6 +10,13 @@ movie with multiple arenas -> multiple movies of 1 arena -> mult trajectories ->
 
 Status:                     meta: open | data: done          data: done           data: work             db: done | handler: open
 
+## Arena Numbering assignement:
+
+Arenas are counted from the top left starting with zero. Hoprizontal first, than vertical 
+e.g.
+
+0 1 2 3
+4 5 6 7
 
 ## Meta Data needed to run the pipeline
 
@@ -100,6 +107,24 @@ PATTERN CHECKERBOARD:
                 else:
                     Assign inverse stimulus list to arena
 
+PATTERN HORIZONTAL:
+    Iterate through arena_list:
+        if arena number smaller than floor(number_of_arenas/2):
+            Assign stimulus list to arena
+        else:
+            Assign inverse stimulus list to arena
+
+PATTERN VERTICAL:
+    set counter to zero
+    Iterate through arena_list:
+        if counter is smaller than floor(number_of_arena_colunns/2):
+            Assign stimulus list to arena
+        elif counter is larger than floor(number_of_arena_colunns/2) but smaller than or equal to  number_of_arena_colunns:
+            Assign inverse stimulus list to arena
+        else:
+            Assign stimulus list to arena
+            set counter to zero
+        increase counter by one
 
 PATTERN INDIVIDUAL:
     Iterate through arena_list:
@@ -109,4 +134,5 @@ PATTERN INDIVIDUAL:
 
 ENTER STIMULI FOR EXPERIMENT:
     Step1: User chooses pattern from (horizontal_split, vertical_split, checkerboard, uniform, individual)
-    Step2: 
+    Step2: RUN chosen PATTERN Function
+
