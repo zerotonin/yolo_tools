@@ -6,8 +6,16 @@ class ArenaAttributeManager:
     def __init__(self, db_handler):
         self.db_handler = db_handler
 
+
+    def _clear_screen(self):
+        """
+        Clears the terminal screen.
+        """
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     def select_or_create_attribute(self):
         with self.db_handler as db:
+            self._clear_screen()
             attributes = db.get_records(ArenaAttribute)
             print("\nExisting Arena Attributes:")
             for attr in attributes:
@@ -31,7 +39,15 @@ class ArenaManager:
     def __init__(self, db_handler):
         self.db_handler = db_handler
 
+
+    def _clear_screen(self):
+        """
+        Clears the terminal screen.
+        """
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     def show_arenas(self):
+        self._clear_screen()
         with self.db_handler as db:
             arenas = db.get_records(Arena)
             table = PrettyTable()
@@ -96,7 +112,7 @@ class ArenaManager:
         """
         arenas_list = self.enter_arena_list_for_experiment(1)  # Get one arena and replicate it
         if arenas_list:
-            return [arenas_list for _ in range(number_of_arenas)]  # Replicate the selected arena uniformly
+            return [arenas_list[0] for _ in range(number_of_arenas)]  # Replicate the selected arena uniformly
         return []
 
     def pattern_individual(self, number_of_arenas):
@@ -105,7 +121,7 @@ class ArenaManager:
         """
         return self.enter_arena_list_for_experiment(number_of_arenas)
 
-    def enter_arenas_for_experiment(self, number_of_arenas):
+    def enter_arenas_for_experiment(self, number_of_arenas,rows,cols):
         """
         Main method to start the arena assignment for an experiment.
         """
@@ -117,11 +133,41 @@ class ArenaManager:
         }
 
         if pattern in pattern_functions:
-            return pattern_functions[pattern](number_of_arenas)
+            assignments = pattern_functions[pattern](number_of_arenas)
         else:
             print("Pattern not recognized.")
             return []
+        
+        self.display_arenas_grid(assignments,rows,cols)
+        return assignments
+        
+    def display_arenas_grid(self, arena_ids, rows, cols):
+        """
+        Displays the arena IDs in a grid format based on the specified number of rows and columns.
+        
+        Args:
+            arena_ids (list): List of arena IDs.
+            rows (int): Number of rows in the grid.
+            cols (int): Number of columns in the grid.
+        """
+        if len(arena_ids) != rows * cols:
+            raise ValueError("The number of arena IDs does not match the product of rows and columns.")
 
+        table = PrettyTable()
+        table.field_names = [f"Column {i+1}" for i in range(cols)]
+
+        index = 0
+        for _ in range(rows):
+            row_entries = []
+            for _ in range(cols):
+                if index < len(arena_ids):
+                    row_entries.append(arena_ids[index])
+                    index += 1
+                else:
+                    row_entries.append("None")  # In case there are fewer IDs than slots
+            table.add_row(row_entries)
+        self._clear_screen()
+        print(table)
 
 
 
@@ -131,5 +177,5 @@ db_handler = DatabaseHandler(db_url)
 stimulus_manager = ArenaManager(db_handler)
 
 # To start entering stimuli for an experiment:
-assignments = stimulus_manager.enter_arenas_for_experiment(54)
+assignments = stimulus_manager.enter_arenas_for_experiment(54,9,6)
 print(assignments)
