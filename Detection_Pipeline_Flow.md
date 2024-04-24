@@ -21,6 +21,9 @@ Status:                     meta: open | data: done          data: done         
     - fps = Column(Float), automated from file I/O input
     - video_file_path = Column(String), automated from file I/O input
     - experiment_type = Column(String), user input cross checked with database
+    - number_of_arenas = Column(Integer)
+    - number_of_arena_rows = Column(Integer)
+    - number_of_arena_columns = Column(Integer)
 
 - Arena (per arena, check for duplicates)
     - name = Column(String), user input cross checked with database
@@ -84,8 +87,19 @@ PATTERN UNIFORM:
 
 PATTERN CHECKERBOARD:
     Step 1: ENTER STIMULUS LIST FOR ARENA
-    Step 2: Assign stimulus list to all even numbered arenas
-    Step 3: Assign inverse stimulus list to all odd numbered arenas
+    For each arena_row in range(number_of_arena_rows)
+        For each arena_col in range(number_of_arena_columns)
+            if arena_row is even:
+                if arena_col is even:
+                    Assign stimulus list to arena
+                else:
+                    Assign inverse stimulus list to arena
+            else:
+                if arena_col is odd:
+                    Assign stimulus list to arena
+                else:
+                    Assign inverse stimulus list to arena
+
 
 PATTERN INDIVIDUAL:
     Iterate through arena_list:
