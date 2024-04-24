@@ -24,15 +24,29 @@ e.g.
 ### ToDo
 - Experimenter
     - name = Column(String), user input cross checked with database
+    
+- Experiment Type
+    - name
 
 - Experiment (check for duplicates)
     - date_time = Column(DateTime), automated from file I/O input
     - fps = Column(Float), automated from file I/O input
     - video_file_path = Column(String), automated from file I/O input
     - experiment_type = Column(String), user input cross checked with database
-    - number_of_arenas = Column(Integer)
-    - number_of_arena_rows = Column(Integer)
-    - number_of_arena_columns = Column(Integer)
+    - number_of_arenas = Column(Integer), user input
+    - number_of_arena_rows = Column(Integer), user input
+    - number_of_arena_columns = Column(Integer), user input
+
+- Fly Assignment to Arena
+    - check the number of avbaiulable flies
+    - do sex by church divide (left female right male)
+    - try to reserve rows for one genotype
+    - allow to delete or correct flies by hand
+
+
+
+
+### Done
 
 - Fly (per arena)     
     - is_female = Column(Boolean), user input
@@ -42,10 +56,6 @@ e.g.
     - fly_attribute_3 = Column(String), user input cross checked with database
     - fly_attribute_4 = Column(String), user input cross checked with database
     - fly_attribute_5 = Column(String), user input cross checked with database
-
-
-### Done
-
 
 - Arena (per arena, check for duplicates)
     - name = Column(String), user input cross checked with database
