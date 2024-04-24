@@ -1,11 +1,19 @@
 from FlyChoiceDatabase import *
 from prettytable import PrettyTable
-import os 
+import os,json
 
 
 def clear_screen():
     """Clears the terminal screen for better readability."""
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def save_flies_to_json(filename,fly_data):
+    with open(filename, 'w') as f:
+        json.dump(fly_data, f, indent=4)
+
+def load_flies_from_json( filename):
+    with open(filename, 'r') as f:
+        return json.load(f)
 
 class FlyAttributeManager:
     def __init__(self, db_handler):
@@ -152,9 +160,111 @@ class FlyManager:
                 self.enter_new_fly()
             elif user_input == 'no':
                 print("Exiting program...")
-                break
+                return assignments
             else:
                 print("Invalid input, please type 'yes' or 'no'.")
+
+class FlyDistributionManager:
+    def __init__(self,fly_dict_list):
+        self.fly_data = fly_dict_list  # List to store fly data dictionaries
+
+
+    def enter_flies_for_experiment(self, total_arenas):
+        clear_screen()
+        print("Current fly configurations:")
+        self.display_fly_data()
+        
+        while True:
+            num_flies = sum(1 for _ in self.fly_data)
+            print(f"Total flies configured: {num_flies}")
+            print(f"Total arenas available: {total_arenas}")
+
+            if num_flies > total_arenas:
+                print("There are more flies than arenas. Please reduce the number of flies.")
+            elif num_flies < total_arenas:
+                print("There are fewer flies than arenas. Distribution will try to spread them evenly.")
+            else:
+                break
+
+            modification = input("Would you like to adjust the flies? (add/remove/done): ").lower()
+            if modification == 'add':
+                self.add_fly_data()
+            elif modification == 'remove':
+                self.remove_fly_data()
+            elif modification == 'done':
+                break
+
+    def add_fly_data(self):
+        # Implement adding fly data logic
+        pass
+
+    def remove_fly_data(self):
+        # Implement removing fly data logic
+        pass
+
+    def display_fly_data(self):
+        table = PrettyTable()
+        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs"]
+        for index, fly in enumerate(self.fly_data):
+            table.add_row([
+                index + 1,
+                "Yes" if fly['is_female'] else "No",
+                fly['genotype_id'],
+                fly['age_day_after_eclosion'],
+                ', '.join(map(str, fly['attribute_ids']))
+            ])
+        print(table)
+
+    def distribute_flies(self, rows, cols):
+        arenas = [[None for _ in range(cols)] for _ in range(rows)]
+        # Distribution logic based on sex and genotype
+        # This part needs to be adapted according to the actual fly sorting logic
+        return arenas
+
+    def show_arena_assignments(self, arenas):
+        clear_screen()
+        table = PrettyTable()
+        headers = [f"Col {i+1}" for i in range(len(arenas[0]))]
+        table.field_names = headers
+        for row in arenas:
+            table.add_row(row)
+        print(table)
+    def specify_participation(self):
+        """
+        Allows the user to specify how many flies of each configuration should participate in the experiment.
+        """
+        for index, fly in enumerate(self.fly_data):
+            self.display_single_fly_data(fly, index)
+            while True:
+                try:
+                    count = int(input(f"Enter the number of flies for configuration {index + 1}: "))
+                    if count < 0:
+                        raise ValueError("The number of flies cannot be negative.")
+                    fly['participation_count'] = count
+                    break
+                except ValueError as e:
+                    print(f"Invalid input: {e}. Please enter a valid number.")
+        print("Participation details updated successfully.")
+
+    def display_single_fly_data(self, fly, index):
+        """
+        Displays data for a single fly configuration.
+        """
+        print(f"Fly Configuration {index + 1}:")
+        print(f"  Is Female: {'Yes' if fly['is_female'] else 'No'}")
+        print(f"  Genotype ID: {fly['genotype_id']}")
+        print(f"  Age (days): {fly['age_day_after_eclosion']}")
+        print(f"  Attributes: {', '.join(map(str, fly['attribute_ids']))}")
+
+    def display_fly_data(self):
+        """
+        Displays all flies in the flies list with human-readable details.
+        """
+        for index, fly in enumerate(self.fly_data):
+            self.display_single_fly_data(fly, index)
+
+
+
 
 # Usage would involve creating an instance of FlyManager and using it to manage fly data efficiently.
 
@@ -165,4 +275,16 @@ fly_manager = FlyManager(db_handler)
 
 # To start entering stimuli for an experiment:
 assignments = fly_manager.enter_flies_for_experiment()
-print(assignments)
+save_flies_to_json('./test_flies.json',assignments)
+
+# # Example usage:
+# fly_distribution_manager = FlyDistributionManager()
+# flies = [
+#     {'is_female': True, 'genotype_id': 1, 'age_day_after_eclosion': 5, 'attribute_ids': [1, 2]},
+#     # Add more flies as needed
+# ]
+# fly_distribution_manager.load_flies(flies)
+# total_arenas = 54  # Example arena count
+# fly_distribution_manager.enter_flies_for_experiment(total_arenas)
+# arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with rows and cols
+# fly_distribution_manager.show_arena_assignments(arenas)
