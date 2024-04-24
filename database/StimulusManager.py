@@ -107,6 +107,7 @@ class StimulusManager:
             'uniform': self.pattern_uniform,
             'horizontal': self.pattern_horizontal,
             'vertical': self.pattern_vetrical,
+            'checkerboard': self.pattern_checkerboard
             # other patterns mapped to their respective functions
         }
 
@@ -200,6 +201,26 @@ class StimulusManager:
             counter += 1
 
         return assignments
+    
+    def pattern_checkerboard(self, number_of_arenas,rows,cols):
+
+        stimulus_list = self.enter_stimulus_list_for_arena()
+        assignments = list()
+        for row_i in range(rows):
+            for col_i in range(cols):
+                if row_i % 2 == 0:
+                    if col_i % 2 == 0:
+                        assignments.append(stimulus_list)
+                    else:
+                        assignments.append(stimulus_list[::-1])
+                else:
+                    if col_i % 2 != 0:
+                        assignments.append(stimulus_list)
+                    else:
+                        assignments.append(stimulus_list[::-1])
+        return assignments
+
+
 
 
 class StimulusAttributeManager:
