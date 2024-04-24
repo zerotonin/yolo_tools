@@ -10,6 +10,13 @@ class StimulusManager:
             db_handler (DatabaseHandler): The database handler instance to manage database operations.
         """
         self.db_handler = db_handler
+    
+
+    def _clear_screen(self):
+        """
+        Clears the terminal screen.
+        """
+        os.system('cls' if os.name == 'nt' else 'clear')
 
     def show_stimuli(self):
         """
@@ -22,7 +29,7 @@ class StimulusManager:
             for stimulus in stimuli:
                 table.add_row([stimulus.id, stimulus.name, stimulus.type, stimulus.amplitude, stimulus.amplitude_unit])
             print(table)
-            
+
     def enter_new_stimulus(self):
         """
         Guides the user to enter a new stimulus into the databasun.
@@ -44,6 +51,7 @@ class StimulusManager:
         """
         stimuli_list = []
         while len(stimuli_list) < 10:
+            self._clear_screen()
             self.show_stimuli()
             stimulus_id = input("Enter stimulus ID or 'new' to add a new stimulus: ")
             if stimulus_id.lower() == 'new':
