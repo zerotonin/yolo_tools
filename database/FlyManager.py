@@ -1,5 +1,6 @@
 from FlyChoiceDatabase import *
 from prettytable import PrettyTable
+from collections import defaultdict
 import os,json
 
 
@@ -57,8 +58,6 @@ class FlyAttributeManager:
                     names.append(attribute[0].name)
         return names
     
-
-
 class GenotypeManager:
     def __init__(self, db_handler):
         self.db_handler = db_handler
@@ -167,15 +166,37 @@ class FlyManager:
 class FlyDistributionManager:
     def __init__(self,fly_dict_list):
         self.fly_data = fly_dict_list  # List to store fly data dictionaries
+        self.initialize_participation_counts()
 
+    def initialize_participation_counts(self):
+        for fly in self.fly_data:
+            if 'participation_count' not in fly or fly['participation_count'] is None:
+                fly['participation_count'] = 0
+    
+    def display_fly_data(self):
+        table = PrettyTable()
+        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"]
+        for index, fly in enumerate(self.fly_data):
+            self.initialize_participation_counts()  # Ensure all data is initialized
+            attributes = ', '.join(map(str, fly.get('attribute_ids', [])))  # Handle if attribute_ids key is missing
+            table.add_row([
+                index + 1,
+                "Yes" if fly['is_female'] else "No",
+                fly['genotype_id'],
+                fly['age_day_after_eclosion'],
+                attributes,
+                fly['participation_count']
+            ])
+        print(table)
 
     def enter_flies_for_experiment(self, total_arenas):
-        clear_screen()
-        print("Current fly configurations:")
-        self.display_fly_data()
-        
+
         while True:
-            num_flies = sum(1 for _ in self.fly_data)
+            self.initialize_participation_counts()  # Ensure participation count is initialized
+            clear_screen()
+            print("Current fly configurations:")
+            self.display_fly_data()
+            num_flies = sum(fly['participation_count'] for fly in self.fly_data)
             print(f"Total flies configured: {num_flies}")
             print(f"Total arenas available: {total_arenas}")
 
@@ -186,82 +207,125 @@ class FlyDistributionManager:
             else:
                 break
 
-            modification = input("Would you like to adjust the flies? (add/remove/done): ").lower()
-            if modification == 'add':
-                self.add_fly_data()
-            elif modification == 'remove':
-                self.remove_fly_data()
+            modification = input("Would you like to adjust the flies? (adjust/done): ").lower()
+            if modification == 'adjust':
+                self.adjust_fly_numbers()
             elif modification == 'done':
                 break
 
-    def add_fly_data(self):
-        # Implement adding fly data logic
-        pass
-
-    def remove_fly_data(self):
-        # Implement removing fly data logic
-        pass
-
-    def display_fly_data(self):
-        table = PrettyTable()
-        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs"]
-        for index, fly in enumerate(self.fly_data):
-            table.add_row([
-                index + 1,
-                "Yes" if fly['is_female'] else "No",
-                fly['genotype_id'],
-                fly['age_day_after_eclosion'],
-                ', '.join(map(str, fly['attribute_ids']))
-            ])
-        print(table)
 
     def distribute_flies(self, rows, cols):
         arenas = [[None for _ in range(cols)] for _ in range(rows)]
-        # Distribution logic based on sex and genotype
-        # This part needs to be adapted according to the actual fly sorting logic
+        grouped_flies = {}  # Group flies by type
+
+        # Group flies by genotype and attributes, including participation count
+        for i, fly in enumerate(self.fly_data):
+            key = (fly['genotype_id'], tuple(fly.get('attribute_ids', [])), fly['is_female'])
+            if key not in grouped_flies:
+                grouped_flies[key] = []
+            for _ in range(fly['participation_count']):  # Respect participation count
+                grouped_flies[key].append(i)
+
+        # Sort and place flies in arenas
+        current_row, current_col = 0, 0
+        for flies in grouped_flies.values():
+            for fly_index in flies:
+                if current_col >= cols:
+                    current_row += 1
+                    current_col = 0
+                if current_row >= rows:
+                    print("Not enough space in arenas to place all flies.")
+                    return arenas
+                arenas[current_row][current_col] = fly_index
+                current_col += 1
+
         return arenas
 
+
     def show_arena_assignments(self, arenas):
+        if not arenas:  # Check if arenas is None or empty
+            print("No arena data available to display.")
+            return
         clear_screen()
         table = PrettyTable()
-        headers = [f"Col {i+1}" for i in range(len(arenas[0]))]
+        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(arenas[0]))]
         table.field_names = headers
-        for row in arenas:
+
+        # Fly type to number mapping (legend)
+        fly_type_to_number = {}
+        legend = "Legend:\n"
+        legend += "0: Empty arena (-)\n"  # Adding empty arena representation to the legend
+
+        # Preparing display rows and updating the legend
+        display_arenas = []
+        for row_index, row in enumerate(arenas):
+            display_row = [f"Row {row_index + 1}"]  # Row label
+            for index in row:
+                if index is None:
+                    display_row.append("-")  # Use dash for empty arenas
+                else:
+                    fly = self.fly_data[index]  # Get fly data using the index stored in arenas
+                    fly_type_key = (
+                        fly['genotype_id'],
+                        'Female' if fly['is_female'] else 'Male',
+                        tuple(fly.get('attribute_ids', []))  # Handle if attribute_ids key is missing
+                    )
+                    if fly_type_key not in fly_type_to_number:
+                        fly_type_to_number[fly_type_key] = len(fly_type_to_number) + 1
+                        attributes = ", ".join(map(str, fly_type_key[2]))
+                        legend += f"{fly_type_to_number[fly_type_key]}: Genotype {fly_type_key[0]}, {fly_type_key[1]}, Attributes: [{attributes}]\n"
+                    display_row.append(fly_type_to_number[fly_type_key])
+            display_arenas.append(display_row)
+
+        # Adding rows to the table
+        for row in display_arenas:
             table.add_row(row)
+
         print(table)
-    def specify_participation(self):
-        """
-        Allows the user to specify how many flies of each configuration should participate in the experiment.
-        """
-        for index, fly in enumerate(self.fly_data):
-            self.display_single_fly_data(fly, index)
-            while True:
-                try:
-                    count = int(input(f"Enter the number of flies for configuration {index + 1}: "))
-                    if count < 0:
-                        raise ValueError("The number of flies cannot be negative.")
-                    fly['participation_count'] = count
-                    break
-                except ValueError as e:
-                    print(f"Invalid input: {e}. Please enter a valid number.")
-        print("Participation details updated successfully.")
+        print(legend)
 
-    def display_single_fly_data(self, fly, index):
-        """
-        Displays data for a single fly configuration.
-        """
-        print(f"Fly Configuration {index + 1}:")
-        print(f"  Is Female: {'Yes' if fly['is_female'] else 'No'}")
-        print(f"  Genotype ID: {fly['genotype_id']}")
-        print(f"  Age (days): {fly['age_day_after_eclosion']}")
-        print(f"  Attributes: {', '.join(map(str, fly['attribute_ids']))}")
+    def display_fly_details(self, fly_index):
+        fly = self.fly_data[fly_index]
+        attributes = ', '.join(map(str, fly.get('attribute_ids', [])))  # Ensure attribute IDs are displayed correctly
+        details = (
+            f"Genotype ID: {fly['genotype_id']}, "
+            f"Is Female: {'Yes' if fly['is_female'] else 'No'}, "
+            f"Age (days): {fly['age_day_after_eclosion']}, "
+            f"Attributes: [{attributes}], "
+            f"Participation Count: {fly['participation_count']}"
+        )
+        print(f"Current configuration for Fly ID {fly_index + 1}:")
+        print(details)
+    def adjust_fly_numbers(self):
+        clear_screen()
+        # Display fly data to choose from
+        self.display_fly_data()
 
-    def display_fly_data(self):
-        """
-        Displays all flies in the flies list with human-readable details.
-        """
-        for index, fly in enumerate(self.fly_data):
-            self.display_single_fly_data(fly, index)
+        try:
+            # Ask user for fly ID to adjust
+            fly_id = int(input("Enter the ID of the fly to adjust (choose by ID number): "))
+            if fly_id < 1 or fly_id > len(self.fly_data):
+                print("Invalid ID. Please enter a correct ID.")
+                return
+
+            # Adjust index to match list indexing (list is 0-indexed)
+            fly_index = fly_id - 1
+
+            # Display current fly information using the subfunction
+            self.display_fly_details(fly_index)
+
+            # Prompt for new participation count
+            new_count = input("Enter new participation count for this fly: ")
+            if new_count.isdigit() and int(new_count) >= 0:
+                self.fly_data[fly_index]['participation_count'] = int(new_count)
+                print("Participation count updated successfully.")
+            else:
+                print("Invalid input. Participation count must be a non-negative integer.")
+
+        except ValueError:
+            print("Invalid input. Please enter a numerical ID.")
+
+    
 
 
 
@@ -278,7 +342,7 @@ db_handler = DatabaseHandler(db_url)
 # save_flies_to_json('./test_flies.json',assignments)
 
 # # Example usage:
-flies = load_flies_from_json('./test_flies.json')
+flies = load_flies_from_json('./test_flySet.json')
 fly_distribution_manager = FlyDistributionManager(flies)
 total_arenas = 54  # Example arena count
 fly_distribution_manager.enter_flies_for_experiment(total_arenas)
