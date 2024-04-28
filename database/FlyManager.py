@@ -15,6 +15,25 @@ def save_flies_to_json(filename,fly_data):
 def load_flies_from_json( filename):
     with open(filename, 'r') as f:
         return json.load(f)
+    
+def show_flies(self):
+    """
+    Displays all flies in the flies list with human-readable details.
+    """
+    clear_screen()
+    table = PrettyTable()
+    table.field_names = ["ID", "Is Female", "Genotype Name", "Age (days)", "Attributes"]
+    for index, fly in enumerate(self.flies):
+        genotype_name = self.genotype_manager.get_genotype_name(fly['genotype_id'])
+        attribute_names = self.attribute_manager.get_attribute_names(fly['attribute_ids'])
+        table.add_row([
+            index + 1,
+            "Yes" if fly['is_female'] else "No",
+            genotype_name,
+            fly['age_day_after_eclosion'],
+            ', '.join(attribute_names)
+        ])
+    print(table)
 
 class FlyAttributeManager:
     def __init__(self, db_handler):
@@ -164,9 +183,35 @@ class FlyManager:
                 print("Invalid input, please type 'yes' or 'no'.")
 
 class FlyDistributionManager:
-    def __init__(self,fly_dict_list):
+    """
+    Manages the distribution of flies across various experimental arenas, handling
+    fly data initialization, display, and adjustments for experiments.
+
+    Attributes:
+        fly_data (list of dicts): Stores the details of each fly involved in the experiment.
+        arenas (list of list of ints): Represents a 2D grid of arenas where each cell contains a fly index.
+        rows (int): Number of rows in the arena grid.
+        cols (int): Number of columns in the arena grid.
+        fly_type_to_number (dict): Maps unique fly type configurations to display numbers for legends.
+        genotype_manager (GenotypeManager): Manages genotype related operations.
+        attribute_manager (FlyAttributeManager): Manages fly attribute related operations.
+    """
+    def __init__(self,db_handler,fly_dict_list):
+        """
+        Initializes the FlyDistributionManager with a database handler and a list of fly dictionaries.
+
+        Args:
+            db_handler (DatabaseHandler): The database handler for accessing fly-related data.
+            fly_dict_list (list of dict): List of dictionaries, each containing details of a fly.
+        """
         self.fly_data = fly_dict_list  # List to store fly data dictionaries
         self.initialize_participation_counts()
+        self.arenas = None #init
+        self.rows = None
+        self.cols = None
+        self.fly_type_to_number = dict()
+        self.genotype_manager = GenotypeManager(db_handler)  
+        self.attribute_manager = FlyAttributeManager(db_handler)
 
     def initialize_participation_counts(self):
         for fly in self.fly_data:
@@ -175,19 +220,25 @@ class FlyDistributionManager:
     
     def display_fly_data(self):
         table = PrettyTable()
-        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"]
+        table.field_names = ["ID", "Is Female", "Genotype", "Age (days)", "Attributes", "Participation Count"]
         for index, fly in enumerate(self.fly_data):
             self.initialize_participation_counts()  # Ensure all data is initialized
-            attributes = ', '.join(map(str, fly.get('attribute_ids', [])))  # Handle if attribute_ids key is missing
+
+            # Fetch human-readable details from managers
+            genotype_name = self.genotype_manager.get_genotype_name(fly['genotype_id'])
+            attribute_names = self.attribute_manager.get_attribute_names(fly['attribute_ids'])
+            attributes_display = ', '.join(attribute_names)
+
             table.add_row([
                 index + 1,
                 "Yes" if fly['is_female'] else "No",
-                fly['genotype_id'],
+                genotype_name,
                 fly['age_day_after_eclosion'],
-                attributes,
+                attributes_display,
                 fly['participation_count']
             ])
         print(table)
+
 
     def enter_flies_for_experiment(self, total_arenas):
 
@@ -213,9 +264,10 @@ class FlyDistributionManager:
             elif modification == 'done':
                 break
 
-
     def distribute_flies(self, rows, cols):
-        arenas = [[None for _ in range(cols)] for _ in range(rows)]
+        self.cols = cols
+        self.rows = rows
+        arenas = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         grouped_flies = {}  # Group flies by type
 
         # Group flies by genotype and attributes, including participation count
@@ -230,32 +282,45 @@ class FlyDistributionManager:
         current_row, current_col = 0, 0
         for flies in grouped_flies.values():
             for fly_index in flies:
-                if current_col >= cols:
+                if current_col >= self.cols:
                     current_row += 1
                     current_col = 0
-                if current_row >= rows:
+                if current_row >= self.rows:
                     print("Not enough space in arenas to place all flies.")
                     return arenas
                 arenas[current_row][current_col] = fly_index
                 current_col += 1
 
-        return arenas
+        self.arenas = arenas
     
-    def generate_legend(self, fly_type_to_number):
+    def generate_legend(self):
         legend = "Legend:\n"
         legend += "0: Empty arena (-)\n"  # Represent empty arenas
-        for fly_type_key, number in fly_type_to_number.items():
-            attributes = ", ".join(map(str, fly_type_key[2]))
-            legend += f"{number}: Genotype {fly_type_key[0]}, {fly_type_key[1]}, Attributes: [{attributes}]\n"
+        
+
+        for fly_type_key, number in self.fly_type_to_number.items():
+            # Fetch genotype name from genotype ID
+            genotype_name = self.genotype_manager.get_genotype_name(fly_type_key[0])
+            
+            # Fetch attribute names from attribute IDs
+            attribute_names = self.attribute_manager.get_attribute_names(fly_type_key[2])
+
+            # Prepare attributes description
+            attributes = ", ".join(attribute_names)
+
+            # Append details to the legend
+            legend += f"{number}: Genotype {genotype_name}, {'Female' if fly_type_key[1] else 'Male'}, Attributes: [{attributes}]\n"
+
         return legend
 
-    def prepare_arena_table(self, arenas, fly_type_to_number):
+
+    def prepare_arena_table(self):
         table = PrettyTable()
-        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(arenas[0]))]
+        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(self.arenas[0]))]
         table.field_names = headers
 
         display_arenas = []
-        for row_index, row in enumerate(arenas):
+        for row_index, row in enumerate(self.arenas):
             display_row = [f"Row {row_index + 1}"]
             for index in row:
                 if index is None:
@@ -267,9 +332,9 @@ class FlyDistributionManager:
                         'Female' if fly['is_female'] else 'Male',
                         tuple(fly.get('attribute_ids', []))
                     )
-                    if fly_type_key not in fly_type_to_number:
-                        fly_type_to_number[fly_type_key] = len(fly_type_to_number) + 1
-                    display_row.append(fly_type_to_number[fly_type_key])
+                    if fly_type_key not in self.fly_type_to_number:
+                        self.fly_type_to_number[fly_type_key] = len(self.fly_type_to_number) + 1
+                    display_row.append(self.fly_type_to_number[fly_type_key])
             display_arenas.append(display_row)
 
         for row in display_arenas:
@@ -277,34 +342,37 @@ class FlyDistributionManager:
         
         return table
 
-    def show_arena_assignments(self, arenas):
-        if not arenas:  # Check if arenas is None or empty
+    def show_arena_assignments(self):
+        if not self.arenas:  # Check if arenas is None or empty
             print("No arena data available to display.")
             return
         
         clear_screen()
 
         # Mapping fly types to numbers for the table and legend
-        fly_type_to_number = {}
 
         # Prepare the table with arena assignments
-        table = self.prepare_arena_table(arenas, fly_type_to_number)
+        table = self.prepare_arena_table()
 
         # Generate the legend
-        legend = self.generate_legend(fly_type_to_number)
+        legend = self.generate_legend()
 
         print(table)
         print(legend)
 
-
     def display_fly_details(self, fly_index):
         fly = self.fly_data[fly_index]
-        attributes = ', '.join(map(str, fly.get('attribute_ids', [])))  # Ensure attribute IDs are displayed correctly
+
+        # Fetch human-readable details from managers
+        genotype_name = self.genotype_manager.get_genotype_name(fly['genotype_id'])
+        attribute_names = self.attribute_manager.get_attribute_names(fly['attribute_ids'])
+        attributes_display = ', '.join(attribute_names)
+
         details = (
-            f"Genotype ID: {fly['genotype_id']}, "
+            f"Genotype: {genotype_name}, "
             f"Is Female: {'Yes' if fly['is_female'] else 'No'}, "
             f"Age (days): {fly['age_day_after_eclosion']}, "
-            f"Attributes: [{attributes}], "
+            f"Attributes: [{attributes_display}], "
             f"Participation Count: {fly['participation_count']}"
         )
         print(f"Current configuration for Fly ID {fly_index + 1}:")
@@ -339,58 +407,54 @@ class FlyDistributionManager:
         except ValueError:
             print("Invalid input. Please enter a numerical ID.")
 
-
     def save_pretty_table_to_text(self, filename):
 
-        # Create a PrettyTable
-        table = PrettyTable()
-        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"]
-        for index, fly in enumerate(self.fly_data):
-            attributes = ', '.join(map(str, fly.get('attribute_ids', [])))
-            table.add_row([
-                index + 1,
-                "Yes" if fly['is_female'] else "No",
-                fly['genotype_id'],
-                fly['age_day_after_eclosion'],
-                attributes,
-                fly['participation_count']
-            ])
-
+        table = self.prepare_arena_table()
+        legend = self.generate_legend()
         # Write to text file
         with open(filename, 'w') as file:
             file.write(str(table))
             file.write("\n\n" + legend)
 
-
     def save_sorted_csv(self, filename):
-        # Assume arenas is a 2D list of indices pointing to self.fly_data
-        arenas = self.distribute_flies(5, 5)  # Example; you should define dimensions appropriately
+        # Prepare headers for CSV file
+        headers = [
+            "Arena Number", "Is Female", "Genotype ID", "Age (days)", 
+            "Attribute 1", "Attribute 2", "Attribute 3", "Attribute 4", "Attribute 5"
+        ]
 
         # Prepare data for CSV
         csv_data = []
-        for row in arenas:
-            for fly_index in row:
+        for row_idx, row in enumerate(self.arenas):
+            for col_idx, fly_index in enumerate(row):
                 if fly_index is not None:
                     fly = self.fly_data[fly_index]
-                    attributes = ', '.join(map(str, fly.get('attribute_ids', [])))
-                    csv_data.append([
-                        fly_index + 1,
-                        "Yes" if fly['is_female'] else "No",
-                        fly['genotype_id'],
-                        fly['age_day_after_eclosion'],
-                        attributes,
-                        fly['participation_count']
-                    ])
+                    attributes = fly.get('attribute_ids', [])
+                    
+                    # Ensure there are exactly five attribute columns
+                    attributes += [None] * (5 - len(attributes))  # Fill missing attributes with None
+                    
+                    # Convert (row, col) into a 1-indexed arena number
+                    arena_number = row_idx * len(row) + col_idx + 1
 
-        # Sort data by the arena order
-        csv_data.sort(key=lambda x: x[0])  # Assuming sorting by ID which reflects the arena order
+                    csv_data.append([
+                        arena_number,
+                        True if fly['is_female'] else False,
+                        fly['genotype_id'],
+                        fly['age_day_after_eclosion']
+                    ] + attributes[:5])  # Ensure only the first five attributes are included
+
+        # Sort data by the arena number
+        csv_data.sort(key=lambda x: x[0])  # Sorting by arena number
 
         # Write data to CSV
         with open(filename, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"])
-            writer.writerows(csv_data)
-
+            writer.writerow(headers)
+            for row in csv_data:
+                # Convert None to an empty string for better CSV formatting
+                formatted_row = ["" if item is None else item for item in row]
+                writer.writerow(formatted_row)
             
     def export_fly_data(self, folder_path):
         if not os.path.exists(folder_path):
@@ -422,8 +486,9 @@ db_handler = DatabaseHandler(db_url)
 
 # # Example usage:
 flies = load_flies_from_json('./test_flySet.json')
-fly_distribution_manager = FlyDistributionManager(flies)
+fly_distribution_manager = FlyDistributionManager(db_handler,flies)
 total_arenas = 54  # Example arena count
 fly_distribution_manager.enter_flies_for_experiment(total_arenas)
 arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with rows and cols
-fly_distribution_manager.show_arena_assignments(arenas)
+fly_distribution_manager.show_arena_assignments()
+fly_distribution_manager.export_fly_data('./')
