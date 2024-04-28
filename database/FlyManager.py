@@ -1,7 +1,7 @@
 from FlyChoiceDatabase import *
 from prettytable import PrettyTable
 from collections import defaultdict
-import os,json
+import os,json,csv
 
 
 def clear_screen():
@@ -240,49 +240,62 @@ class FlyDistributionManager:
                 current_col += 1
 
         return arenas
+    
+    def generate_legend(self, fly_type_to_number):
+        legend = "Legend:\n"
+        legend += "0: Empty arena (-)\n"  # Represent empty arenas
+        for fly_type_key, number in fly_type_to_number.items():
+            attributes = ", ".join(map(str, fly_type_key[2]))
+            legend += f"{number}: Genotype {fly_type_key[0]}, {fly_type_key[1]}, Attributes: [{attributes}]\n"
+        return legend
 
+    def prepare_arena_table(self, arenas, fly_type_to_number):
+        table = PrettyTable()
+        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(arenas[0]))]
+        table.field_names = headers
+
+        display_arenas = []
+        for row_index, row in enumerate(arenas):
+            display_row = [f"Row {row_index + 1}"]
+            for index in row:
+                if index is None:
+                    display_row.append("-")
+                else:
+                    fly = self.fly_data[index]
+                    fly_type_key = (
+                        fly['genotype_id'],
+                        'Female' if fly['is_female'] else 'Male',
+                        tuple(fly.get('attribute_ids', []))
+                    )
+                    if fly_type_key not in fly_type_to_number:
+                        fly_type_to_number[fly_type_key] = len(fly_type_to_number) + 1
+                    display_row.append(fly_type_to_number[fly_type_key])
+            display_arenas.append(display_row)
+
+        for row in display_arenas:
+            table.add_row(row)
+        
+        return table
 
     def show_arena_assignments(self, arenas):
         if not arenas:  # Check if arenas is None or empty
             print("No arena data available to display.")
             return
+        
         clear_screen()
-        table = PrettyTable()
-        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(arenas[0]))]
-        table.field_names = headers
 
-        # Fly type to number mapping (legend)
+        # Mapping fly types to numbers for the table and legend
         fly_type_to_number = {}
-        legend = "Legend:\n"
-        legend += "0: Empty arena (-)\n"  # Adding empty arena representation to the legend
 
-        # Preparing display rows and updating the legend
-        display_arenas = []
-        for row_index, row in enumerate(arenas):
-            display_row = [f"Row {row_index + 1}"]  # Row label
-            for index in row:
-                if index is None:
-                    display_row.append("-")  # Use dash for empty arenas
-                else:
-                    fly = self.fly_data[index]  # Get fly data using the index stored in arenas
-                    fly_type_key = (
-                        fly['genotype_id'],
-                        'Female' if fly['is_female'] else 'Male',
-                        tuple(fly.get('attribute_ids', []))  # Handle if attribute_ids key is missing
-                    )
-                    if fly_type_key not in fly_type_to_number:
-                        fly_type_to_number[fly_type_key] = len(fly_type_to_number) + 1
-                        attributes = ", ".join(map(str, fly_type_key[2]))
-                        legend += f"{fly_type_to_number[fly_type_key]}: Genotype {fly_type_key[0]}, {fly_type_key[1]}, Attributes: [{attributes}]\n"
-                    display_row.append(fly_type_to_number[fly_type_key])
-            display_arenas.append(display_row)
+        # Prepare the table with arena assignments
+        table = self.prepare_arena_table(arenas, fly_type_to_number)
 
-        # Adding rows to the table
-        for row in display_arenas:
-            table.add_row(row)
+        # Generate the legend
+        legend = self.generate_legend(fly_type_to_number)
 
         print(table)
         print(legend)
+
 
     def display_fly_details(self, fly_index):
         fly = self.fly_data[fly_index]
@@ -296,6 +309,7 @@ class FlyDistributionManager:
         )
         print(f"Current configuration for Fly ID {fly_index + 1}:")
         print(details)
+
     def adjust_fly_numbers(self):
         clear_screen()
         # Display fly data to choose from
@@ -325,8 +339,73 @@ class FlyDistributionManager:
         except ValueError:
             print("Invalid input. Please enter a numerical ID.")
 
-    
 
+    def save_pretty_table_to_text(self, filename):
+
+        # Create a PrettyTable
+        table = PrettyTable()
+        table.field_names = ["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"]
+        for index, fly in enumerate(self.fly_data):
+            attributes = ', '.join(map(str, fly.get('attribute_ids', [])))
+            table.add_row([
+                index + 1,
+                "Yes" if fly['is_female'] else "No",
+                fly['genotype_id'],
+                fly['age_day_after_eclosion'],
+                attributes,
+                fly['participation_count']
+            ])
+
+        # Write to text file
+        with open(filename, 'w') as file:
+            file.write(str(table))
+            file.write("\n\n" + legend)
+
+
+    def save_sorted_csv(self, filename):
+        # Assume arenas is a 2D list of indices pointing to self.fly_data
+        arenas = self.distribute_flies(5, 5)  # Example; you should define dimensions appropriately
+
+        # Prepare data for CSV
+        csv_data = []
+        for row in arenas:
+            for fly_index in row:
+                if fly_index is not None:
+                    fly = self.fly_data[fly_index]
+                    attributes = ', '.join(map(str, fly.get('attribute_ids', [])))
+                    csv_data.append([
+                        fly_index + 1,
+                        "Yes" if fly['is_female'] else "No",
+                        fly['genotype_id'],
+                        fly['age_day_after_eclosion'],
+                        attributes,
+                        fly['participation_count']
+                    ])
+
+        # Sort data by the arena order
+        csv_data.sort(key=lambda x: x[0])  # Assuming sorting by ID which reflects the arena order
+
+        # Write data to CSV
+        with open(filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["ID", "Is Female", "Genotype ID", "Age (days)", "Attribute IDs", "Participation Count"])
+            writer.writerows(csv_data)
+
+            
+    def export_fly_data(self, folder_path):
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        
+        text_filename = os.path.join(folder_path, "fly_data.txt")
+        csv_filename = os.path.join(folder_path, "fly_data.csv")
+
+        # Call the function to save PrettyTable and legend as text
+        self.save_pretty_table_to_text(text_filename)
+
+        # Call the function to save CSV sorted by arenas
+        self.save_sorted_csv(csv_filename)
+
+        print(f"Data exported successfully to {folder_path}")
 
 
 
