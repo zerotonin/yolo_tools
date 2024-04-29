@@ -214,11 +214,19 @@ class FlyDistributionManager:
         self.attribute_manager = FlyAttributeManager(db_handler)
 
     def initialize_participation_counts(self):
+        """
+        Ensures that each fly dictionary has a 'participation_count' field initialized properly.
+        Sets the count to 0 if it's not already present or if it's set to None.
+        """
         for fly in self.fly_data:
             if 'participation_count' not in fly or fly['participation_count'] is None:
                 fly['participation_count'] = 0
     
     def display_fly_data(self):
+        """
+        Displays the current configuration of flies using a pretty table format. Shows details
+        like ID, gender, genotype, age, attributes, and participation count for each fly.
+        """
         table = PrettyTable()
         table.field_names = ["ID", "Is Female", "Genotype", "Age (days)", "Attributes", "Participation Count"]
         for index, fly in enumerate(self.fly_data):
@@ -241,6 +249,13 @@ class FlyDistributionManager:
 
 
     def enter_flies_for_experiment(self, total_arenas):
+        """
+        Manages the interactive process of configuring flies for an experiment. Allows the user
+        to adjust the number of participating flies to match the number of available arenas.
+
+        Args:
+            total_arenas (int): The total number of available arenas for the experiment.
+        """
 
         while True:
             self.initialize_participation_counts()  # Ensure participation count is initialized
@@ -265,6 +280,14 @@ class FlyDistributionManager:
                 break
 
     def distribute_flies(self, rows, cols):
+        """
+        Distributes flies into a specified grid of arenas based on the fly type and participation count.
+        Attempts to place flies into the grid while respecting their specified participation counts.
+
+        Args:
+            rows (int): Number of rows in the grid of arenas.
+            cols (int): Number of columns in the grid of arenas.
+        """
         self.cols = cols
         self.rows = rows
         arenas = [[None for _ in range(self.cols)] for _ in range(self.rows)]
@@ -294,6 +317,13 @@ class FlyDistributionManager:
         self.arenas = arenas
     
     def generate_legend(self):
+        """
+        Generates a legend that maps fly type numbers to their descriptions for easier identification
+        in the display table. Includes genotype, sex, and attributes of each fly type.
+
+        Returns:
+            str: A string representing the legend for fly types in the table.
+        """
         legend = "Legend:\n"
         legend += "0: Empty arena (-)\n"  # Represent empty arenas
         
@@ -313,8 +343,15 @@ class FlyDistributionManager:
 
         return legend
 
-
     def prepare_arena_table(self):
+        """
+        Prepares a PrettyTable to display the current fly assignments in the arenas with a row and
+        column format. Each cell in the table represents an arena and contains the number representing
+        a fly type as defined in the legend.
+
+        Returns:
+            PrettyTable: A table object with fly assignments across the configured grid of arenas.
+        """
         table = PrettyTable()
         headers = ["Row/Col"] + [f"Col {i+1}" for i in range(len(self.arenas[0]))]
         table.field_names = headers
@@ -343,13 +380,20 @@ class FlyDistributionManager:
         return table
 
     def show_arena_assignments(self):
+        """
+        Displays the current assignments of flies to arenas if any are set up. It uses a PrettyTable
+        to represent the layout of arenas and includes a generated legend to help identify the flies
+        in each arena based on their types.
+
+        Uses:
+            prepare_arena_table(): To get the table layout of the arenas.
+            generate_legend(): To provide the legend corresponding to the fly types in the table.
+        """
         if not self.arenas:  # Check if arenas is None or empty
             print("No arena data available to display.")
             return
         
         clear_screen()
-
-        # Mapping fly types to numbers for the table and legend
 
         # Prepare the table with arena assignments
         table = self.prepare_arena_table()
@@ -361,6 +405,13 @@ class FlyDistributionManager:
         print(legend)
 
     def display_fly_details(self, fly_index):
+        """
+        Displays detailed information for a specific fly based on its index in the fly_data list.
+        The details include the fly's genotype, whether it is female, age, attributes, and participation count.
+
+        Args:
+            fly_index (int): The index of the fly in the fly_data list.
+        """
         fly = self.fly_data[fly_index]
 
         # Fetch human-readable details from managers
@@ -379,6 +430,15 @@ class FlyDistributionManager:
         print(details)
 
     def adjust_fly_numbers(self):
+        """
+        Allows the user to adjust the participation count of a specific fly. The function prompts the user
+        to select a fly by its ID, displays the current details of the selected fly, and then allows the
+        user to input a new participation count.
+
+        This function uses:
+            display_fly_data(): To display the list of all flies for selection.
+            display_fly_details(fly_index): To show details of the selected fly.
+        """
         clear_screen()
         # Display fly data to choose from
         self.display_fly_data()
@@ -408,6 +468,12 @@ class FlyDistributionManager:
             print("Invalid input. Please enter a numerical ID.")
 
     def save_pretty_table_to_text(self, filename):
+        """
+        Saves the current arena assignment table and the corresponding legend to a text file.
+
+        Args:
+            filename (str): The path and filename where the table and legend should be saved.
+        """
 
         table = self.prepare_arena_table()
         legend = self.generate_legend()
@@ -417,6 +483,13 @@ class FlyDistributionManager:
             file.write("\n\n" + legend)
 
     def save_sorted_csv(self, filename):
+        """
+        Exports the arena assignments to a CSV file. Each row in the CSV corresponds to a fly in an arena,
+        with detailed fly information and the arena number.
+
+        Args:
+            filename (str): The path and filename where the CSV file should be saved.
+        """
         # Prepare headers for CSV file
         headers = [
             "Arena Number", "Is Female", "Genotype ID", "Age (days)", 
@@ -456,20 +529,27 @@ class FlyDistributionManager:
                 formatted_row = ["" if item is None else item for item in row]
                 writer.writerow(formatted_row)
             
-    def export_fly_data(self, folder_path):
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-        
-        text_filename = os.path.join(folder_path, "fly_data.txt")
-        csv_filename = os.path.join(folder_path, "fly_data.csv")
+    def export_fly_data(self, text_filename,csv_filename):
+        """
+        Exports all fly data and arena assignments both as a text file with a pretty table and as a CSV file.
+        The text file includes a pretty table of the arena assignments along with a legend,
+        and the CSV file contains detailed fly data sorted by arena number.
 
+        Args:
+            text_filename (str): The file path and name where the pretty table and legend should be saved.
+            csv_filename (str): The file path and name where the CSV file should be saved.
+
+        Note:
+            The function assumes that the directories for both filenames already exist.
+            Ensure directories are created before calling this function if unsure.
+        """
+       
         # Call the function to save PrettyTable and legend as text
         self.save_pretty_table_to_text(text_filename)
 
         # Call the function to save CSV sorted by arenas
         self.save_sorted_csv(csv_filename)
 
-        print(f"Data exported successfully to {folder_path}")
 
 
 
