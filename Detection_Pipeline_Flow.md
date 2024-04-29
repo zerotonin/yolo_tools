@@ -37,12 +37,6 @@ e.g.
     - number_of_arena_rows = Column(Integer), user input
     - number_of_arena_columns = Column(Integer), user input
 
-- Fly Assignment to Arena
-    - check the number of avbaiulable flies
-    - do sex by church divide (left female right male)
-    - try to reserve rows for one genotype
-    - allow to delete or correct flies by hand
-
 
 
 
@@ -93,5 +87,11 @@ e.g.
     - stimuli_attribute_3 = Column(String), user input cross checked with database
     - stimuli_attribute_4 = Column(String), user input cross checked with database
     - stimuli_attribute_5 = Column(String), user input cross checked with database
+
+- Fly Assignment to Arena
+    - check the number of available flies
+    - do sex by church divide (left female right male)
+    - try to reserve rows for one genotype
+    - allow to delete or correct flies by hand
 
 
