@@ -1,3 +1,7 @@
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Table,Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -341,11 +345,6 @@ class Trajectories(Base):
 
     # Relationship to Trial
     trial = relationship("Trial", back_populates="trajectories")
-
-import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
 class DatabaseHandler:
     def __init__(self, connection_string):
