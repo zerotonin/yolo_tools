@@ -1,4 +1,4 @@
-from FlyChoiceDatabase import *
+from database.FlyChoiceDatabase import *
 from prettytable import PrettyTable
 import os 
 

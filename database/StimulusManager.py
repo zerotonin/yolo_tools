@@ -1,4 +1,4 @@
-from FlyChoiceDatabase import *
+from database.FlyChoiceDatabase import *
 from prettytable import PrettyTable
 import os 
 
@@ -229,7 +229,6 @@ class StimulusManager:
                     else:
                         assignments.append(stimulus_list[::-1])
         return assignments
-
 
 
 

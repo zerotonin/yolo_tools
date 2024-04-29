@@ -1,4 +1,4 @@
-from FlyChoiceDatabase import *
+from database.FlyChoiceDatabase import *
 from prettytable import PrettyTable
 from collections import defaultdict
 import os,json,csv
@@ -558,10 +558,10 @@ class FlyDistributionManager:
 # Usage example:
 db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
 db_handler = DatabaseHandler(db_url)
-# fly_manager = FlyManager(db_handler)
+fly_manager = FlyManager(db_handler)
 
 # # To start entering stimuli for an experiment:
-# assignments = fly_manager.enter_flies_for_experiment()
+flies = fly_manager.enter_flies_for_experiment()
 # save_flies_to_json('./test_flies.json',assignments)
 
 # # Example usage:
