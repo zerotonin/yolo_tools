@@ -1,15 +1,16 @@
 import os
-import tkinter as tk
-from tkinter import filedialog
 from database.ExperimentManager import ExperimentManager
 from database.ArenaManager import ArenaManager
 from database.FlyManager import FlyManager,FlyDistributionManager
 from movie_preprocessing.FrameSplitter import FrameSplitter
 from database.FlyChoiceDatabase import DatabaseHandler
+from CLI_tools.CLIFileManager import CLIFileManager
 
-# Set up the root Tkinter window
-root = tk.Tk()
-root.withdraw()  # We don't want a full GUI, so keep the root window from appearing
+
+def clear_screen():
+    """Clears the terminal screen for better readability."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
 # Instantiate database handler
 db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
@@ -20,6 +21,10 @@ experiment_manager = ExperimentManager(db_handler)
 arena_manager = ArenaManager(db_handler)
 fly_manager = FlyManager(db_handler)
 fly_distribution_manager = FlyDistributionManager(db_handler,{})
+cli_file_manager = CLIFileManager()
+
+clear_screen()
+experiment_preset = cli_file_manager.load_dialogue('whole experiment',('*.csv', '*.*'))
 
 # Start the process
 experimenter_id, experiment_type_id = experiment_manager.manage_experiments()
