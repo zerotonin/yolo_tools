@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-import csv, pandas
+import pandas as pd
 import json
 
 class CLIFileManager:
