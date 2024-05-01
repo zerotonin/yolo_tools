@@ -550,25 +550,3 @@ class FlyDistributionManager:
         # Call the function to save CSV sorted by arenas
         self.save_sorted_csv(csv_filename)
 
-
-
-
-# Usage would involve creating an instance of FlyManager and using it to manage fly data efficiently.
-
-# Usage example:
-db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-db_handler = DatabaseHandler(db_url)
-fly_manager = FlyManager(db_handler)
-
-# # To start entering stimuli for an experiment:
-flies = fly_manager.enter_flies_for_experiment()
-# save_flies_to_json('./test_flies.json',assignments)
-
-# # Example usage:
-flies = load_flies_from_json('./test_flySet.json')
-fly_distribution_manager = FlyDistributionManager(db_handler,flies)
-total_arenas = 54  # Example arena count
-fly_distribution_manager.enter_flies_for_experiment(total_arenas)
-arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with rows and cols
-fly_distribution_manager.show_arena_assignments()
-fly_distribution_manager.export_fly_data('./')

@@ -230,8 +230,6 @@ class StimulusManager:
                         assignments.append(stimulus_list[::-1])
         return assignments
 
-
-
 class StimulusAttributeManager:
     def __init__(self, db_handler):
         self.db_handler = db_handler
@@ -266,11 +264,3 @@ class StimulusAttributeManager:
         return new_attribute
 
 
-# Usage example:
-db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-db_handler = DatabaseHandler(db_url)
-stimulus_manager = StimulusManager(db_handler)
-
-# To start entering stimuli for an experiment:
-assignments = stimulus_manager.enter_stimuli_for_experiment(54, 9, 6)
-print(assignments)

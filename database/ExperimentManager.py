@@ -215,13 +215,3 @@ class ExperimentManager:
                 print("Invalid choice. Please select a valid option.")
 
 
-
-db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-db_handler = DatabaseHandler(db_url)
-experiment_manager = ExperimentManager(db_handler)
-
-# Start managing experiments:
-experiment_id = experiment_manager.manage_experiments()
-print(experiment_id)
-
-

@@ -169,13 +169,3 @@ class ArenaManager:
         self._clear_screen()
         print(table)
 
-
-
-# Usage example:
-db_url = 'sqlite:////home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-db_handler = DatabaseHandler(db_url)
-arena_manager = ArenaManager(db_handler)
-
-# To start entering stimuli for an experiment:
-assignments = arena_manager.enter_arenas_for_experiment(54,9,6)
-print(assignments)
