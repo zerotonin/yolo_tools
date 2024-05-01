@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-import csv
+import csv, pandas
 import json
 
 class CLIFileManager:
@@ -39,22 +39,20 @@ class CLIFileManager:
         filename = filedialog.askopenfilename(title="Select a file", filetypes=file_types)
         return filename
 
+
     def load_csv(self, filepath):
         """
-        Loads data from a CSV file.
+        Loads data from a CSV file using pandas for enhanced performance and ease of use.
 
         Args:
             filepath (str): Path to the CSV file to be loaded.
 
         Returns:
-            list: List of dictionaries, where each dictionary represents a row from the CSV file.
+            pandas.DataFrame: A DataFrame object containing the loaded data.
         """
-        data = []
-        with open(filepath, newline='') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                data.append(row)
-        return data
+        df = pd.read_csv(filepath)
+        return df
+
 
     def load_json(self, filepath):
         """
@@ -84,7 +82,8 @@ class CLIFileManager:
                     data = self.load_json(file_path)
                 elif file_path.endswith('.csv'):
                     data = self.load_csv(file_path)
-                print("Data loaded successfully:", data)
+                return data
             else:
-                print("No file selected.")
+                print(f"No file selected for {topic} preset.")
+                return None
 
