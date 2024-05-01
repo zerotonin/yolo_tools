@@ -5,7 +5,7 @@ from database.ExperimentManager import ExperimentManager
 from database.ArenaManager import ArenaManager
 from database.FlyManager import FlyManager,FlyDistributionManager
 from movie_preprocessing.FrameSplitter import FrameSplitter
-from database.DatabaseHandler import DatabaseHandler
+from database.FlyChoiceDatabase import DatabaseHandler
 
 # Set up the root Tkinter window
 root = tk.Tk()
