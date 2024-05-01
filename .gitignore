@@ -7,3 +7,4 @@ database/__pycache__/*
 test_flies.json
 movie_preprocessing/__pycache__/*
 CLI_tools/__pycache__/*
+AnalysisFileManager/__pycache__/*

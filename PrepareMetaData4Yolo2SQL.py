@@ -4,9 +4,38 @@ from database.ArenaManager import ArenaManager
 from database.FlyManager import FlyManager,FlyDistributionManager
 from movie_preprocessing.FrameSplitter import FrameSplitter
 from database.FlyChoiceDatabase import DatabaseHandler
-from CLI_tools.CLIFileManager import CLIFileManager
+from AnalysisFileManager.PresetManager import PresetManager
 import tkinter as tk
 from tkinter import filedialog
+from pathlib import Path
+
+def create_subfolders(output_folder):
+    """
+    Creates multiple subdirectories within the specified output folder.
+    Does not raise an error if the directories already exist.
+
+    Args:
+        output_folder (str): The path to the output directory where subdirectories will be created.
+    """
+    # Define the list of subdirectories to create
+    subfolders = [
+        "preprocessed_single_videos",
+        "slurm_scripts",
+        "presets",
+        "meta_data",
+        "results"
+    ]
+    
+    # Convert the output folder path to a Path object
+    base_path = Path(output_folder)
+    
+    # Iterate over the subfolders list and create each as a subdirectory of the base path
+    for folder in subfolders:
+        # Create the full path for the subfolder
+        subfolder_path = base_path / folder
+        
+        # Use mkdir with exist_ok=True to avoid throwing an error if the folder already exists
+        subfolder_path.mkdir(parents=True, exist_ok=True)
 
 def get_file_path(file_types,mode_str):
     # Create a new Tkinter root instance
@@ -70,16 +99,33 @@ def check_and_get_paths(file_path,mode):
         raise ValueError(f"No {mode} file was selected.")
 
 # file and folder paths
-db_url = '/home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-video_file_path = '/home/geuba03p/food_example_video/original/2024_03_28__16-19-28.mp4'
+db_file_position = '/home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
+video_file_position = '/home/geuba03p/food_example_video/original/2024_03_28__16-19-28.mp4'
 output_file_path = '/home/geuba03p/food_example_video/output'
 
-check_and_get_paths(db_url,'database')
-check_and_get_paths(video_file_path,'video')
-check_and_get_paths(output_file_path,'output_folder')
+check_and_get_paths(db_file_position,'database')
+check_and_get_paths(video_file_position,'video')
+check_and_get_paths(output_file_path,'output_folder') 
+
+# Make subfolders in output path 
+create_subfolders(output_file_path)
+
+# Make file_dict
+file_dict = { 
+'db_file_position' : db_file_position,
+'video_file_position' : video_file_position,
+'output_file_path' : output_file_path,
+'preprocessed_single_videos' : os.path.join(output_file_path,'preprocessed_single_videos'),
+'slurm_scripts' : os.path.join(output_file_path,'slurm_scripts'),
+'presets' : os.path.join(output_file_path,'presets'),
+'meta_data' : os.path.join(output_file_path,'meta_data'),
+'results' : os.path.join(output_file_path,'results'),
+}
+
+
 
 # Instantiate database handler
-db_handler = DatabaseHandler(f'sqlite:///{db_url}')
+db_handler = DatabaseHandler(f'sqlite:///{db_file_position}')
         
 
 # Initialize managers
@@ -103,7 +149,7 @@ arenas = fly_distribution_manager.distribute_flies(9, 6)  # Example layout with 
 fly_distribution_manager.show_arena_assignments()
 
 # Ask for the movie file location
-video_file_path = filedialog.askopenfilename(
+video_file_position = filedialog.askopenfilename(
     title="Select the video file",
     filetypes=(("MP4 files", "*.mp4"), ("AVI files", "*.avi"))
 )
@@ -123,7 +169,7 @@ save_preset(fly_configurations, os.path.join(presets_folder, 'fly_presets.json')
 save_preset(arena_layout, os.path.join(presets_folder, 'arena_presets.json'))
 
 # Process video
-splitter = FrameSplitter(video_file_path, split_vids_folder, arena_layout)
+splitter = FrameSplitter(video_file_position, split_vids_folder, arena_layout)
 splitter.split_video()
 
 print("Experiment setup complete. Processed videos are saved in:", split_vids_folder)

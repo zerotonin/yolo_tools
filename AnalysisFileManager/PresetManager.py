@@ -3,7 +3,7 @@ from tkinter import filedialog
 import pandas as pd
 import json
 
-class CLIFileManager:
+class PresetManager:
     def __init__(self):
         """
         Initializes the CLIFileManager with a hidden root Tkinter window.
