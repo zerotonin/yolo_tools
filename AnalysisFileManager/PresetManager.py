@@ -86,4 +86,29 @@ class PresetManager:
             else:
                 print(f"No file selected for {topic} preset.")
                 return None
+        
+    def save_file(self, data, file_path):
+        """
+        Saves data to a file in CSV or JSON format depending on the file extension.
+
+        Args:
+            data (pandas.DataFrame or dict): The data to be saved. This can be either a DataFrame for CSV files
+                                            or a dictionary for JSON files.
+            file_path (str): The path to the file where the data will be saved.
+
+        Returns:
+            None
+        """
+        if file_path.endswith('.csv'):
+            # Assuming 'data' is a pandas DataFrame
+            data.to_csv(file_path, index=False)
+            print(f"Data successfully saved to {file_path}")
+        elif file_path.endswith('.json'):
+            # Assuming 'data' is a dictionary
+            with open(file_path, 'w') as f:
+                json.dump(data, f, indent=4)
+            print(f"Data successfully saved to {file_path}")
+        else:
+            raise ValueError("Unsupported file format. Please use .csv or .json")
+
 
