@@ -22,11 +22,11 @@ e.g.
 
 
 ### ToDo
-- Experimenter
-    - name = Column(String), user input cross checked with database
-    
-- Experiment Type
-    - name
+
+
+
+
+### Done
 
 - Experiment (check for duplicates)
     - date_time = Column(DateTime), automated from file I/O input
@@ -37,10 +37,11 @@ e.g.
     - number_of_arena_rows = Column(Integer), user input
     - number_of_arena_columns = Column(Integer), user input
 
-
-
-
-### Done
+- Experimenter
+    - name = Column(String), user input cross checked with database
+    
+- Experiment Type
+    - name
 
 - Fly (per arena)     
     - is_female = Column(Boolean), user input
