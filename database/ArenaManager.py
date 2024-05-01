@@ -168,4 +168,6 @@ class ArenaManager:
             table.add_row(row_entries)
         self._clear_screen()
         print(table)
+        _=input("Press Enter to continue...")
+
 
