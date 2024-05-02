@@ -75,61 +75,52 @@ class ExperimentSetupManager:
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def manage_preset(self, key, creation_func, *args, **kwargs):
+        """
+        Manages loading or creating a preset. Checks if a preset is available and loads it;
+        if not, it runs the specified creation function and saves the result as a new preset.
 
+        Args:
+            key (str): The key for the preset to check or create.
+            creation_func (callable): Function to call to create the preset if it doesn't exist.
+            *args: Arguments to pass to the creation function.
+            **kwargs: Keyword arguments to pass to the creation function.
 
+        Returns:
+            The loaded or newly created data for the preset.
+        """
+        if self.check_loadable_preset(key):
+            return self.load_preset(key)
+        else:
+            data = creation_func(*args, **kwargs)
+            self.save_preset(key, data)
+            return data
 
-# file and folder paths
-db_file_position = '/home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
-video_file_position = '/home/geuba03p/food_example_video/original/2024_03_28__16-19-28.mp4'
-base_output_path = '/home/geuba03p/food_example_video/output'
-python_interp = '/home/geuba03p/miniconda3/envs/yolov8/bin/python'
+    def setup_experiments(self):
+        """
+        Setup and manage the entire experiment configuration using manage_preset method.
+        """
+        self.experiment_info = self.manage_preset('experiment_info', self.experiment_manager.manage_experiments)
+        self.arena_info = self.manage_preset('arena_info', self.get_arena_configuration)
+        self.arena_layout = self.manage_preset('arena_layout', self.arena_manager.enter_arenas_for_experiment,
+                                          self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
+        self.stim_layout = self.manage_preset('stim_layout', self.stimulus_manager.enter_stimuli_for_experiment,
+                                         self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
+        self.flies = self.manage_preset('flies', self.fly_manager.enter_flies_for_experiment)
+        self.fly_distribution_manager.fly_data = self.flies
+        self.fly_distribution_manager.enter_flies_for_experiment(self.arena_info['arena_num'])
+        self.fly_layout = self.manage_preset('fly_layout', self.fly_distribution_manager.distribute_flies,
+                                        self.arena_info['arena_rows'], self.arena_info['arena_cols'])
 
-experiment = ExperimentSetupManager(base_output_path,db_file_position,video_file_position,python_interp)
+# Example usage of the setup_experiments method
+if __name__ == "__main__":
+    base_output_path = '/home/geuba03p/food_example_video/output'
+    db_file_path = '/home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
+    video_file_path = '/home/geuba03p/food_example_video/original/2024_03_28__16-19-28.mp4'
+    python_interp = '/home/geuba03p/miniconda3/envs/yolov8/bin/python'
 
-if experiment.check_loadable_preset('experiment_info'):
-    experiment_info = experiment.load_preset('experiment_info')
-else:
-    # Start the process
-    experiment_info = experiment.experiment_manager.manage_experiments()
-    experiment.save_preset('experiment_info',experiment_info)
-
-if  experiment.check_loadable_preset('arena_layout'):
-    arena_layout = experiment.load_preset('arena_layout')
-    arena_info = experiment.load_preset('arena_info')
-else:
-    experiment.clear_screen()
-    arena_info =  experiment.get_arena_configuration()
-    print(f"Configuration: {arena_info['arena_num']} arenas arranged in {arena_info['arena_rows']} rows and {arena_info['arena_cols']} columns.")
-    arena_layout =  experiment.arena_manager.enter_arenas_for_experiment(arena_info['arena_num'], arena_info['arena_rows'], arena_info['arena_cols'])
-    experiment.save_preset('arena_layout',arena_layout)
-    experiment.save_preset('arena_info',arena_info)
-
-
-if  experiment.check_loadable_preset('stim_layout'):
-    stim_layout = experiment.load_preset('stim_layout')
-else:
-    experiment.clear_screen()
-    stim_layout =  experiment.stimulus_manager.enter_stimuli_for_experiment(arena_info['arena_num'], arena_info['arena_rows'], arena_info['arena_cols'])
-    experiment.save_preset('stim_layout',stim_layout)
-
-
-
-if  experiment.check_loadable_preset('flies'):
-    flies = experiment.load_preset('fly_layout')
-else:
-    flies = experiment.fly_manager.enter_flies_for_experiment()
-    experiment.save_preset('flies',flies)
-
-    
-if  experiment.check_loadable_preset('fly_layout'):
-    fly_layout = experiment.load_preset('fly_layout')
-else:
-    experiment.fly_distribution_manager.fly_data = flies
-    experiment.fly_distribution_manager.enter_flies_for_experiment(arena_info['arena_num'])
-    fly_layout = experiment.fly_distribution_manager.distribute_flies(arena_info['arena_rows'], arena_info['arena_cols'])  # Example layout with rows and cols
-    experiment.fly_distribution_manager.show_arena_assignments()
-    experiment.save_preset('fly_layout',fly_layout)
-
+    experiment_setup = ExperimentSetupManager(base_output_path, db_file_path, video_file_path, python_interp)
+    experiment_setup.setup_experiments()
 
 
 
