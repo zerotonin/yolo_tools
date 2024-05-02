@@ -229,6 +229,35 @@ class StimulusManager:
                     else:
                         assignments.append(stimulus_list[::-1])
         return assignments
+    
+
+    def get_human_readable_stimulus_details(self, stimulus_id):
+        """
+        Returns a human-readable string of the stimulus's details, including its name, type,
+        amplitude, unit, and associated attributes.
+
+        Args:
+            stimulus_id (int): The ID of the stimulus to retrieve details for.
+
+        Returns:
+            str: Human-readable string of the stimulus's details, or an error message if not found.
+        """
+        with self.db_handler as db:
+            # Fetch the stimulus information
+            stimulus = db.get_records(Stimulus, {'id': stimulus_id})
+            if not stimulus:
+                return "Stimulus not found."
+            stimulus = stimulus[0]
+
+            # Fetch attribute names
+            attribute_names = ', '.join([attr.name for attr in stimulus.attributes])
+
+            # Compile the details into a human-readable string
+            details = (f"Name: {stimulus.name}, Type: {stimulus.type}, "
+                       f"Amplitude: {stimulus.amplitude} {stimulus.amplitude_unit}, "
+                       f"Attributes: [{attribute_names}]")
+            return details
+
 
 class StimulusAttributeManager:
     def __init__(self, db_handler):

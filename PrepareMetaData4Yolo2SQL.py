@@ -119,6 +119,11 @@ class ExperimentSetupManager:
         fly_legend = list()
         for fly in self.flies:
             fly_legend.append(self.fly_manager.get_human_readable_fly_details(fly))
+
+        stim_legend = list()
+        for stimulus in set(stim for arena in self.stim_layout for stim in arena):
+            stim_legend.append(self.stimulus_manager.get_human_readable_stimulus_details(stimulus))
+            
         pass
 
 # Example usage of the setup_experiments method
