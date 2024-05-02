@@ -315,6 +315,7 @@ class FlyDistributionManager:
                 current_col += 1
 
         self.arenas = arenas
+        return arenas
     
     def generate_legend(self):
         """
