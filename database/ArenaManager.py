@@ -170,4 +170,32 @@ class ArenaManager:
         print(table)
         _=input("Press Enter to continue...")
 
+    def get_human_readable_arena_details(self, arena_id):
+        """
+        Returns a human-readable string of the arena's details, including its name,
+        dimensions, and associated attributes.
+
+        Args:
+            arena_id (int): The ID of the arena to retrieve details for.
+
+        Returns:
+            str: Human-readable string of the arena's details, or an error message if not found.
+        """
+        with self.db_handler as db:
+            # Fetch the arena information
+            arena = db.get_records(Arena, {'id': arena_id})
+            if not arena:
+                return "Arena not found."
+            arena = arena[0]
+
+            # Collect attributes names
+            attributes = ', '.join([attr.name for attr in arena.attributes])
+
+            # Compile the details into a human-readable string
+            dimensions = f"Width: {arena.size_width_mm} mm, Height: {arena.size_height_mm} mm"
+            if arena.size_radius_mm:
+                dimensions += f", Radius: {arena.size_radius_mm} mm"
+            details = f"Name: {arena.name}, {dimensions}, Attributes: [{attributes}]"
+            return details
+
 
