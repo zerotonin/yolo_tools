@@ -116,15 +116,61 @@ class ExperimentSetupManager:
             self.fly_layout =  self.fly_distribution_manager.distribute_flies(self.arena_info['arena_rows'], self.arena_info['arena_cols'])
 
     def display_experiment_overview(self):
-        fly_legend = list()
-        for fly in self.flies:
-            fly_legend.append(self.fly_manager.get_human_readable_fly_details(fly))
+        """
+        Displays an overview of the experiment setup in a grid format,
+        where each cell contains a simple encoded format for flies, stimuli, and arenas.
+        """
+        # Generate legends
+        fly_legend = [(i, self.fly_manager.get_human_readable_fly_details(fly)) for i, fly in enumerate(self.flies)]
+        stim_legend = [(stimulus, self.stimulus_manager.get_human_readable_stimulus_details(stimulus)) for stimulus in set(stim for arena in self.stim_layout for stim in arena)]
+        arena_legend = [(arena, self.arena_manager.get_human_readable_arena_details(arena)) for arena in set(self.arena_layout)]
 
-        stim_legend = list()
-        for stimulus in set(stim for arena in self.stim_layout for stim in arena):
-            stim_legend.append(self.stimulus_manager.get_human_readable_stimulus_details(stimulus))
-            
-        pass
+        # Create maps for quick index lookup
+        stim_index_map = {item[0]: chr(65 + i) for i, item in enumerate(stim_legend)}  # Mapping stimuli IDs to 'a' to 'z'
+        arena_index_map = {item[0]: chr(97 + i) for i, item in enumerate(arena_legend)}  # Mapping arena IDs to 'A' to 'Z'
+
+        # Table setup
+        rows, cols = self.arena_info['arena_rows'], self.arena_info['arena_cols']
+        table = PrettyTable()
+        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(cols)]
+        table.field_names = headers
+
+        for row_index in range(rows):
+            display_row = [f"Row {row_index + 1}"]
+            for col_index in range(cols):
+                # Fly details
+                fly_index = self.fly_layout[row_index][col_index]
+                fly_info = f"F:{fly_index+1}" if fly_index is not None else "F:-"
+
+                # Stimulus details
+                stim_ids = self.stim_layout[row_index * cols + col_index]
+                stim_info = f"S:{''.join(stim_index_map.get(id, '-') for id in stim_ids)}" if stim_ids else "S:[]"
+
+                # Arena details
+                arena_type = self.arena_layout[row_index * cols + col_index]
+                arena_info = f"A:{arena_index_map.get(arena_type, '-')}"
+
+                display_row.append(f"{fly_info} {stim_info} {arena_info}")
+            table.add_row(display_row)
+
+        self.clear_screen()
+        print(table)
+
+        # Print legend
+        print("\nLegend:")
+        print("Flies:")
+        for i, details in fly_legend:
+            print(f"{i+1}: {details}")
+        print("Stimuli:")
+        for id, details in stim_legend:
+            print(f"{stim_index_map.get(id, '-')}: {details}")
+        print("Arenas:")
+        for id, details in arena_legend:
+            print(f"{arena_index_map.get(id, '-')}: {details}")
+
+# Example of usage
+# Assuming you've already created an instance of ExperimentSetupManager as `experiment_setup`
+# experiment_setup.display_experiment_overview()
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
