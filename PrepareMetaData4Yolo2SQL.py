@@ -114,47 +114,35 @@ class ExperimentSetupManager:
             self.fly_distribution_manager.fly_data = self.flies
             self.fly_distribution_manager.enter_flies_for_experiment(self.arena_info['arena_num'])
             self.fly_layout =  self.fly_distribution_manager.distribute_flies(self.arena_info['arena_rows'], self.arena_info['arena_cols'])
+            self.save_preset('fly_layout', self.fly_layout)
 
-    def display_experiment_overview(self):
-        """
-        Displays an overview of the experiment setup in a grid format,
-        where each cell contains a simple encoded format for flies, stimuli, and arenas.
-        """
-        # Generate legends
+
+    
+    def generate_legends_and_maps(self):
+        """Generate legends and maps for easy reference."""
         fly_legend = [(i, self.fly_manager.get_human_readable_fly_details(fly)) for i, fly in enumerate(self.flies)]
         stim_legend = [(stimulus, self.stimulus_manager.get_human_readable_stimulus_details(stimulus)) for stimulus in set(stim for arena in self.stim_layout for stim in arena)]
         arena_legend = [(arena, self.arena_manager.get_human_readable_arena_details(arena)) for arena in set(self.arena_layout)]
 
-        # Create maps for quick index lookup
-        stim_index_map = {item[0]: chr(65 + i) for i, item in enumerate(stim_legend)}  # Mapping stimuli IDs to 'a' to 'z'
-        arena_index_map = {item[0]: chr(97 + i) for i, item in enumerate(arena_legend)}  # Mapping arena IDs to 'A' to 'Z'
+        stim_index_map = {item[0]: chr(65 + i) for i, item in enumerate(stim_legend)}  # 'A' to 'Z'
+        arena_index_map = {item[0]: chr(97 + i) for i, item in enumerate(arena_legend)}  # 'a' to 'z'
+        return fly_legend, stim_legend, arena_legend, stim_index_map, arena_index_map
 
-        # Table setup
-        rows, cols = self.arena_info['arena_rows'], self.arena_info['arena_cols']
-        table = PrettyTable()
-        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(cols)]
-        table.field_names = headers
-
+    def prepare_data_for_display(self, rows, cols, stim_index_map, arena_index_map):
+        """Prepare data for table display."""
+        data = []
         for row_index in range(rows):
-            display_row = [f"Row {row_index + 1}"]
             for col_index in range(cols):
-                # Fly details
                 fly_index = self.fly_layout[row_index][col_index]
                 fly_info = f"F:{fly_index+1}" if fly_index is not None else "F:-"
-
-                # Stimulus details
                 stim_ids = self.stim_layout[row_index * cols + col_index]
                 stim_info = f"S:{''.join(stim_index_map.get(id, '-') for id in stim_ids)}" if stim_ids else "S:[]"
-
-                # Arena details
                 arena_type = self.arena_layout[row_index * cols + col_index]
-                arena_info = f"A:{arena_index_map.get(arena_type, '-')}"
-
-                display_row.append(f"{fly_info} {stim_info} {arena_info}")
-            table.add_row(display_row)
-
-        self.clear_screen()
-        print(table)
+                arena_info = f"A:{arena_index_map.get(arena_type)}"
+                data.append([row_index * cols + col_index + 1, stim_info, fly_info, arena_info])
+        return data
+    
+    def print_legend(self,fly_legend,stim_legend,arena_legend,arena_index_map,stim_index_map):
 
         # Print legend
         print("\nLegend:")
@@ -168,9 +156,51 @@ class ExperimentSetupManager:
         for id, details in arena_legend:
             print(f"{arena_index_map.get(id, '-')}: {details}")
 
-# Example of usage
-# Assuming you've already created an instance of ExperimentSetupManager as `experiment_setup`
-# experiment_setup.display_experiment_overview()
+    def display_experiment_overview_arena_wise(self):
+        """Main function to display experiment setup and optionally save to CSV."""
+        rows, cols = self.arena_info['arena_rows'], self.arena_info['arena_cols']
+        fly_legend, stim_legend, arena_legend, stim_index_map, arena_index_map = self.generate_legends_and_maps()
+        data = self.prepare_data_for_display(rows, cols, stim_index_map, arena_index_map)
+        
+        # Displaying in pretty table for user interface
+        table = PrettyTable()
+        table.field_names = ['Arena Number', 'Stimulus', 'Fly', 'Arena Type']
+        for row in data:
+            table.add_row(row[:1]+[entry[2::] for entry in row[1::]])
+        print(table)
+        self.print_legend(fly_legend,stim_legend,arena_legend,arena_index_map,stim_index_map)
+
+    def display_experiment_overview(self):
+        """
+        Displays an overview of the experiment setup in a grid format,
+        where each cell contains a simple encoded format for flies, stimuli, and arenas.
+        """
+
+        # Table setup
+        rows, cols = self.arena_info['arena_rows'], self.arena_info['arena_cols']
+        fly_legend, stim_legend, arena_legend, stim_index_map, arena_index_map = self.generate_legends_and_maps()
+        data = self.prepare_data_for_display(rows, cols, stim_index_map, arena_index_map)
+        table = PrettyTable()
+        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(cols)]
+        table.field_names = headers
+
+        for row_index in range(rows):
+            display_row = [f"Row {row_index + 1}"]
+            for col_index in range(cols):
+                arena=    data[row_index * cols + col_index]
+                display_row.append(f"{arena[2]} {arena[1]} {arena[3]}")
+            table.add_row(display_row)
+
+        self.clear_screen()
+        print(table)
+        self.print_legend(fly_legend,stim_legend,arena_legend,arena_index_map,stim_index_map)
+
+    def get_video_info(self):
+
+        # Get automated info from posthoc run
+
+        self.video_info_extractor = VideoInfoExtractor(self.file_manager.file_dict['video_file_position'])
+        self.experiment_info = self.manage_preset('video_info', self.video_info_extractor.get_video_info)
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
@@ -182,18 +212,9 @@ if __name__ == "__main__":
     experiment_setup = ExperimentSetupManager(base_output_path, db_file_path, video_file_path, python_interp)
     experiment_setup.setup_experiments()
     experiment_setup.display_experiment_overview()
-
-
-
-
-
-# Get automated info from posthoc run
-
-video_info_extractor = VideoInfoExtractor(file_manager.file_dict['video_file_position'])
-video_info = video_info_extractor.get_video_info()
-
-
-
-
-# Get arena layout and other configurations
-
+    experiment_setup.display_experiment_overview_arena_wise()
+    if video_file_path:
+        experiment_setup.get_video_info()
+    
+        if not experiment_setup.check_loadable_preset('slurm_video_scripts'):
+            experiment_setup.make_split_slurm_script()
