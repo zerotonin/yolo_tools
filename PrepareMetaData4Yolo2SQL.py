@@ -115,66 +115,11 @@ class ExperimentSetupManager:
             self.fly_distribution_manager.enter_flies_for_experiment(self.arena_info['arena_num'])
             self.fly_layout =  self.fly_distribution_manager.distribute_flies(self.arena_info['arena_rows'], self.arena_info['arena_cols'])
 
-
     def display_experiment_overview(self):
-        """
-        Displays an overview of the experiment setup in a grid format,
-        where each cell contains encoded information for flies, stimuli, and arenas.
-        """
-        # Retrieve the arena configuration
-        rows, cols = self.arena_info['arena_rows'], self.arena_info['arena_cols']
-
-        # Initialize the table
-        table = PrettyTable()
-        headers = ["Row/Col"] + [f"Col {i+1}" for i in range(cols)]
-        table.field_names = headers
-
-        # Prepare data for display
-        display_arenas = []
-        for row_index in range(rows):
-            display_row = [f"Row {row_index + 1}"]
-            for col_index in range(cols):
-                # Initialize cell content
-                cell_content = ""
-
-                # Process fly distribution for this cell
-                fly_index = self.fly_layout.get((row_index, col_index), None)
-                if fly_index is not None:
-                    fly = self.flies[fly_index]
-                    fly_type = f"F:{chr(65 + fly_index)}"  # Assuming fly_index can be mapped to A, B, C...
-                else:
-                    fly_type = "F:-"
-
-                # Process stimulus for this cell
-                stim_ids = self.stim_layout.get((row_index, col_index), [])
-                stim_types = ",".join(str(id) for id in stim_ids)
-                if stim_types:
-                    stim_type = f"S:[{stim_types}]"
-                else:
-                    stim_type = "S:[]"
-
-                # Process arena type for this cell
-                arena_type = self.arena_layout.get((row_index, col_index), "a")  # Example default type 'a'
-                arena_type = f"A:{arena_type}"
-
-                # Combine all parts into one cell content
-                cell_content = f"{fly_type} {stim_type} {arena_type}"
-                display_row.append(cell_content)
-
-            display_arenas.append(display_row)
-
-        # Populate the table with data
-        for row in display_arenas:
-            table.add_row(row)
-
-        # Print the table
-        self.clear_screen()
-        print(table)
-        print("\nLegend:")
-        print("F: Fly type (A, B, C... based on index)")
-        print("S: Stimuli IDs in the cell (list of numbers)")
-        print("A: Arena type (lowercase letter for type)")
-
+        fly_legend = list()
+        for fly in self.flies:
+            fly_legend.append(self.fly_manager.get_human_readable_fly_details(fly))
+        pass
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":

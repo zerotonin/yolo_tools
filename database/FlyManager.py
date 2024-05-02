@@ -194,23 +194,26 @@ class FlyManager:
         Returns:
             str: Human-readable string of the fly's details.
         """
-        # Extract details from the dictionary
-        is_female = fly_dict['is_female']
-        age = fly_dict['age_day_after_eclosion']
-        genotype_id = fly_dict['genotype_id']
-        attribute_ids = fly_dict.get('attribute_ids', [])
+        with self.db_handler as db:
+            # Extract details from the dictionary
+            is_female = fly_dict['is_female']
+            age = fly_dict['age_day_after_eclosion']
+            genotype_id = fly_dict['genotype_id']
+            attribute_ids = fly_dict.get('attribute_ids', [])
 
-        # Fetch the genotype information
-        genotype = self.db_handler.get_records(Genotype, {'id': genotype_id})[0].genotype
-        sex = "Female" if is_female else "Male"
+            # Fetch the genotype information
+            genotype = db.get_records(Genotype, {'id': genotype_id})[0].genotype
+            sex = "Female" if is_female else "Male"
 
-        # Fetch attribute names
-        attributes = self.db_handler.get_records(FlyAttribute, {'id': attribute_ids})
-        attribute_names = ', '.join([attr.name for attr in attributes])
+            # Fetch attribute names
+            attributes = list()
+            for attribute_id in attribute_ids:
+                attributes.append(db.get_records(FlyAttribute, {'id': attribute_id}))
+            attribute_names = ', '.join([attr[0].name for attr in attributes])
 
-        # Compile the details into a human-readable string
-        details = f"Sex: {sex}, Age: {age} days, Genotype: {genotype}, Attributes: [{attribute_names}]"
-        return details
+            # Compile the details into a human-readable string
+            details = f"Sex: {sex}, Age: {age} days, Genotype: {genotype}, Attributes: [{attribute_names}]"
+            return details
 
 class FlyDistributionManager:
     """
