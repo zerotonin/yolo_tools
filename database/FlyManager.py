@@ -181,6 +181,36 @@ class FlyManager:
                 return self.flies
             else:
                 print("Invalid input, please type 'yes' or 'no'.")
+    
+
+    def get_human_readable_fly_details(self, fly_dict):
+        """
+        Returns a human-readable string of the fly's details, including genotype,
+        sex, age, and attributes.
+
+        Args:
+            fly_dict (dict): Dictionary containing details about the fly.
+
+        Returns:
+            str: Human-readable string of the fly's details.
+        """
+        # Extract details from the dictionary
+        is_female = fly_dict['is_female']
+        age = fly_dict['age_day_after_eclosion']
+        genotype_id = fly_dict['genotype_id']
+        attribute_ids = fly_dict.get('attribute_ids', [])
+
+        # Fetch the genotype information
+        genotype = self.db_handler.get_records(Genotype, {'id': genotype_id})[0].genotype
+        sex = "Female" if is_female else "Male"
+
+        # Fetch attribute names
+        attributes = self.db_handler.get_records(FlyAttribute, {'id': attribute_ids})
+        attribute_names = ', '.join([attr.name for attr in attributes])
+
+        # Compile the details into a human-readable string
+        details = f"Sex: {sex}, Age: {age} days, Genotype: {genotype}, Attributes: [{attribute_names}]"
+        return details
 
 class FlyDistributionManager:
     """
