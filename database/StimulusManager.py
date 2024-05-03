@@ -48,7 +48,7 @@ class StimulusManager:
 
         attributes = []
         user_wants_attributes = input("Do you want to enter attributes for this stimulus (y/n): ")
-        if user_wants_attributes:
+        if user_wants_attributes == 'y':
             attribute_manager = StimulusAttributeManager(self.db_handler)
             for _ in range(5):  # Allows entry for up to 5 attributes
                 attribute = attribute_manager.select_or_create_attribute()
