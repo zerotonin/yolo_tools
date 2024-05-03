@@ -32,28 +32,30 @@ class AnalysisFileManager:
         """
         Opens a file dialog to select a file with specified types.
         """
-        root = tk.Tk()
-        root.withdraw()
-        file_path = filedialog.askopenfilename(
-            title=title,
-            filetypes=file_types,
-            initialdir="/"
-        )
-        root.destroy()
+        if self.use_tkinter():
+            root = tk.Tk()
+            root.withdraw()
+            file_path = filedialog.askopenfilename(title=title, filetypes=file_types, initialdir="/")
+            root.destroy()
+        else:
+            print(f"{title}:")
+            for i, ft in enumerate(file_types, 1):
+                print(f"{i}. {ft[1]} files")
+            file_path = input("Please enter the path to your file: ")
         return file_path
-
+    
     def get_folder_path(self, title):
         """
         Opens a directory dialog to select or create a directory.
         """
-        root = tk.Tk()
-        root.withdraw()
-        folder_path = filedialog.askdirectory(
-            title=title,
-            mustexist=False,
-            initialdir="/"
-        )
-        root.destroy()
+        if self.use_tkinter():
+            root = tk.Tk()
+            root.withdraw()
+            folder_path = filedialog.askdirectory(title=title, mustexist=False, initialdir="/")
+            root.destroy()
+        else:
+            print(f"{title}: Please enter the path to your directory")
+            folder_path = input("Directory path: ")
         return folder_path
 
     def check_and_get_paths(self, file_path, mode):

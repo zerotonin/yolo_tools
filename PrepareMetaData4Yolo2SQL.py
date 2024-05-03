@@ -204,7 +204,7 @@ class ExperimentSetupManager:
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
-    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders'
+    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/template_01'
     video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids'
 
     # Load JSON data from file
