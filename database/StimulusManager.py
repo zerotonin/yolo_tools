@@ -45,14 +45,17 @@ class StimulusManager:
         amplitude = float(input("Enter the amplitude of the new stimulus: "))
         amplitude_unit = input("Enter the unit of amplitude (e.g., 'mV', 'lux'): ")
 
-        attribute_manager = StimulusAttributeManager(self.db_handler)
+
         attributes = []
-        for _ in range(5):  # Allows entry for up to 5 attributes
-            attribute = attribute_manager.select_or_create_attribute()
-            if attribute:  # Ensure attribute is not None
-                attributes.append(attribute)
-            if input("Add more? (y/n): ").lower() != 'y' or not attribute:
-                break
+        user_wants_attributes = input("Do you want to enter attributes for this stimulus (y/n): ")
+        if user_wants_attributes:
+            attribute_manager = StimulusAttributeManager(self.db_handler)
+            for _ in range(5):  # Allows entry for up to 5 attributes
+                attribute = attribute_manager.select_or_create_attribute()
+                if attribute:  # Ensure attribute is not None
+                    attributes.append(attribute)
+                if input("Add more? (y/n): ").lower() != 'y' or not attribute:
+                    break
 
         new_stimulus = Stimulus(name=name, type=type_, amplitude=amplitude, amplitude_unit=amplitude_unit, attributes=attributes)
         with self.db_handler as db:
