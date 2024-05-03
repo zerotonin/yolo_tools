@@ -66,11 +66,12 @@ class AnalysisFileManager:
                 return path
         
         title = f"Select a {mode}"
-        if mode in ['video', 'database']:
+        if mode in ['video', 'database','python_interpreter', 'yolo_weights']:
             extensions = {
                 'video': [("MP4 files", "*.mp4"), ("AVI files", "*.avi"), ("SEQ files", "*.seq"), ("All files", "*.*")],
                 'database': [("SQLite 3", "*.db")],
-                'python_interpreter': [("Python", '*.*')]
+                'python_interpreter': [("Python", '*.*')],
+                'yolo_weights': [("Yolo Weights", '*.*')]
             }
             file_path = self.get_file_path(extensions[mode], title)
         elif mode == 'output_folder':
@@ -83,7 +84,7 @@ class AnalysisFileManager:
         else:
             raise ValueError(f"No {mode} file was selected.")
 
-    def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter):
+    def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter,yolo_weights):
         """
         Sets up and verifies all paths necessary for an experiment, including the database file,
         video file, and output directory. It initializes the experiment's directory structure
@@ -110,13 +111,15 @@ class AnalysisFileManager:
         video_file = self.check_and_get_paths(video_file, 'video')
         output_folder = self.check_and_get_paths(base_output_path, 'output_folder')
         python_interpreter = self.check_and_get_paths(python_interpreter, 'python_interpreter')
+        yolo_weights = self.check_and_get_paths(yolo_weights, 'yolo_weights')
         self.base_path = Path(output_folder)
         self.create_subfolders()
         
         self.file_dict = {
             'db_file_position': db_file,
             'video_file_position': video_file,
-            'python_interpreter': python_interpreter
+            'python_interpreter': python_interpreter,
+            'yolo_weights': yolo_weights
         }
         
         self.path_dict = {

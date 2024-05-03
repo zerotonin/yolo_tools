@@ -1,4 +1,4 @@
-import os
+import os,json
 from prettytable import PrettyTable
 from database.ExperimentManager import ExperimentManager
 from database.ArenaManager import ArenaManager
@@ -11,9 +11,9 @@ from AnalysisFileManager.AnalysisFileManager import AnalysisFileManager
 
 
 class ExperimentSetupManager:
-    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path):
+    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path,yolo_weights):
         self.file_manager = AnalysisFileManager()
-        self.file_manager.setup_experiment_paths(base_output_path,db_file_path, video_file_path, python_env_path)
+        self.file_manager.setup_experiment_paths(base_output_path,db_file_path, video_file_path, python_env_path,yolo_weights)
         self.db_handler = DatabaseHandler(f'sqlite:///{db_file_path}')
         self.experiment_manager = ExperimentManager(self.db_handler)
         self.arena_manager = ArenaManager(self.db_handler)
@@ -205,11 +205,13 @@ class ExperimentSetupManager:
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
     base_output_path = '/home/geuba03p/food_example_video/output'
-    db_file_path = '/home/geuba03p/PyProjects/yolo_tools/fly_choice.db'
     video_file_path = '/home/geuba03p/food_example_video/original/2024_03_28__16-19-28.mp4'
-    python_interp = '/home/geuba03p/miniconda3/envs/yolov8/bin/python'
 
-    experiment_setup = ExperimentSetupManager(base_output_path, db_file_path, video_file_path, python_interp)
+    # Load JSON data from file
+    with open('path_config_locacl.json', 'r') as json_file:
+        path_config = json.load(json_file)
+
+    experiment_setup = ExperimentSetupManager(base_output_path, path_config['db_file_path'], video_file_path, path_config['python_interp'],path_config['yolo_weights'])
     experiment_setup.setup_experiments()
     experiment_setup.display_experiment_overview()
     experiment_setup.display_experiment_overview_arena_wise()
