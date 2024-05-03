@@ -208,7 +208,7 @@ if __name__ == "__main__":
     video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids'
 
     # Load JSON data from file
-    with open('path_config_locacl.json', 'r') as json_file:
+    with open('path_config_local.json', 'r') as json_file:
         path_config = json.load(json_file)
 
     experiment_setup = ExperimentSetupManager(base_output_path, path_config['db_file_path'], video_file_path, path_config['python_interp'],path_config['yolo_weights'])

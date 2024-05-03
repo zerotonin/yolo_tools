@@ -14,7 +14,8 @@ dependencies:
   - torchvision 
   - ultralytics  
   - fuzzywuzzy
-  - tabulate 
-  - pip
+  - tabulate
+  - sqlalchemy 
+  - pip  
   - pip:
       - prettytables
