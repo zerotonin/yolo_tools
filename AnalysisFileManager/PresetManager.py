@@ -1,16 +1,21 @@
 import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
-import json
+import json,os
 
 class PresetManager:
     def __init__(self):
         """
         Initializes the CLIFileManager with a hidden root Tkinter window.
         """
-        self.root = tk.Tk()
-        self.root.withdraw()  # Hide the Tkinter root window
+        if self.use_tkinter():
+            self.root = tk.Tk()
+            self.root.withdraw()  # Hide the Tkinter root window
 
+    def use_tkinter(self):
+        """Check if a GUI display environment is available."""
+        return os.environ.get('DISPLAY', None) is not None
+    
     def query_load_presets(self, topic="presets"):
         """
         Asks the user if they want to load presets for a specified topic, handling the response via CLI.
@@ -35,10 +40,15 @@ class PresetManager:
         Returns:
             str: The file path to the selected file.
         """
-        file_types = [(f"{ext} files", f"*{ext}") for ext in file_extensions]
-        filename = filedialog.askopenfilename(title="Select a file", filetypes=file_types)
+        if self.use_tkinter():
+            file_types = [(f"{ext} files", f"*{ext}") for ext in file_extensions]
+            filename = filedialog.askopenfilename(title="Select a file", filetypes=file_types)
+        else:
+            print("Available file types:")
+            for i, (desc, ext) in enumerate(file_extensions, 1):
+                print(f"{i}. {desc} ({ext})")
+            filename = input("Enter the path to your file: ")
         return filename
-
 
     def load_csv(self, filepath):
         """
