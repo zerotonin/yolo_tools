@@ -66,7 +66,7 @@ class AnalysisFileManager:
                 return path
         
         title = f"Select a {mode}"
-        if mode in ['video', 'database','python_interpreter', 'yolo_weights']:
+        if mode in ['database','python_interpreter', 'yolo_weights']:
             extensions = {
                 'video': [("MP4 files", "*.mp4"), ("AVI files", "*.avi"), ("SEQ files", "*.seq"), ("All files", "*.*")],
                 'database': [("SQLite 3", "*.db")],
