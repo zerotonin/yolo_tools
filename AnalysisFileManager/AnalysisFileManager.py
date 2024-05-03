@@ -28,6 +28,9 @@ class AnalysisFileManager:
         
         print("Subfolders created or verified.")
 
+    def use_tkinter(self):
+        return os.environ.get('DISPLAY', None) is not None
+
     def get_file_path(self, file_types, title):
         """
         Opens a file dialog to select a file with specified types.
