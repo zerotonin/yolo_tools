@@ -17,4 +17,4 @@ dependencies:
   - tabulate 
   - pip
   - pip:
-      - pretty tables
+      - prettytables
