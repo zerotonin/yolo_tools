@@ -18,6 +18,7 @@ class AnalysisFileManager:
             "slurm_scripts",
             "presets",
             "meta_data",
+            'slurm_logs',
             "results"
         ]
 
