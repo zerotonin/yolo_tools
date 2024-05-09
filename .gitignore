@@ -6,3 +6,4 @@ training_runs/*
 test_flies.json
 *__pycache__/*
 path_config_local.json
+data/*
