@@ -1,4 +1,4 @@
-import os,json
+import os
 from prettytable import PrettyTable
 from database.ExperimentManager import ExperimentManager
 from database.ArenaManager import ArenaManager
@@ -6,8 +6,8 @@ from database.FlyManager import FlyManager,FlyDistributionManager
 from database.StimulusManager import StimulusManager
 from movie_preprocessing.VideoInfoExtractor import VideoInfoExtractor
 from database.FlyChoiceDatabase import DatabaseHandler
-from AnalysisFileManager.PresetManager import PresetManager
-from AnalysisFileManager.AnalysisFileManager import AnalysisFileManager
+from analysis_file_manager.PresetManager import PresetManager
+from analysis_file_manager.AnalysisFileManager import AnalysisFileManager
 
 
 class ExperimentSetupManager:

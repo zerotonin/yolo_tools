@@ -1,7 +1,7 @@
 *.pt
 *.npy
 *.cpython*
-runs/*
+training_runs/*
 *.db
 test_flies.json
 *__pycache__/*
