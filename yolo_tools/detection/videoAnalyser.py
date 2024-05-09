@@ -2,8 +2,8 @@ import numpy as np
 from tqdm import tqdm
 from itertools import chain
 import argparse
-from TrajectoryAnalysis.trajectoryAnalyser import trajectoryAnalyser
-from training_tools.YoloWrapper import YoloWrapper
+from yolo_tools.trajectory_analysis.trajectoryAnalyser import trajectoryAnalyser
+from yolo_tools.training_tools.YoloWrapper import YoloWrapper
 
 class YOLO_detector:
     def __init__(self, video_path, apriori_classes, apriori_class_names, yolo_weights, max_frames =None):
@@ -12,7 +12,7 @@ class YOLO_detector:
         self.apriori_classes = apriori_classes
         self.apriori_class_names = apriori_class_names
         self.yolo_weights = yolo_weights
-        self.yolo_fly = YoloWrapper('runs/detect/fly_arena7/weights/best.pt')
+        self.yolo_fly = YoloWrapper(yolo_weights)
 
     def _tracking_result_to_cpu(self, results, frame_no):
         track_ids = results[frame_no].boxes.id.int().cpu().tolist()
@@ -67,4 +67,4 @@ if __name__ == '__main__':
 
 # /home/geuba03p/miniconda3/envs/yolov8/bin/python /home/geuba03p/PyProjects/yolo_tools/detection/videoAnalyser.py\
 # --video_path '/home/geuba03p/2024_03_28__16-19-28_45.mp4' --apriori_classes 0 1 --apriori_class_names arena fly \
-# --yolo_weights 'runs/detect/fly_arena7/weights/best.pt'
+# --yolo_weights 'resources/yolov8_weights_for_single_2chamberSeparatedArena_singleFly.pt'
