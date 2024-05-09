@@ -1,4 +1,4 @@
-from .FlyChoiceDatabase import *
+from yolo_tools.database.FlyChoiceDatabase import *
 from prettytable import PrettyTable
 import os
 
