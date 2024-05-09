@@ -8,8 +8,8 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import torch
 import matplotlib
-matplotlib.use('Qt5Agg') 
 import matplotlib.pyplot as plt
+matplotlib.use('Qt5Agg') 
 
 
 class YoloWrapper:
