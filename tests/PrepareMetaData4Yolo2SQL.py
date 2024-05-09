@@ -1,4 +1,4 @@
-from workflow.ExperimentSetupManager import ExperimentSetupManager
+from yolo_tools.workflow.ExperimentSetupManager import ExperimentSetupManager
 import json
 
 # Example usage of the setup_experiments method
