@@ -1,6 +1,6 @@
 from pathlib import Path
 import cv2
-from training_tools.YoloWrapper import YoloWrapper
+from yolo_tools.training_tools.YoloWrapper import YoloWrapper
 import os
 
 #set the memoryto be expandable

@@ -1,13 +1,13 @@
 import os
 from prettytable import PrettyTable
-from database.ExperimentManager import ExperimentManager
-from database.ArenaManager import ArenaManager
-from database.FlyManager import FlyManager,FlyDistributionManager
-from database.StimulusManager import StimulusManager
-from movie_preprocessing.VideoInfoExtractor import VideoInfoExtractor
-from database.FlyChoiceDatabase import DatabaseHandler
-from analysis_file_manager.PresetManager import PresetManager
-from analysis_file_manager.AnalysisFileManager import AnalysisFileManager
+from yolo_tools.database.ExperimentManager import ExperimentManager
+from yolo_tools.database.ArenaManager import ArenaManager
+from yolo_tools.database.FlyManager import FlyManager,FlyDistributionManager
+from yolo_tools.database.StimulusManager import StimulusManager
+from yolo_tools.movie_preprocessing.VideoInfoExtractor import VideoInfoExtractor
+from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
+from yolo_tools.analysis_file_manager.PresetManager import PresetManager
+from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
 
 
 class ExperimentSetupManager:
