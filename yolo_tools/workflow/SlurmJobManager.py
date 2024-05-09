@@ -2,11 +2,12 @@ import subprocess
 import os
 
 class SlurmJobManager:
-    def __init__(self, file_base_dir,script_base_dir,python_path,arena_num):
-        self.file_base_dir = file_base_dir
-        self.script_base_dir = script_base_dir
+    def __init__(self, analysis_file_manager,module_name,arena_num):
+        self.file_manager = analysis_file_manager
+        self.file_base_dir =  self.file_manager.path_dict['output_file_path']
+        self.module_name = module_name
         self.user_name = os.getlogin()
-        self.python_path = python_path
+        self.python_path =  self.file_manager.file_dict['python_interpreter']
         self.arena_num = arena_num
 
     def submit_job(self, script_path, dependency_id=None):
@@ -45,7 +46,7 @@ class SlurmJobManager:
         """
         
         # Build the command line for the Python script with additional variables
-        python_command = f"{self.python_path} {script_parameters['python_script']} {script_parameters['script_variables']}"
+        python_command = f"{self.python_path} -m yolo_tools.{self.module_name}.{script_parameters['python_script']} {script_parameters['script_variables']}"
         
         # Construct the SLURM script content
         content =  f'#!/bin/bash\n'
@@ -71,7 +72,7 @@ class SlurmJobManager:
 
     def create_video_splitting_slurm_script(self,input_file_position,meomory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
-        script_variables = f'--video_path {input_file_position} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
+        script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
         script_parameters['partition'] =  "aoraki"
         script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/split_video.sh'
         script_parameters['cpus_per_task'] = cpus_per_task
