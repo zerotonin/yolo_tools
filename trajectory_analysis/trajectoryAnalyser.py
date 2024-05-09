@@ -467,6 +467,6 @@ class trajectoryAnalyser:
         plt.show()
 
 
-trajectories = np.load('./tra.npy')
-traAna = trajectoryAnalyser()
-traAna.analyse_trajectory(trajectories,0.1,True,True)
+# trajectories = np.load('./tra.npy')
+# traAna = trajectoryAnalyser()
+# traAna.analyse_trajectory(trajectories,0.1,True,True)
