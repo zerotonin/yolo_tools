@@ -1,4 +1,4 @@
-from AnalysisFileManager.ExperimentSetupManager import ExperimentSetupManager
+from workflow.ExperimentSetupManager import ExperimentSetupManager
 import json
 
 # Example usage of the setup_experiments method
