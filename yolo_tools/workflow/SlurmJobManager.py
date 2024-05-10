@@ -77,7 +77,7 @@ class SlurmJobManager:
         script_parameters['partition'] =  "aoraki"
         script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/split_video.sh'
         script_parameters['cpus_per_task'] = cpus_per_task
-        script_parameters['python_script'] = f'frameSplitter.py'
+        script_parameters['python_script'] = f'FrameSplitter'
         script_parameters['jobname'] =  f'split_{os.path.basename(self.file_manager.file_dict['video_file_position'])}'
         script_parameters['memory'] = memory_GB_int
         script_parameters['script_variables'] = script_variables
