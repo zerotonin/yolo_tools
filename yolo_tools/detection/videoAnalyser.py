@@ -42,11 +42,10 @@ class YOLO_detector:
             coordinates.append(self.get_best_tracking_results(results, frame_no))
         return np.array(coordinates)
 
-    def analyze_video(self):
+    def analyze_video(self,file_name):
         results = self.yolo_fly.model.track(self.video_path, conf=0.8)
         trajectories = self.get_detection_trajectories(results)
-        traAna = trajectoryAnalyser()
-        traAna.analyse_trajectory(trajectories, 0.1, True, True)
+        np.save(file_name,trajectories)
 
 def main():
     parser = argparse.ArgumentParser(description='YOLO Detector for analyzing videos.')
@@ -55,16 +54,14 @@ def main():
     parser.add_argument('--apriori_classes', nargs='+', type=int, default=[0, 1], help='List of apriori classes.')
     parser.add_argument('--apriori_class_names', nargs='+', type=str, default=['arena', 'fly'], help='Names of the apriori classes.')
     parser.add_argument('--yolo_weights', type=str, default='runs/detect/fly_arena7/weights/best.pt', help='Path to YOLO weights.')
-    parser.add_argument('--output_folder', type=str, help='Path where the .')
+    parser.add_argument('--output_file', type=str, help='Path where the .npy trajectory file is saved')
 
     args = parser.parse_args()
 
     detector = YOLO_detector(args.video_path, args.apriori_classes, args.apriori_class_names, args.yolo_weights, max_frames=args.max_frames)
-    detector.analyze_video()
+    detector.analyze_video(args.output_file)
 
 if __name__ == '__main__':
     main()
 
-# /home/geuba03p/miniconda3/envs/yolov8/bin/python /home/geuba03p/PyProjects/yolo_tools/detection/videoAnalyser.py\
-# --video_path '/home/geuba03p/2024_03_28__16-19-28_45.mp4' --apriori_classes 0 1 --apriori_class_names arena fly \
-# --yolo_weights 'resources/yolov8_weights_for_single_2chamberSeparatedArena_singleFly.pt'
+# /home/geuba03p/miniconda3/envs/yolov8/bin/python -m yolo_tools.detection.videoAnalyser --video_path '/home/geuba03p/2024_03_28__16-19-28_45.mp4' --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights 'resources/yolov8_weights_for_single_2chamberSeparatedArena_singleFly.pt'
