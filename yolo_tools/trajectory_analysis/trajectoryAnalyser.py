@@ -10,13 +10,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from scipy import signal
-import pandas as pd
-import glob
-import csv
+import json
 import argparse
-import os
 
 # ----------------------------[ CONSTANTS ]-----------------------------------
 
@@ -466,6 +462,37 @@ class trajectoryAnalyser:
 
         plt.show()
 
+def main():
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='Process video trajectories and analyze movements.')
+    parser.add_argument('--input_file', type=str, required=True, help='Path to the input file containing trajectory data.')
+    parser.add_argument('--midline_tolerance', type=float, required=True, help='Tolerance for midline calculation.')
+    parser.add_argument('--positive_stimulus_on_left', type=bool, required=True, help='True if the positive stimulus is on the left.')
+    parser.add_argument('--filter_trajectory', type=bool, required=True, help='Apply filter to trajectory data.')
+    parser.add_argument('--output_locomotion_file', type=str, required=True, help='Output path for locomotion data in JSON format.')
+    parser.add_argument('--output_decision_file', type=str, required=True, help='Output path for decision data in JSON format.')
+
+    args = parser.parse_args()
+
+    # Load trajectories from the specified input file
+    trajectories = np.load(args.input_file)
+
+    # Initialize the trajectory analyzer with the midline tolerance as a tuple for boundaries
+    traAna = trajectoryAnalyser()
+    traAna.analyse_trajectory(trajectories, args.midline_tolerance, args.positive_stimulus_on_left, args.filter_trajectory)
+
+    # Write decision dictionary to JSON file
+    with open(args.output_decision_file, 'w') as outfile:
+        json.dump(traAna.decision_dict, outfile, indent=4)
+
+    # Write locomotion dictionary to JSON file
+    with open(args.output_locomotion_file, 'w') as outfile:
+        json.dump(traAna.locomotor_dict, outfile, indent=4)
+
+    print("Analysis complete. Data saved to specified files.")
+
+if __name__ == "__main__":
+    main()
 
 # trajectories = np.load('./tra.npy')
 # traAna = trajectoryAnalyser()
