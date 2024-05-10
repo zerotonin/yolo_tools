@@ -70,7 +70,7 @@ class SlurmJobManager:
             f.write(content)
 
 
-    def create_video_splitting_slurm_script(self,input_file_position,meomory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
+    def create_video_splitting_slurm_script(self,meomory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
         script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
         script_parameters['partition'] =  "aoraki"
