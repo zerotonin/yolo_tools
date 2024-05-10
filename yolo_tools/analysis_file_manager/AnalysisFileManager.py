@@ -27,6 +27,13 @@ class AnalysisFileManager:
             subfolder_path.mkdir(parents=True, exist_ok=True)
             self.folder_dict[folder] = subfolder_path
         
+        result_subs = {'choice_analysis','trajectories'}
+        for folder in result_subs:
+            subfolder_path = self.base_path / 'results' / folder
+            subfolder_path.mkdir(parents=True, exist_ok=True)
+            self.folder_dict[folder] = subfolder_path
+
+
         print("Subfolders created or verified.")
 
     def use_tkinter(self):
@@ -134,5 +141,8 @@ class AnalysisFileManager:
             'slurm_scripts': os.path.join(output_folder, 'slurm_scripts'),
             'presets': os.path.join(output_folder, 'presets'),
             'meta_data': os.path.join(output_folder, 'meta_data'),
-            'results': os.path.join(output_folder, 'results')
+            'results': os.path.join(output_folder, 'results'),
+            'choice_analysis': os.path.join(os.path.join(output_folder, 'results'),'choice_analysis'),
+            'trajectories': os.path.join(os.path.join(output_folder, 'results'),'trajectories')
+
         }
