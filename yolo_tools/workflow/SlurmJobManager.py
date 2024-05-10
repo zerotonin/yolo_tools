@@ -1,11 +1,10 @@
 import subprocess
 import os
-
+import re
 class SlurmJobManager:
-    def __init__(self, analysis_file_manager,module_name,arena_num,gpu_partition = 'aoraki_GPU'):
+    def __init__(self, analysis_file_manager,arena_num,gpu_partition = 'aoraki_GPU'):
         self.file_manager = analysis_file_manager
         self.file_base_dir =  self.file_manager.path_dict['output_file_path']
-        self.module_name = module_name
         self.user_name = os.getlogin()
         self.python_path =  self.file_manager.file_dict['python_interpreter']
         self.arena_num = arena_num
@@ -47,7 +46,7 @@ class SlurmJobManager:
         """
         
         # Build the command line for the Python script with additional variables
-        python_command = f"{self.python_path} -m yolo_tools.{self.module_name}.{script_parameters['python_script']} {script_parameters['script_variables']}"
+        python_command = f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {script_parameters['script_variables']}"
         
         # Construct the SLURM script content
         content =  f'#!/bin/bash\n'
@@ -70,20 +69,23 @@ class SlurmJobManager:
         with open(script_parameters['filename'], 'w') as f:
             f.write(content)
 
-    def create_tracking_slurm_script(self,gpus_per_task =1, memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
-         
-        script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
+    def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 32, nodes = 1, cpus_per_task = 1, ntasks = 1):
+        
+
+        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly 
+                            --yolo_weights {self.file_manager.file_dict['yolo_weights']} 
+                            --output_file {self.file_manager.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
         script_parameters = dict()
-        script_parameters['partition'] =  self.gpu_partion
         script_parameters['gpus_per_task'] = gpus_per_task
-        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/split_video.sh'
+        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/track_arena_{str(arena_num).zfill(2)}.sh'
         script_parameters['cpus_per_task'] = cpus_per_task
-        script_parameters['python_script'] = f'FrameSplitter'
-        script_parameters['jobname'] =  f'split_{os.path.basename(self.file_manager.file_dict['video_file_position'])}'
+        script_parameters['python_script'] = f'videoAnalyser'
+        script_parameters['jobname'] =  f'split_{os.path.basename(split_video_fileposition)}'
         script_parameters['memory'] = memory_GB_int
         script_parameters['script_variables'] = script_variables
         script_parameters['nodes'] = nodes
         script_parameters['ntasks_per_node'] = ntasks
+        script_parameters['module'] = 'detection'
 
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
@@ -102,6 +104,7 @@ class SlurmJobManager:
         script_parameters['script_variables'] = script_variables
         script_parameters['nodes'] = nodes
         script_parameters['ntasks_per_node'] = ntasks
+        script_parameters['module'] = 'video_preprocessing'
 
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
