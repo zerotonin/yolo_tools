@@ -2,13 +2,14 @@ import subprocess
 import os
 
 class SlurmJobManager:
-    def __init__(self, analysis_file_manager,module_name,arena_num):
+    def __init__(self, analysis_file_manager,module_name,arena_num,gpu_partition = 'aoraki_GPU'):
         self.file_manager = analysis_file_manager
         self.file_base_dir =  self.file_manager.path_dict['output_file_path']
         self.module_name = module_name
         self.user_name = os.getlogin()
         self.python_path =  self.file_manager.file_dict['python_interpreter']
         self.arena_num = arena_num
+        self.gpu_partion = gpu_partition
 
     def submit_job(self, script_path, dependency_id=None):
         """
@@ -68,6 +69,24 @@ class SlurmJobManager:
         # Write the SLURM script to a file
         with open(script_parameters['filename'], 'w') as f:
             f.write(content)
+
+    def create_tracking_slurm_script(self,gpus_per_task =1, memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
+         
+        script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
+        script_parameters = dict()
+        script_parameters['partition'] =  self.gpu_partion
+        script_parameters['gpus_per_task'] = gpus_per_task
+        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/split_video.sh'
+        script_parameters['cpus_per_task'] = cpus_per_task
+        script_parameters['python_script'] = f'FrameSplitter'
+        script_parameters['jobname'] =  f'split_{os.path.basename(self.file_manager.file_dict['video_file_position'])}'
+        script_parameters['memory'] = memory_GB_int
+        script_parameters['script_variables'] = script_variables
+        script_parameters['nodes'] = nodes
+        script_parameters['ntasks_per_node'] = ntasks
+
+        self.create_slurm_script(script_parameters)
+        return script_parameters['filename']
 
 
     def create_video_splitting_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
