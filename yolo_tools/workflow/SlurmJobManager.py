@@ -79,7 +79,7 @@ class SlurmJobManager:
         script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/track_arena_{str(arena_num).zfill(2)}.sh'
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'videoAnalyser'
-        script_parameters['jobname'] =  f'split_{os.path.basename(split_video_fileposition)}'
+        script_parameters['jobname'] =  f'track arena {arena_num}'
         script_parameters['memory'] = memory_GB_int
         script_parameters['script_variables'] = script_variables
         script_parameters['nodes'] = nodes
@@ -90,6 +90,29 @@ class SlurmJobManager:
         return script_parameters['filename']
 
 
+    def create_trajectory_analysis_slurm_script(self, arena_num, positive_stimulus_on_left,
+                                                filter_trajectory=True,midline_tolerance = 0.1,memory_GB_int = 64, 
+                                                nodes = 1, cpus_per_task = 1, ntasks = 1):
+
+        input_file_position =  f'{self.file_manager.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
+        output_locomotion_file =  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}.csv'
+        output_decision_file = f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}.csv'
+        
+        script_variables = f'--input_file {input_file_position} --midline_tolerance {midline_tolerance} --positive_stimulus_on_left {positive_stimulus_on_left} --filter_trajectory {filter_trajectory} --output_locomotion_file {output_locomotion_file} --output_decision_file {output_decision_file}'
+        script_parameters = dict()
+        script_parameters['partition'] =  "aoraki"
+        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/analyse_arena_{str(arena_num).zfill(2)}.sh'
+        script_parameters['cpus_per_task'] = cpus_per_task
+        script_parameters['python_script'] = f'trajectoryAnalyser'
+        script_parameters['jobname'] =  f'analyse arena {arena_num}'
+        script_parameters['memory'] = memory_GB_int
+        script_parameters['script_variables'] = script_variables
+        script_parameters['nodes'] = nodes
+        script_parameters['ntasks_per_node'] = ntasks
+        script_parameters['module'] = 'trajectory_analysis'
+
+        self.create_slurm_script(script_parameters)
+        return script_parameters['filename']
     def create_video_splitting_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
         script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
@@ -131,10 +154,10 @@ class SlurmJobManager:
             self.create_tracking_slurm_script(self.anticipate_split_video_position(split_i),split_i)
             #track_job_id = self.submit_job(f'track_job_{i}.sh', dependency_id=split_job_id)
             track_job_id = split_i+100
-        #     analysis_output = f"{self.file_base_dir}/slurm_scripts/analysis_output_{i}.dat"
-        #     self.create_slurm_script(f'analysis_job_{i}.sh', analysis_script, track_output, analysis_output)
-        #     analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
-        #     analysis_jobs.append(analysis_job_id)
+            self.create_trajectory_analysis_slurm_script(split_i,)
+            #analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
+            analysis_job_id = split_i+200
+            analysis_jobs.append(analysis_job_id)
 
         # # Step 3: Create and submit the final job that depends on all analysis jobs
         # all_dependencies = ":".join(analysis_jobs)
