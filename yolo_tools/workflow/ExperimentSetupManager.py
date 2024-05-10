@@ -233,8 +233,15 @@ class ExperimentSetupManager:
         # Get automated info from posthoc run
 
         self.video_info_extractor = VideoInfoExtractor(self.file_manager.file_dict['video_file_position'])
-        self.experiment_info = self.manage_preset('video_info', self.video_info_extractor.get_video_info)
+        self.experiment_info.update(self.manage_preset('video_info', self.video_info_extractor.get_video_info))
+    
+    def write_meta_data_table(self):
+        self.arena_layout
+        self.stim_layout
+        self.fly_layout
+        self.experiment_info
+        pass
 
-    def make_video_splitting_slurm_script(self): 
+    def run_slurm_jobs(self): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.stim_layout,self.gpu_parttition)
         self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'])
