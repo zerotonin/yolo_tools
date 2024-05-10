@@ -109,6 +109,11 @@ class SlurmJobManager:
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
 
+    def anticipate_split_video_position(self,arena_i):
+        video_base_name = os.path.basename(self.file_manager.file_dict['video_file_position'])
+        filename,extension = video_base_name.split('.')
+        splitname = f'{filename}__{str(arena_i).zfill(2)}.{extension}'
+        return os.path.join(self.file_manager.path_dict['preprocessed_single_videos'],splitname)
 
 
     def manage_workflow(self, num_splits):
@@ -122,19 +127,19 @@ class SlurmJobManager:
 
         # Step 2: Submit tracking and analysis jobs
         analysis_jobs = []
-        for i in range(num_splits):
+        for split_i in range(num_splits):
             # Assume each split file is named uniquely
-            self.create_slurm_script()
+            self.create_tracking_slurm_script(self.anticipate_split_video_position(split_i),split_i)
             #track_job_id = self.submit_job(f'track_job_{i}.sh', dependency_id=split_job_id)
-            track_job_id = i+100
-            analysis_output = f"{self.file_base_dir}/slurm_scripts/analysis_output_{i}.dat"
-            self.create_slurm_script(f'analysis_job_{i}.sh', analysis_script, track_output, analysis_output)
-            analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
-            analysis_jobs.append(analysis_job_id)
+            track_job_id = split_i+100
+        #     analysis_output = f"{self.file_base_dir}/slurm_scripts/analysis_output_{i}.dat"
+        #     self.create_slurm_script(f'analysis_job_{i}.sh', analysis_script, track_output, analysis_output)
+        #     analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
+        #     analysis_jobs.append(analysis_job_id)
 
-        # Step 3: Create and submit the final job that depends on all analysis jobs
-        all_dependencies = ":".join(analysis_jobs)
-        self.create_slurm_script('final_job.sh', final_script, self.file_base_dir, f"{self.file_base_dir}/final_output.sql")
-        self.submit_job('final_job.sh', dependency_id=all_dependencies)
+        # # Step 3: Create and submit the final job that depends on all analysis jobs
+        # all_dependencies = ":".join(analysis_jobs)
+        # self.create_slurm_script('final_job.sh', final_script, self.file_base_dir, f"{self.file_base_dir}/final_output.sql")
+        # self.submit_job('final_job.sh', dependency_id=all_dependencies)
 
 
