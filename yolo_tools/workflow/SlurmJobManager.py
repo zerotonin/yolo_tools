@@ -2,12 +2,13 @@ import subprocess
 import os
 
 class SlurmJobManager:
-    def __init__(self, analysis_file_manager,arena_num,gpu_partition = 'aoraki_GPU'):
+    def __init__(self, analysis_file_manager,arena_num,stim_layout,gpu_partition = 'aoraki_GPU'):
         self.file_manager = analysis_file_manager
         self.file_base_dir =  self.file_manager.path_dict['output_file_path']
         self.user_name = os.getlogin()
         self.python_path =  self.file_manager.file_dict['python_interpreter']
         self.arena_num = arena_num
+        self.stim_layout = stim_layout
         self.gpu_partion = gpu_partition
 
     def submit_job(self, script_path, dependency_id=None):
@@ -154,7 +155,7 @@ class SlurmJobManager:
             self.create_tracking_slurm_script(self.anticipate_split_video_position(split_i),split_i)
             #track_job_id = self.submit_job(f'track_job_{i}.sh', dependency_id=split_job_id)
             track_job_id = split_i+100
-            self.create_trajectory_analysis_slurm_script(split_i,)
+            self.create_trajectory_analysis_slurm_script(split_i,self.stim_layout[0]==self.stim_layout[split_i])
             #analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
             analysis_job_id = split_i+200
             analysis_jobs.append(analysis_job_id)

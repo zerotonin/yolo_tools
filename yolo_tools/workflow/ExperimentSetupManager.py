@@ -236,5 +236,5 @@ class ExperimentSetupManager:
         self.experiment_info = self.manage_preset('video_info', self.video_info_extractor.get_video_info)
 
     def make_video_splitting_slurm_script(self): 
-        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.gpu_parttition)
+        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.stim_layout,self.gpu_parttition)
         self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'])
