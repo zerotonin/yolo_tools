@@ -4,10 +4,11 @@ from yolo_tools.database.ExperimentManager import ExperimentManager
 from yolo_tools.database.ArenaManager import ArenaManager
 from yolo_tools.database.FlyManager import FlyManager,FlyDistributionManager
 from yolo_tools.database.StimulusManager import StimulusManager
-from yolo_tools.movie_preprocessing.VideoInfoExtractor import VideoInfoExtractor
+from yolo_tools.video_preprocessing.VideoInfoExtractor import VideoInfoExtractor
 from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
 from yolo_tools.analysis_file_manager.PresetManager import PresetManager
 from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
+from yolo_tools.workflow.SlurmJobManager import SlurmJobManager
 
 
 class ExperimentSetupManager:
@@ -232,3 +233,7 @@ class ExperimentSetupManager:
 
         self.video_info_extractor = VideoInfoExtractor(self.file_manager.file_dict['video_file_position'])
         self.experiment_info = self.manage_preset('video_info', self.video_info_extractor.get_video_info)
+
+    def make_video_splitting_slurm_script(self): 
+        self.slurm_job_manager = SlurmJobManager(self.file_manager,'video_preprocessing',self.arena_info['arena_num'])
+        self.slurm_job_manager.create_video_splitting_slurm_script()
