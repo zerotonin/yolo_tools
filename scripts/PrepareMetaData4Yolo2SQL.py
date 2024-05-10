@@ -12,7 +12,9 @@ if __name__ == "__main__":
     with open('config/path_config_local.json', 'r') as json_file:
         path_config = json.load(json_file)
 
-    experiment_setup = ExperimentSetupManager(base_output_path, path_config['db_file_path'], video_file_path, path_config['python_interp'],path_config['yolo_weights'])
+    experiment_setup = ExperimentSetupManager(base_output_path, path_config['db_file_path'], 
+                                              video_file_path, path_config['python_interp'],
+                                              path_config['yolo_weights'])
     experiment_setup.setup_experiments()
     experiment_setup.display_experiment_overview()
     experiment_setup.display_experiment_overview_arena_wise()

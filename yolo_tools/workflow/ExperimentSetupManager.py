@@ -12,7 +12,7 @@ from yolo_tools.workflow.SlurmJobManager import SlurmJobManager
 
 
 class ExperimentSetupManager:
-    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path,yolo_weights):
+    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path,yolo_weights,gpu_partition='aoraki_GPU'):
         self.file_manager = AnalysisFileManager()
         self.file_manager.setup_experiment_paths(base_output_path,db_file_path, video_file_path, python_env_path,yolo_weights)
         self.db_handler = DatabaseHandler(f'sqlite:///{db_file_path}')
@@ -22,6 +22,7 @@ class ExperimentSetupManager:
         self.fly_distribution_manager = FlyDistributionManager(self.db_handler, {})
         self.stimulus_manager = StimulusManager(self.db_handler)
         self.preset_manager = PresetManager()
+        self.gpu_parttition = gpu_partition
         self.load_existing_presets()
 
     def clear_screen(self):
@@ -235,5 +236,5 @@ class ExperimentSetupManager:
         self.experiment_info = self.manage_preset('video_info', self.video_info_extractor.get_video_info)
 
     def make_video_splitting_slurm_script(self): 
-        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'])
+        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.gpu_parttition)
         self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'])
