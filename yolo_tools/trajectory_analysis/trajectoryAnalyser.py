@@ -11,7 +11,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-import json
+import pandas as pd
 import argparse
 
 # ----------------------------[ CONSTANTS ]-----------------------------------
@@ -481,13 +481,13 @@ def main():
     traAna = trajectoryAnalyser()
     traAna.analyse_trajectory(trajectories, args.midline_tolerance, args.positive_stimulus_on_left, args.filter_trajectory)
 
-    # Write decision dictionary to JSON file
-    with open(args.output_decision_file, 'w') as outfile:
-        json.dump(traAna.decision_dict, outfile, indent=4)
+    # Write decision dictionary to CSV
+    df = pd.DataFrame(traAna.decision_dict)
+    df.to_csv(args.output_decision_file)
 
-    # Write locomotion dictionary to JSON file
-    with open(args.output_locomotion_file, 'w') as outfile:
-        json.dump(traAna.locomotor_dict, outfile, indent=4)
+    # Write locomotion dictionary to o CSV
+    df = pd.DataFrame(traAna.locomotor_dict)
+    df.to_csv(args.output_locomotion_file)
 
     print("Analysis complete. Data saved to specified files.")
 
