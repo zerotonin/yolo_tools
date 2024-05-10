@@ -16,8 +16,8 @@ if __name__ == "__main__":
     experiment_setup.setup_experiments()
     experiment_setup.display_experiment_overview()
     experiment_setup.display_experiment_overview_arena_wise()
-    # if video_file_path:
-    #     experiment_setup.get_video_info()
+    if video_file_path:
+        experiment_setup.get_video_info()
     
-    #     if not experiment_setup.check_loadable_preset('slurm_video_scripts'):
-    #         experiment_setup.make_split_slurm_script()
+        if not experiment_setup.check_loadable_preset('slurm_video_scripts'):
+            experiment_setup.make_video_splitting_slurm_script()
