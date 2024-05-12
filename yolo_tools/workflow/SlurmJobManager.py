@@ -73,7 +73,7 @@ class SlurmJobManager:
     def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 32, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
 
-        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
+        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(arena_num)}.npy'
         script_parameters = dict()
         script_parameters['partition'] =  self.gpu_partion
         script_parameters['gpus_per_task'] = gpus_per_task
@@ -95,9 +95,9 @@ class SlurmJobManager:
                                                 filter_trajectory=True,midline_tolerance = 0.1,memory_GB_int = 64, 
                                                 nodes = 1, cpus_per_task = 1, ntasks = 1):
 
-        input_file_position =  f'{self.file_manager.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
-        output_locomotion_file =  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}_'
-        output_decision_file = f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
+        input_file_position    = self.file_manager.create_yolo_trajectory_filepath(arena_num)
+        output_locomotion_file = self.file_manager.create_locomotor_result_base_path(arena_num)
+        output_decision_file   = self.file_manager.create_decision_result_base_path(arena_num)
         
         script_variables = f'--input_file {input_file_position} --midline_tolerance {midline_tolerance} --positive_stimulus_on_left {positive_stimulus_on_left} --filter_trajectory {filter_trajectory} --output_locomotion_file {output_locomotion_file} --output_decision_file {output_decision_file}'
         script_parameters = dict()
@@ -160,8 +160,9 @@ class SlurmJobManager:
             analysis_job_id = split_i+200
             analysis_jobs.append(analysis_job_id)
 
-        # # Step 3: Create and submit the final job that depends on all analysis jobs
-        # all_dependencies = ":".join(analysis_jobs)
+        # Step 3: Create and submit the final job that depends on all analysis jobs
+        all_dependencies = ":".join(analysis_jobs)
+
         # self.create_slurm_script('final_job.sh', final_script, self.file_base_dir, f"{self.file_base_dir}/final_output.sql")
         # self.submit_job('final_job.sh', dependency_id=all_dependencies)
 
