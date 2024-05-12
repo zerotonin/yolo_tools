@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from prettytable import PrettyTable
 from yolo_tools.database.ExperimentManager import ExperimentManager
 from yolo_tools.database.ArenaManager import ArenaManager
@@ -235,12 +236,74 @@ class ExperimentSetupManager:
         self.video_info_extractor = VideoInfoExtractor(self.file_manager.file_dict['video_file_position'])
         self.experiment_info.update(self.manage_preset('video_info', self.video_info_extractor.get_video_info))
     
+    def _fill_list(self,my_list,max_len):
+        return my_list + [None] * (max_len - len(my_list))
+    
     def write_meta_data_table(self):
-        self.arena_layout
-        self.stim_layout
-        self.fly_layout
-        self.experiment_info
-        pass
+        # Shorthand
+        arena_num  = self.arena_info['arena_num']
+        # Experiment and arena
+        meta_data_dict = dict() 
+        meta_data_dict['arena_number']            = list(range(arena_num))
+        meta_data_dict['date_time']               = [f'{self.experiment_info['date']}  {self.experiment_info['time']}' for _ in range(arena_num)]
+        meta_data_dict['fps']                     = [self.experiment_info['fps'] for _ in range(arena_num)]
+        meta_data_dict['video_file_path']         = [self.file_manager.file_dict['video_info'] for _ in range(arena_num)]
+        meta_data_dict['experiment_type']         = [self.experiment_info['experiment_type_id'] for _ in range(arena_num)]
+        meta_data_dict['experimenter_id']         = [self.experiment_info['experimenter_id'] for _ in range(arena_num)] 
+        meta_data_dict['number_of_arenas']        = arena_num 
+        meta_data_dict['number_of_arena_rows']    = [self.arena_info['arena_rows'] for _ in range(arena_num)] 
+        meta_data_dict['number_of_arena_columns'] = [self.arena_info['arena_cols'] for _ in range(arena_num)]  
+        # Flies
+
+        fly_list = [fly for sublist in self.fly_layout for fly in (sublist if isinstance(sublist, list) else [sublist])]
+        is_female_list = list()
+        genotype_id_list = list()
+        age_day_after_eclosion_list = list()
+        fly_attribute_list = [list(),list(),list(),list(),list()]
+
+        for arena_i in range(arena_num):
+
+            fly_id = fly_list[arena_i]
+            fly_dict = self.flies[fly_id]
+
+            is_female_list.append(fly_dict['is_female']) 
+            genotype_id_list.append(fly_dict['genotype_id']) 
+            age_day_after_eclosion_list.append(fly_dict['age_day_after_eclosion'])
+            fly_dict['attribute_ids'] = self._fill_list(fly_dict['attribute_ids'],5)
+            for attribute_i in range(len(fly_dict['attribute_ids'])):
+                fly_attribute_list[attribute_i].append(fly_dict['attribute_ids'][attribute_i])
+             
+            
+        meta_data_dict['is_female']              =  is_female_list
+        meta_data_dict['genotype_id']            =  genotype_id_list
+        meta_data_dict['age_day_after_eclosion'] =  age_day_after_eclosion_list
+        meta_data_dict['fly_attribute_1']        =  fly_attribute_list[0]
+        meta_data_dict['fly_attribute_2']        =  fly_attribute_list[1]
+        meta_data_dict['fly_attribute_3']        =  fly_attribute_list[2]
+        meta_data_dict['fly_attribute_4']        =  fly_attribute_list[3]
+        meta_data_dict['fly_attribute_5']        =  fly_attribute_list[4]
+
+    
+        # Stimuli
+        stimulus_list = [list(),list(),list(),list(),list(),list(),list(),list(),list(),list()]
+
+        for arena_i in range(arena_num):
+            self.stim_layout[arena_i] = self._fill_list(self.stim_layout[arena_i],10)
+            for stimulus_i in range(len(self.stim_layout[arena_i])):
+                stimulus_list[stimulus_i].append(self.stim_layout[arena_i][stimulus_i])
+
+        meta_data_dict['stimuli_01'] = stimulus_list[0] 
+        meta_data_dict['stimuli_02'] = stimulus_list[1] 
+        meta_data_dict['stimuli_03'] = stimulus_list[2] 
+        meta_data_dict['stimuli_04'] = stimulus_list[3] 
+        meta_data_dict['stimuli_05'] = stimulus_list[4] 
+        meta_data_dict['stimuli_06'] = stimulus_list[5] 
+        meta_data_dict['stimuli_07'] = stimulus_list[6] 
+        meta_data_dict['stimuli_08'] = stimulus_list[7] 
+        meta_data_dict['stimuli_09'] = stimulus_list[8] 
+        meta_data_dict['stimuli_10'] = stimulus_list[9] 
+
+        pd.DataFrame(meta_data_dict).to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
 
     def run_slurm_jobs(self): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.stim_layout,self.gpu_parttition)

@@ -128,12 +128,6 @@ class AnalysisFileManager:
         self.base_path = Path(output_folder)
         self.create_subfolders()
         
-        self.file_dict = {
-            'db_file_position': db_file,
-            'video_file_position': video_file,
-            'python_interpreter': python_interpreter,
-            'yolo_weights': yolo_weights
-        }
         
         self.path_dict = {
             'output_file_path': output_folder,
@@ -145,4 +139,11 @@ class AnalysisFileManager:
             'choice_analysis': os.path.join(os.path.join(output_folder, 'results'),'choice_analysis'),
             'trajectories': os.path.join(os.path.join(output_folder, 'results'),'trajectories')
 
+        }
+        self.file_dict = {
+            'db_file_position': db_file,
+            'video_file_position': video_file,
+            'python_interpreter': python_interpreter,
+            'yolo_weights': yolo_weights,
+            'meta_data_csv_file': os.path.join(self.path_dict['meta_data'],'meta_data_table.csv')
         }
