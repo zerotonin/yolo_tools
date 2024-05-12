@@ -303,7 +303,8 @@ class ExperimentSetupManager:
         meta_data_dict['stimuli_09'] = stimulus_list[8] 
         meta_data_dict['stimuli_10'] = stimulus_list[9] 
 
-        pd.DataFrame(meta_data_dict).to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
+        self.meta_data_table = pd.DataFrame(meta_data_dict)
+        self.meta_data_table.to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
 
     def run_slurm_jobs(self): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.stim_layout,self.gpu_parttition)
