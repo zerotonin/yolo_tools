@@ -96,8 +96,8 @@ class SlurmJobManager:
                                                 nodes = 1, cpus_per_task = 1, ntasks = 1):
 
         input_file_position =  f'{self.file_manager.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
-        output_locomotion_file =  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}.csv'
-        output_decision_file = f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}.csv'
+        output_locomotion_file =  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}_'
+        output_decision_file = f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
         
         script_variables = f'--input_file {input_file_position} --midline_tolerance {midline_tolerance} --positive_stimulus_on_left {positive_stimulus_on_left} --filter_trajectory {filter_trajectory} --output_locomotion_file {output_locomotion_file} --output_decision_file {output_decision_file}'
         script_parameters = dict()
