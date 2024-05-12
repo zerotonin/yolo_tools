@@ -96,6 +96,19 @@ class AnalysisFileManager:
             return file_path
         else:
             raise ValueError(f"No {mode} file was selected.")
+    
+    def create_result_filepath_for_arena(self,arena_num,type):
+        pass
+
+    def create_yolo_trajectory_filepath(self,arena_num):
+        return  f'{self.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
+    
+    def create_locomotor_result_base_path(self,arena_num):
+        return  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}_'
+    
+    def create_decision_result_base_path(self,arena_num):
+        return f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
+
 
     def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter,yolo_weights):
         """
