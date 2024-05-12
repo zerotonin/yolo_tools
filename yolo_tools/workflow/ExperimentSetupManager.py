@@ -303,6 +303,12 @@ class ExperimentSetupManager:
         meta_data_dict['stimuli_09'] = stimulus_list[8] 
         meta_data_dict['stimuli_10'] = stimulus_list[9] 
 
+        # Preallocation
+        meta_data_dict['fly_id'] = [None for _ in range(arena_num)]
+        meta_data_dict['experiment_id'] = [None for _ in range(arena_num)]
+        meta_data_dict['trial_id'] = [None for _ in range(arena_num)]
+
+
         self.meta_data_table = pd.DataFrame(meta_data_dict)
         self.meta_data_table.to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
 
