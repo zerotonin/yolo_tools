@@ -97,8 +97,15 @@ class AnalysisFileManager:
         else:
             raise ValueError(f"No {mode} file was selected.")
     
-    def create_result_filepath_for_arena(self,arena_num,type):
-        pass
+    def create_result_filepath_for_arena(self,base_path,data_type):
+        npy_data_types = ['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix', 'tra_mm']
+        json_data_types = ['choice_json','locomotor_json']
+        if data_type in npy_data_types:
+           return  base_path+data_type+'.npy'
+        elif data_type in json_data_types:
+            return base_path[:-1]+'.json'
+        else:
+            raise ValueError(f'AnalysisFileManger:create_result_filepath_for_arena: Unknown data type: {data_type}')
 
     def create_yolo_trajectory_filepath(self,arena_num):
         return  f'{self.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
