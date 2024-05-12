@@ -132,11 +132,6 @@ class SlurmJobManager:
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
 
-    def anticipate_split_video_position(self,arena_i):
-        video_base_name = os.path.basename(self.file_manager.file_dict['video_file_position'])
-        filename,extension = video_base_name.split('.')
-        splitname = f'{filename}__{str(arena_i).zfill(2)}.{extension}'
-        return os.path.join(self.file_manager.path_dict['preprocessed_single_videos'],splitname)
 
 
     def manage_workflow(self, num_splits):
@@ -152,7 +147,7 @@ class SlurmJobManager:
         analysis_jobs = []
         for split_i in range(num_splits):
             # Assume each split file is named uniquely
-            self.create_tracking_slurm_script(self.anticipate_split_video_position(split_i),split_i)
+            self.create_tracking_slurm_script(self.file_manager.anticipate_split_video_position(split_i),split_i)
             #track_job_id = self.submit_job(f'track_job_{i}.sh', dependency_id=split_job_id)
             track_job_id = split_i+100
             self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[0] == self.meta_data_table.stimuli_01[split_i])

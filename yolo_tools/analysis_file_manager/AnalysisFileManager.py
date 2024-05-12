@@ -108,6 +108,12 @@ class AnalysisFileManager:
     
     def create_decision_result_base_path(self,arena_num):
         return f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
+    
+    def anticipate_split_video_position(self,arena_i):
+        video_base_name = os.path.basename(self.file_dict['video_file_position'])
+        filename,extension = video_base_name.split('.')
+        splitname = f'{filename}__{str(arena_i).zfill(2)}.{extension}'
+        return os.path.join(self.path_dict['preprocessed_single_videos'],splitname)
 
 
     def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter,yolo_weights):
