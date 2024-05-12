@@ -11,7 +11,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
-import pandas as pd
+import json
 import argparse
 
 # ----------------------------[ CONSTANTS ]-----------------------------------
@@ -481,13 +481,25 @@ def main():
     traAna = trajectoryAnalyser()
     traAna.analyse_trajectory(trajectories, args.midline_tolerance, args.positive_stimulus_on_left, args.filter_trajectory)
 
-    # Write decision dictionary to CSV
-    df = pd.DataFrame(traAna.decision_dict)
-    df.to_csv(args.output_decision_file)
 
-    # Write locomotion dictionary to o CSV
-    df = pd.DataFrame(traAna.locomotor_dict)
-    df.to_csv(args.output_locomotion_file)
+    choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index']
+    choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix']
+    choice_json_dict = {key: traAna.decision_dict.get(key, None) for key in choice_json_keys}
+
+
+    # Write decision dictionary to JSON file
+    with open(args.output_decision_file[:-1]+'.json', 'w') as outfile:
+        json.dump(choice_json_dict, outfile, indent=4)
+    
+    for name in choice_numpy_keys:
+        np.save(args.output_decision_file+name+'.npy',traAna.decision_dict[name])
+
+
+    # Write locomotion dictionary to JSON file
+    with open(args.output_locomotion_file[:-1]+'.json', 'w') as outfile:
+        json.dump(traAna.locomotor_dict, outfile, indent=4)
+
+    np.save(args.output_locomotion_file+'tra_mm.npy',traAna.fly_tra_mm)
 
     print("Analysis complete. Data saved to specified files.")
 
