@@ -247,7 +247,7 @@ class ExperimentSetupManager:
         meta_data_dict['arena_number']            = list(range(arena_num))
         meta_data_dict['date_time']               = [f'{self.experiment_info['date']}  {self.experiment_info['time']}' for _ in range(arena_num)]
         meta_data_dict['fps']                     = [self.experiment_info['fps'] for _ in range(arena_num)]
-        meta_data_dict['video_file_path']         = [self.file_manager.file_dict['video_info'] for _ in range(arena_num)]
+        meta_data_dict['video_file_path']         = [self.file_manager.file_dict['video_file_position'] for _ in range(arena_num)]
         meta_data_dict['experiment_type']         = [self.experiment_info['experiment_type_id'] for _ in range(arena_num)]
         meta_data_dict['experimenter_id']         = [self.experiment_info['experimenter_id'] for _ in range(arena_num)] 
         meta_data_dict['number_of_arenas']        = arena_num 
