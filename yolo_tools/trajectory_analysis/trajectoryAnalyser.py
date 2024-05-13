@@ -107,8 +107,8 @@ class trajectoryAnalyser:
 
     def get_fly_trace_mm(self):
         self.fly_tra_mm = np.zeros(shape= self.fly_tra_arenaNorm.shape)
-        self.fly_tra_mm[:,0] = self.fly_tra_mm[:,0] * self.arena_size[0]
-        self.fly_tra_mm[:,1] = self.fly_tra_mm[:,1] * self.arena_size[1] 
+        self.fly_tra_mm[:,0] = self.fly_tra_imageNorm[:,0] * self.arena_size[0]
+        self.fly_tra_mm[:,1] = self.fly_tra_imageNorm[:,1] * self.arena_size[1] 
 
     def interpolate_and_fill(self,arr):
         # Indices of the valid values (not np.nan)
