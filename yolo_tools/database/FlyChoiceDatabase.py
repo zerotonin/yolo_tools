@@ -459,6 +459,48 @@ class DatabaseHandler:
         self.session.commit()
         return records
 
+    def find_fly_by_attributes(self, attribute_ids, genotype_id, is_female, age_day_after_eclosion):
+        """
+        Finds a fly that has all the specified attributes and matches the given genotype, gender, and age,
+        regardless of the order or specific attribute columns.
+
+        Args:
+            attribute_ids (list of int): List of attribute IDs to check against fly attributes.
+            genotype_id (int): ID of the genotype that the fly should match.
+            is_female (bool): Gender of the fly to match.
+            age_day_after_eclosion (float): Age of the fly to match.
+
+        Returns:
+            int: The ID of the fly if found, None otherwise.
+        """
+        from sqlalchemy import and_
+
+        # Convert list to set for easy comparison
+        attribute_set = set(attribute_ids)
+
+        # Fetch all flies matching the genotype, gender, and age
+        flies = self.session.query(Fly).filter(
+            and_(
+                Fly.genotype_id == genotype_id,
+                Fly.is_female == is_female,
+                Fly.age_day_after_eclosion == age_day_after_eclosion
+            )
+        ).all()
+
+        for fly in flies:
+            # Gather all attribute IDs from the fly into a set
+            fly_attributes = set(
+                getattr(fly, f'fly_attribute_{i}') for i in range(1, 6)
+                if getattr(fly, f'fly_attribute_{i}', None) is not None
+            )
+
+            # Check if the sets match
+            if attribute_set == fly_attributes:
+                return fly.id
+        
+        return None
+
+
 '''
 # Assuming you have a model defined as `MyModel` and SQLAlchemy setup done.
 db_url = 'sqlite:///your_database.db'
