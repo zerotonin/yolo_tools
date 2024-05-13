@@ -77,7 +77,7 @@ class SlurmJobManager:
         script_parameters = dict()
         script_parameters['partition'] =  self.gpu_partion
         script_parameters['gpus_per_task'] = gpus_per_task
-        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/track_arena_{str(arena_num).zfill(2)}.sh'
+        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'track_arena_{str(arena_num).zfill(2)}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'videoAnalyser'
         script_parameters['jobname'] =  f'track arena {arena_num}'
@@ -102,7 +102,7 @@ class SlurmJobManager:
         script_variables = f'--input_file {input_file_position} --midline_tolerance {midline_tolerance} --positive_stimulus_on_left {positive_stimulus_on_left} --filter_trajectory {filter_trajectory} --output_locomotion_file {output_locomotion_file} --output_decision_file {output_decision_file}'
         script_parameters = dict()
         script_parameters['partition'] =  "aoraki"
-        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/analyse_arena_{str(arena_num).zfill(2)}.sh'
+        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'analyse_arena_{str(arena_num).zfill(2)}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'trajectoryAnalyser'
         script_parameters['jobname'] =  f'analyse arena {arena_num}'
@@ -114,12 +114,32 @@ class SlurmJobManager:
 
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
+    
+    def create_sql_entry_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
+
+        
+        script_variables = f'"--db_url {self.file_manager.file_dict['db_file_position']} --meta_data_csv_path" {self.file_manager.file_dict['meta_data_csv_file']} --result_base_path {self.file_manager.path_dict['results']}'
+        script_parameters = dict()
+        script_parameters['partition'] =  "aoraki"
+        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'],'enter_SQL.sh')
+        script_parameters['cpus_per_task'] = cpus_per_task
+        script_parameters['python_script'] = f'ResultManager'
+        script_parameters['jobname'] =  f'SQL_entry_2choice'
+        script_parameters['memory'] = memory_GB_int
+        script_parameters['script_variables'] = script_variables
+        script_parameters['nodes'] = nodes
+        script_parameters['ntasks_per_node'] = ntasks
+        script_parameters['module'] = 'database'
+
+        self.create_slurm_script(script_parameters)
+        return script_parameters['filename']
+
     def create_video_splitting_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
         script_variables = f'--video_path { self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
         script_parameters = dict()
         script_parameters['partition'] =  "aoraki"
-        script_parameters['filename'] = f'{self.file_base_dir}/slurm_scripts/split_video.sh'
+        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'],'split_video.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'FrameSplitter'
         script_parameters['jobname'] =  f'split_{os.path.basename(self.file_manager.file_dict['video_file_position'])}'
@@ -156,7 +176,8 @@ class SlurmJobManager:
             analysis_jobs.append(analysis_job_id)
 
         # Step 3: Create and submit the final job that depends on all analysis jobs
-        all_dependencies = ":".join(analysis_jobs)
+        self.create_sql_entry_slurm_script()
+        #all_dependencies = ":".join(analysis_jobs)
 
         # self.create_slurm_script('final_job.sh', final_script, self.file_base_dir, f"{self.file_base_dir}/final_output.sql")
         # self.submit_job('final_job.sh', dependency_id=all_dependencies)
