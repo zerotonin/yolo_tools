@@ -159,27 +159,25 @@ class SlurmJobManager:
         Manages the full workflow of splitting, tracking, analyzing, and compiling results.
         """
         # Step 1: Create and submit the split job
-        split_script_position = self.create_video_splitting_slurm_script()
-        #split_job_id = self.submit_job(split_script_position)
-        split_job_id = 666
+        split_script_filepath = self.create_video_splitting_slurm_script()
+        split_job_id = self.submit_job(split_script_filepath)
+        
 
         # Step 2: Submit tracking and analysis jobs
         analysis_jobs = []
         for split_i in range(num_splits):
-            # Assume each split file is named uniquely
-            self.create_tracking_slurm_script(self.file_manager.anticipate_split_video_position(split_i),split_i)
-            #track_job_id = self.submit_job(f'track_job_{i}.sh', dependency_id=split_job_id)
-            track_job_id = split_i+100
-            self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[0] == self.meta_data_table.stimuli_01[split_i])
-            #analysis_job_id = self.submit_job(f'analysis_job_{i}.sh', dependency_id=track_job_id)
-            analysis_job_id = split_i+200
+            
+            track_script_filepath = self.create_tracking_slurm_script(self.file_manager.anticipate_split_video_position(split_i),split_i)
+            track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
+            
+            
+            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[0] == self.meta_data_table.stimuli_01[split_i])
+            analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
             analysis_jobs.append(analysis_job_id)
 
         # Step 3: Create and submit the final job that depends on all analysis jobs
-        self.create_sql_entry_slurm_script()
-        #all_dependencies = ":".join(analysis_jobs)
-
-        # self.create_slurm_script('final_job.sh', final_script, self.file_base_dir, f"{self.file_base_dir}/final_output.sql")
-        # self.submit_job('final_job.sh', dependency_id=all_dependencies)
+        sql_script_filepath =self.create_sql_entry_slurm_script()
+        all_dependencies = ":".join(str(job_id) for job_id in analysis_jobs)
+        self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
 
 
