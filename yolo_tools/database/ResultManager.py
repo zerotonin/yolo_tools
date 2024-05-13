@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import datetime
 import numpy as np
 import pandas as pd
 from yolo_tools.database.FlyChoiceDatabase import *
@@ -43,10 +44,13 @@ class ResultManager:
         """
         Insert an experiment into the database and update metadata DataFrame with the experiment ID.
         """
+        # Parse the datetime string into a datetime object
+        date_time_str = self.metadata_df['date_time'][0]
+        date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
         experiment = Experiment(
-            date_time               = self.metadata_df.date_time[0],
+            date_time               = date_time_obj,
             fps                     = self.metadata_df.fps[0],
-            video_file_path         = self.metadata_df.video_file_path.fps[0],
+            video_file_path         = self.metadata_df.fps[0],
             experiment_type         = self.metadata_df.experiment_type[0],
             experimenter_id         = self.metadata_df.experimenter_id[0],
             number_of_arenas        = self.metadata_df.number_of_arenas[0],
@@ -54,7 +58,7 @@ class ResultManager:
             number_of_arena_columns = self.metadata_df.number_of_arena_columns[0])
         with self.db_handler as db:
             db.add_record(experiment)
-        self.experiment_id = experiment.id
+            self.experiment_id = experiment.id
         self.metadata_df.experiment_id = experiment.id
 
     def insert_fly(self, row):
@@ -77,7 +81,7 @@ class ResultManager:
         with self.db_handler as db:
             db.add_record(new_fly)
             db.session.flush()  # Ensure ID is assigned
-        self.metadata_df.loc[row.name, 'fly_id'] = new_fly.id
+            self.metadata_df.loc[row.name, 'fly_id'] = new_fly.id
 
     def check_and_if_needed_insert_fly(self,idx,row):
         
@@ -114,7 +118,7 @@ class ResultManager:
         with self.db_handler as db:
             db.add_record(new_trial)
             db.session.flush()  # Ensure ID is assigned
-        self.metadata_df.loc[idx, 'trial_id'] = new_trial.id
+            self.metadata_df.loc[idx, 'trial_id'] = new_trial.id
 
     def insert_decision_result(self,row):
         decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_num'])
