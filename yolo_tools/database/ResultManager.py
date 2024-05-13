@@ -30,7 +30,7 @@ class ResultManager:
         self.metadata_df.to_csv(self.csmeta_data_csv_pathv_path, index=False)
 
 
-    def insert_experiment(self, data):
+    def insert_experiment(self):
         """
         Insert an experiment into the database and update metadata DataFrame with the experiment ID.
         """
@@ -46,25 +46,75 @@ class ResultManager:
         with self.db_handler as db:
             db.add_record(experiment)
         self.experiment_id = experiment.id
+        self.metadata_df.experiment_id = experiment.id
+
+    def insert_fly(self, row):
+        """
+        Insert a new fly into the database if it doesn't already exist.
+
+        Args:
+            row (pd.Series): A DataFrame row containing the fly's attributes.
+        """
+        new_fly = Fly(
+            is_female=row['is_female'],
+            genotype_id=row['genotype_id'],
+            age_day_after_eclosion=row['age_day_after_eclosion'],
+            fly_attribute_1=row.get('fly_attribute_1'),
+            fly_attribute_2=row.get('fly_attribute_2'),
+            fly_attribute_3=row.get('fly_attribute_3'),
+            fly_attribute_4=row.get('fly_attribute_4'),
+            fly_attribute_5=row.get('fly_attribute_5')
+        )
+        with self.db_handler as db:
+            db.add_record(new_fly)
+            db.session.flush()  # Ensure ID is assigned
+        self.metadata_df.loc[row.name, 'fly_id'] = new_fly.id
+
+    def check_and_if_needed_insert_fly(self,row):
+        
+        attribute_ids = [row.get(f'fly_attribute_{i}') for i in range(1, 6) if pd.notna(row.get(f'fly_attribute_{i}'))]
+        with self.db_handler as db:
+            fly_id = self.db_handler.find_fly_by_attributes(
+                attribute_ids,
+                row['genotype_id'],
+                row['is_female'],
+                row['age_day_after_eclosion']
+            )
+        if fly_id is None:
+            self.insert_fly(row)
+        else:
+            self.metadata_df.loc[idx, 'fly_id'] = fly_id
+    
+    def insert_trial(self,row):
+
+        new_trial = Trial(arena_number= row['arena_number'],
+                        experiment_id = row['experiment_id'],
+                        fly_id        = row['fly_id'],
+                        arena_id      = row['arena_id'],
+                        stimuli_01    = row['stimuli_01'],
+                        stimuli_02    = row['stimuli_02'],
+                        stimuli_03    = row['stimuli_03'],
+                        stimuli_04    = row['stimuli_04'],
+                        stimuli_05    = row['stimuli_05'],
+                        stimuli_06    = row['stimuli_06'],
+                        stimuli_07    = row['stimuli_07'],
+                        stimuli_08    = row['stimuli_08'],
+                        stimuli_09    = row['stimuli_09'],
+                        stimuli_10    = row['stimuli_10'])
+        
+        with self.db_handler as db:
+            db.add_record(new_trial)
+            db.session.flush()  # Ensure ID is assigned
+        self.metadata_df.loc[row.name, 'trial_id'] = new_trial.id
 
     def process_metadata(self):
         """
         Process each row in the metadata DataFrame to create experiments, flies, and trials.
+        Assumes that `insert_experiment` has already been called and set `self.experiment_id`.
         """
+        self.insert_experiment()  
         for idx, row in self.metadata_df.iterrows():
-            exp_data = {
-                'date_time': row['date_time'],
-                'fps': row['fps'],
-                'video_file_path': row['video_file_path']
-            }
-            exp_id = self.insert_experiment(exp_data)
-            # Add further processing steps here for flies, trials, etc.
-            self.metadata_df.loc[idx, 'experiment_id'] = exp_id
+            self.check_and_if_needed_insert_fly(row)
+            self.update_metadata_file()
 
-# Example usage
-db_url = 'sqlite:///your_database.db'
-csv_path = 'path_to_metadata.csv'
-exp_manager = ExperimentManager(db_url, csv_path)
-exp_manager.read_metadata()
-exp_manager.process_metadata()
-exp_manager.update_metadata_file()
+
