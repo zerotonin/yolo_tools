@@ -1,0 +1,3 @@
+SPACK_ROOT=$HOME/spack
+source $SPACK_ROOT/shar/spack/setup-env.sh
+source ~/miniconda3/bin/activate
