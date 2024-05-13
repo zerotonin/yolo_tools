@@ -37,7 +37,7 @@ class ResultManager:
         """
         Save the updated metadata DataFrame back to the CSV.
         """
-        self.metadata_df.to_csv(self.csmeta_data_csv_pathv_path, index=False)
+        self.metadata_df.to_csv(self.meta_data_csv_path, index=False)
 
 
     def insert_experiment(self):
@@ -101,7 +101,7 @@ class ResultManager:
     def insert_trial(self,idx,row):
 
         new_trial = Trial(arena_number= row['arena_number'],
-                        experiment_id = row['experiment_id'],
+                        experiment_id = int(row['experiment_id']),
                         fly_id        = row['fly_id'],
                         arena_id      = row['arena_id'],
                         stimuli_01    = row['stimuli_01'],
@@ -134,7 +134,7 @@ class ResultManager:
         four_field_matrix = np.load(four_field_file_path)
         decision_duration_matrix = np.load(duration_file_path)
 
-        new_decision_entry = TwoChoiceDecision(trial_id = row['trial_id'],
+        new_decision_entry = TwoChoiceDecision(trial_id = int(row['trial_id']),
                                                fraction_left = decision_results['fraction_left'],
                                                fraction_right = decision_results['fraction_right'], 
                                                fraction_middle = decision_results['fraction_middle'], 
@@ -160,7 +160,7 @@ class ResultManager:
         with open(json_file_path, 'r') as json_file:
             locomotor_results = json.load(json_file)
         
-        new_locomotor_entry = Locomotor(trial_id = row['trial_id'],
+        new_locomotor_entry = Locomotor(trial_id = int(row['trial_id']),
                                         distance_walked_mm = locomotor_results['distance_walked'],
                                         max_speed_mmPs = locomotor_results['max_speed'],
                                         avg_speed_mmPs = locomotor_results['avg_speed'])
@@ -177,7 +177,7 @@ class ResultManager:
 
         with self.db_handler as db:
             for frame_i in range(trajectory_mm.shape[0]):
-                new_entry = Trajectories(trial_id = row['trial_id'],
+                new_entry = Trajectories(trial_id = int(row['trial_id']),
                                         pos_x_mm_arena_centered = trajectory_mm[frame_i,0],
                                         pos_y_mm_arena_centered = trajectory_mm[frame_i,1])
                 db.add_record(new_entry)
