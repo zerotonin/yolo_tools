@@ -253,6 +253,7 @@ class ExperimentSetupManager:
         meta_data_dict['number_of_arenas']        = arena_num 
         meta_data_dict['number_of_arena_rows']    = [self.arena_info['arena_rows'] for _ in range(arena_num)] 
         meta_data_dict['number_of_arena_columns'] = [self.arena_info['arena_cols'] for _ in range(arena_num)]  
+        meta_data_dict['arena_id']                = self.arena_layout
         # Flies
 
         fly_list = [fly for sublist in self.fly_layout for fly in (sublist if isinstance(sublist, list) else [sublist])]
@@ -260,6 +261,7 @@ class ExperimentSetupManager:
         genotype_id_list = list()
         age_day_after_eclosion_list = list()
         fly_attribute_list = [list(),list(),list(),list(),list()]
+        
 
         for arena_i in range(arena_num):
 
