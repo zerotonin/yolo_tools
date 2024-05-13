@@ -111,10 +111,10 @@ class AnalysisFileManager:
         return  f'{self.path_dict['trajectories']}/trajectory_arena_{str(arena_num).zfill(2)}.npy'
     
     def create_locomotor_result_base_path(self,arena_num):
-        return  f'{self.file_manager.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}_'
+        return  f'{self.path_dict['trajectories']}/locomotor_results_arena_{str(arena_num).zfill(2)}_'
     
     def create_decision_result_base_path(self,arena_num):
-        return f'{self.file_manager.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
+        return f'{self.path_dict['choice_analysis']}/choice_results_arena_{str(arena_num).zfill(2)}_'
     
     def anticipate_split_video_position(self,arena_i):
         video_base_name = os.path.basename(self.file_dict['video_file_position'])
