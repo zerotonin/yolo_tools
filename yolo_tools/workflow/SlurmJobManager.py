@@ -2,7 +2,7 @@ import subprocess
 import os
 
 class SlurmJobManager:
-    def __init__(self, analysis_file_manager,arena_num,meta_data_table,gpu_partition = 'aoraki_GPU'):
+    def __init__(self, analysis_file_manager,arena_num,meta_data_table,gpu_partition = 'aoraki_gpu'):
         self.file_manager = analysis_file_manager
         self.file_base_dir =  self.file_manager.path_dict['output_file_path']
         self.user_name = os.getlogin()

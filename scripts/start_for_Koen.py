@@ -4,7 +4,7 @@ import json
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
     base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/Column1Male_Agarose1p_Left_Agarose1p_Fructose26.2p_Right/'
-    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_04_10__14-41-42_FirstcolumnMale_agarose1pLeft_agarose1pfructose26_2pRight.mp4'
+    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_04_10__14-41-42_FirstcolumnMale_agarose1pLeft_agarose1pfructose26-2pRight.mp4'
     
 
     # Load JSON data from file
