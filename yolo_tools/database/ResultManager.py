@@ -192,16 +192,16 @@ class ResultManager:
         Process each row in the metadata DataFrame to create experiments, flies, and trials.
         Assumes that `insert_experiment` has already been called and set `self.experiment_id`.
         """
-        self.insert_experiment()  
+        self.insert_experiment() 
+         
         for idx, row in self.metadata_df.iterrows():
-            if idx == 16:
 
-                self.check_and_if_needed_insert_fly(idx,row)
-                self.insert_trial(idx,row)
-                self.insert_decision_result(row)
-                self.insert_locomotor_result(row)
-                self.insert_trajectory_data(row)
-        
+            self.check_and_if_needed_insert_fly(idx,row)
+            self.insert_trial(idx,row)
+            self.insert_decision_result(row)
+            self.insert_locomotor_result(row)
+            self.insert_trajectory_data(row)
+    
         self.update_metadata_file()
 
 def main():
