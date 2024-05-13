@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from scipy import signal
 import json
 import argparse
+from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
 
 # ----------------------------[ CONSTANTS ]-----------------------------------
 
@@ -485,21 +486,21 @@ def main():
     choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index']
     choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix']
     choice_json_dict = {key: traAna.decision_dict.get(key, None) for key in choice_json_keys}
-
+    file_manager = AnalysisFileManager()
 
     # Write decision dictionary to JSON file
-    with open(args.output_decision_file[:-1]+'.json', 'w') as outfile:
+    with open(file_manager.create_result_filepath(args.output_decision_file,'choice_json'), 'w') as outfile:
         json.dump(choice_json_dict, outfile, indent=4)
     
     for name in choice_numpy_keys:
-        np.save(args.output_decision_file+name+'.npy',traAna.decision_dict[name])
+        np.save(file_manager.create_result_filepath(args.output_decision_file,name),traAna.decision_dict[name])
 
 
     # Write locomotion dictionary to JSON file
-    with open(args.output_locomotion_file[:-1]+'.json', 'w') as outfile:
+    with open(file_manager.create_result_filepath(args.output_locomotion_file,'locomotor_json'), 'w') as outfile:
         json.dump(traAna.locomotor_dict, outfile, indent=4)
 
-    np.save(args.output_locomotion_file+'tra_mm.npy',traAna.fly_tra_mm)
+    np.save(file_manager.create_result_filepath(args.output_locomotion_file,'tra_mm'),traAna.fly_tra_mm)
 
     print("Analysis complete. Data saved to specified files.")
 
