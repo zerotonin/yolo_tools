@@ -13,7 +13,7 @@ from yolo_tools.workflow.SlurmJobManager import SlurmJobManager
 
 
 class ExperimentSetupManager:
-    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path,yolo_weights,gpu_partition='aoraki_GPU'):
+    def __init__(self, base_output_path, db_file_path, video_file_path, python_env_path,yolo_weights,gpu_partition='aoraki_gpu'):
         self.file_manager = AnalysisFileManager()
         self.file_manager.setup_experiment_paths(base_output_path,db_file_path, video_file_path, python_env_path,yolo_weights)
         self.db_handler = DatabaseHandler(f'sqlite:///{db_file_path}')
