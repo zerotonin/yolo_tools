@@ -82,6 +82,7 @@ class ResultManager:
             db.add_record(new_fly)
             db.session.flush()  # Ensure ID is assigned
             self.metadata_df.loc[row.name, 'fly_id'] = new_fly.id
+            row['fly_id'] = new_fly.id # need for updating inside the for loop of process meta_data
 
     def check_and_if_needed_insert_fly(self,idx,row):
         
@@ -97,6 +98,7 @@ class ResultManager:
             self.insert_fly(row)
         else:
             self.metadata_df.loc[idx, 'fly_id'] = fly_id
+            row['fly_id'] = fly_id # need for updating inside the for loop of process meta_data
     
     def insert_trial(self,idx,row):
 
@@ -118,6 +120,7 @@ class ResultManager:
         with self.db_handler as db:
             db.add_record(new_trial)
             db.session.flush()  # Ensure ID is assigned
+            row['trial_id'] = new_trial.id # need for updating inside the for loop of process meta_data
             self.metadata_df.loc[idx, 'trial_id'] = new_trial.id
 
     def insert_decision_result(self,row):
