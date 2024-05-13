@@ -1,7 +1,8 @@
-import pandas as pd
 import os
-import numpy as np
 import json
+import argparse
+import numpy as np
+import pandas as pd
 from yolo_tools.database.FlyChoiceDatabase import *
 from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
 
@@ -186,12 +187,39 @@ class ResultManager:
         """
         self.insert_experiment()  
         for idx, row in self.metadata_df.iterrows():
-            self.check_and_if_needed_insert_fly(idx,row)
-            self.insert_trial(idx,row)
-            self.insert_decision_result(row)
-            self.insert_locomotor_result(row)
-            self.insert_trajectory_data(row)
+            if idx == 16:
+
+                self.check_and_if_needed_insert_fly(idx,row)
+                self.insert_trial(idx,row)
+                self.insert_decision_result(row)
+                self.insert_locomotor_result(row)
+                self.insert_trajectory_data(row)
         
         self.update_metadata_file()
 
+def main():
+    parser = argparse.ArgumentParser(description='Manage results and insert them into a database.')
+    parser.add_argument('--db_url', type=str, required=True, help='Database connection URL.')
+    parser.add_argument('--meta_data_csv_path', type=str, required=True, help='Path to the metadata CSV file.')
+    parser.add_argument('--result_base_path', type=str, required=True, help='Base path for where result files are stored.')
 
+    args = parser.parse_args()
+
+    # Initialize the ResultManager with parsed arguments
+    result_manager = ResultManager(
+        db_url=args.db_url,
+        meta_data_csv_path=args.meta_data_csv_path,
+        result_base_path=args.result_base_path
+    )
+
+    # Read metadata to ensure everything is loaded correctly
+    result_manager.read_metadata()
+
+    # Process metadata which involves inserting data into the database
+    result_manager.process_metadata()
+
+    # Optionally, print a message or handle further tasks
+    print("Data processing complete.")
+
+if __name__ == '__main__':
+    main()
