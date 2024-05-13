@@ -121,7 +121,7 @@ class ResultManager:
             self.metadata_df.loc[idx, 'trial_id'] = new_trial.id
 
     def insert_decision_result(self,row):
-        decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_num'])
+        decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_number'])
         json_file_path = self.file_manager.create_result_filepath(decision_base_path,'choice_json')
         four_field_file_path = self.file_manager.create_result_filepath(decision_base_path,'decision_four_field_matrix')
         duration_file_path = self.file_manager.create_result_filepath(decision_base_path,'decision_duration_matrix')
@@ -145,15 +145,15 @@ class ResultManager:
                                                decision_from_positive_num = four_field_matrix[1,0],
                                                decision_to_negative_num = four_field_matrix[0,1],
                                                decision_from_negative_num = four_field_matrix[1,1],
-                                               duration_after_positive = decision_duration_matrix[0],
-                                               duration_after_negative = decision_duration_matrix[1])
+                                               duration_after_positive = decision_duration_matrix[0,0],
+                                               duration_after_negative = decision_duration_matrix[0,1])
 
         with self.db_handler as db:
             db.add_record(new_decision_entry)
             db.session.flush()  # Ensure ID is assigned
 
     def insert_locomotor_result(self,row):
-        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_num'])
+        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
         json_file_path = self.file_manager.create_result_filepath(locomotor_base_path,'locomotor_json')
      
         # Load decision data from JSON file
@@ -161,9 +161,9 @@ class ResultManager:
             locomotor_results = json.load(json_file)
         
         new_locomotor_entry = Locomotor(trial_id = row['trial_id'],
-                                        distance_walked_mm = locomotor_results['distance_walked_mm'],
-                                        max_speed_mmPs = locomotor_results['max_speed_mmPs'],
-                                        avg_speed_mmPs = locomotor_results['avg_speed_mmPs'])
+                                        distance_walked_mm = locomotor_results['distance_walked'],
+                                        max_speed_mmPs = locomotor_results['max_speed'],
+                                        avg_speed_mmPs = locomotor_results['avg_speed'])
         with self.db_handler as db:
             db.add_record(new_locomotor_entry)
             db.session.flush()  # Ensure ID is assigned
@@ -171,7 +171,7 @@ class ResultManager:
 
 
     def insert_trajectory_data(self,row):
-        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_num'])
+        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
         trajectory_file_path = self.file_manager.create_result_filepath(locomotor_base_path,'tra_mm')
         trajectory_mm = np.load(trajectory_file_path)
 
