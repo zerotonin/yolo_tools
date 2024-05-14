@@ -73,7 +73,7 @@ class SlurmJobManager:
     def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 16, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
 
-        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(arena_num)}.npy'
+        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(arena_num)}'
         script_parameters = dict()
         script_parameters['partition'] =  self.gpu_partion
         script_parameters['gpus_per_task'] = gpus_per_task
