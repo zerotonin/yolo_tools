@@ -9,7 +9,7 @@ import pandas as pd
 import torch
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use('Qt5Agg') 
+#matplotlib.use('Qt5Agg') 
 
 
 class YoloWrapper:
