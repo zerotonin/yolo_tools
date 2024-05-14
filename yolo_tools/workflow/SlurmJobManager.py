@@ -70,7 +70,7 @@ class SlurmJobManager:
         with open(script_parameters['filename'], 'w') as f:
             f.write(content)
 
-    def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 32, nodes = 1, cpus_per_task = 1, ntasks = 1):
+    def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 16, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
 
         script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(arena_num)}.npy'
@@ -92,7 +92,7 @@ class SlurmJobManager:
 
 
     def create_trajectory_analysis_slurm_script(self, arena_num, positive_stimulus_on_left,
-                                                filter_trajectory=True,midline_tolerance = 0.1,memory_GB_int = 64, 
+                                                filter_trajectory=True,midline_tolerance = 0.1,memory_GB_int = 32, 
                                                 nodes = 1, cpus_per_task = 1, ntasks = 1):
 
         input_file_position    = self.file_manager.create_yolo_trajectory_filepath(arena_num)
@@ -134,7 +134,7 @@ class SlurmJobManager:
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
 
-    def create_video_splitting_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
+    def create_video_splitting_slurm_script(self,memory_GB_int = 32, nodes = 1, cpus_per_task = 1, ntasks = 1):
         
         script_variables = f'--video_path {self.file_manager.file_dict['video_file_position']} --output_folder {self.file_base_dir}/preprocessed_single_videos --output_type videos'
         script_parameters = dict()
