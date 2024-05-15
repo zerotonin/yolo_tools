@@ -65,7 +65,7 @@ class FrameSplitter:
         writers = []
         for row in range(self.rows):
             for col in range(self.cols):
-                video_number = row * self.cols + col + 1  # To create a suffix from 01 to self.rows*self.cols
+                video_number = row * self.cols + col # To create a suffix from 01 to self.rows*self.cols
                 filename = f"{os.path.splitext(os.path.basename(video_path))[0]}__{video_number:02d}.mp4"
                 filepath = os.path.join(output_folder, filename)
                 writer = cv2.VideoWriter(filepath, codec, fps, (new_width, new_height))
