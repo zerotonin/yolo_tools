@@ -500,22 +500,3 @@ class DatabaseHandler:
         
         return None
 
-
-'''
-# Assuming you have a model defined as `MyModel` and SQLAlchemy setup done.
-db_url = 'sqlite:///your_database.db'
-with DatabaseHandler(db_url) as db:
-    # Adding a new record
-    new_record = MyModel(name="New Record")
-    db.add_record(new_record)
-
-    # Querying records
-    records = db.get_records(MyModel, filters={'name': 'New Record'})
-
-    # Updating records
-    db.update_records(MyModel, filters={'name': 'New Record'}, updates={'name': 'Updated Record'})
-
-    # Deleting records
-    db.delete_records(MyModel, filters={'name': 'Updated Record'})
-
-'''
