@@ -365,8 +365,11 @@ class DatabaseHandler:
 
     def set_busy_timeout(self, duration_ms = 8400000):
         if self.engine.url.get_backend_name() == 'sqlite':
-            with self.engine.connect() as conn:
-                conn.execute(f'PRAGMA busy_timeout = {duration_ms}')
+            @event.listens_for(self.engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                cursor.execute(f"PRAGMA busy_timeout = {duration_ms}")
+                cursor.close()
 
     def __enter__(self):
         """
