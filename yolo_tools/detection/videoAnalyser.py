@@ -39,7 +39,11 @@ class YOLO_detector:
     def get_detection_trajectories(self, results):
         coordinates = []
         for frame_no in range(len(results)):
-            coordinates.append(self.get_best_tracking_results(results, frame_no))
+            try:
+                coordinates.append(self.get_best_tracking_results(results, frame_no))
+            except:
+                coordinates.append([])
+
         return np.array(coordinates)
 
     def analyze_video(self,file_name):
