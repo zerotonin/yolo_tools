@@ -360,6 +360,8 @@ class DatabaseHandler:
             db_path = connection_string.replace('sqlite:///', '')
             if not os.path.exists(db_path):
                 self.create_database()
+        # Set database busy timeout to 3 hours 180 min = 8400s 8400000 ms
+        self.engine.execute('PRAGMA busy_timeout = 8400000')
     def __enter__(self):
         """
         Enters a runtime context related to this object. The with statement will bind this method’s return
