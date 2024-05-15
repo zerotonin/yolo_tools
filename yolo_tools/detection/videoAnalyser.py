@@ -4,6 +4,7 @@ from itertools import chain
 import argparse
 from yolo_tools.trajectory_analysis.trajectoryAnalyser import trajectoryAnalyser
 from yolo_tools.training_tools.YoloWrapper import YoloWrapper
+import datetime
 
 class YOLO_detector:
     def __init__(self, video_path, apriori_classes, apriori_class_names, yolo_weights, max_frames =None):
@@ -47,7 +48,9 @@ class YOLO_detector:
         return np.array(coordinates)
 
     def analyze_video(self,file_name):
+        print(datetime.datetime.now(),"start")
         results = self.yolo_fly.model.track(self.video_path, conf=0.8, stream=True, persist=True, verbose= False)
+        print(datetime.datetime.now(),"done")
         trajectories = self.get_detection_trajectories(results)
         np.save(file_name,trajectories)
 
