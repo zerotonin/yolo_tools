@@ -14,15 +14,15 @@ class YOLO_detector:
         self.yolo_weights = yolo_weights
         self.yolo_fly = YoloWrapper(yolo_weights)
 
-    def _tracking_result_to_cpu(self, results, frame_no):
-        track_ids = results[frame_no].boxes.id.int().cpu().tolist()
-        classes = results[frame_no].boxes.cls.int().cpu().tolist()
-        confidence = results[frame_no].boxes.conf.cpu().tolist()
-        boxes = results[frame_no].boxes.xyxyn.cpu().tolist()
+    def _tracking_result_to_cpu(self, frame_results):
+        track_ids = frame_results.boxes.id.int().cpu().tolist()
+        classes = frame_results.boxes.cls.int().cpu().tolist()
+        confidence = frame_results.boxes.conf.cpu().tolist()
+        boxes = frame_results.boxes.xyxyn.cpu().tolist()
         return track_ids, classes, confidence, boxes
 
-    def get_best_tracking_results(self, results, frame_no):
-        track_ids, classes, confidence, boxes = self._tracking_result_to_cpu(results, frame_no)
+    def get_best_tracking_results(self, frame_result):
+        track_ids, classes, confidence, boxes = self._tracking_result_to_cpu(frame_results)
         detections = zip(track_ids, classes, confidence, boxes)
         best_detections = {}
         for track_id, cls, conf, box in detections:
@@ -38,9 +38,9 @@ class YOLO_detector:
 
     def get_detection_trajectories(self, results):
         coordinates = []
-        for frame_no in range(len(results)):
+        for frame_result in results:
             try:
-                coordinates.append(self.get_best_tracking_results(results, frame_no))
+                coordinates.append(self.get_best_tracking_results(frame_result))
             except:
                 coordinates.append([])
 
