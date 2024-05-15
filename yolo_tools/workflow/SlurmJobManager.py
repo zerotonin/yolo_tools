@@ -115,7 +115,7 @@ class SlurmJobManager:
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
     
-    def create_sql_entry_slurm_script(self,memory_GB_int = 64, nodes = 1, cpus_per_task = 1, ntasks = 1):
+    def create_sql_entry_slurm_script(self,memory_GB_int = 32, nodes = 1, cpus_per_task = 1, ntasks = 1):
 
         
         script_variables = f'--db_url {self.file_manager.file_dict['db_file_position']} --meta_data_csv_path {self.file_manager.file_dict['meta_data_csv_file']} --result_base_path {self.file_manager.path_dict['results']}'
