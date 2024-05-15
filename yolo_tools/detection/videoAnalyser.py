@@ -47,7 +47,7 @@ class YOLO_detector:
         return np.array(coordinates)
 
     def analyze_video(self,file_name):
-        results = self.yolo_fly.model.track(self.video_path, conf=0.8)
+        results = self.yolo_fly.model.track(self.video_path, conf=0.8, stream=True, persist=True, verbose= False)
         trajectories = self.get_detection_trajectories(results)
         np.save(file_name,trajectories)
 
