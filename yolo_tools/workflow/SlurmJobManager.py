@@ -80,7 +80,7 @@ class SlurmJobManager:
         script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'track_arena_{str(arena_num).zfill(2)}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'videoAnalyser'
-        script_parameters['jobname'] =  f'track_arena_{arena_num}'
+        script_parameters['jobname'] =  f'track_arena_{str(arena_num).zfill(2)}'
         script_parameters['memory'] = memory_GB_int
         script_parameters['script_variables'] = script_variables
         script_parameters['nodes'] = nodes
@@ -105,7 +105,7 @@ class SlurmJobManager:
         script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'analyse_arena_{str(arena_num).zfill(2)}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'trajectoryAnalyser'
-        script_parameters['jobname'] =  f'analyse_arena_{arena_num}'
+        script_parameters['jobname'] =  f'analyse_arena_{str(arena_num).zfill(2)}'
         script_parameters['memory'] = memory_GB_int
         script_parameters['script_variables'] = script_variables
         script_parameters['nodes'] = nodes
