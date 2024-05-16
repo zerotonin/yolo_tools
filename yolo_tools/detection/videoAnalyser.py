@@ -23,7 +23,7 @@ class YOLO_detector:
         return track_ids, classes, confidence, boxes
 
     def get_best_tracking_results(self, frame_result):
-        track_ids, classes, confidence, boxes = self._tracking_result_to_cpu(frame_results)
+        track_ids, classes, confidence, boxes = self._tracking_result_to_cpu(frame_result)
         detections = zip(track_ids, classes, confidence, boxes)
         best_detections = {}
         for track_id, cls, conf, box in detections:
@@ -48,9 +48,7 @@ class YOLO_detector:
         return np.array(coordinates)
 
     def analyze_video(self,file_name):
-        print(datetime.datetime.now(),"start")
         results = self.yolo_fly.model.track(self.video_path, conf=0.8, stream=True, persist=True, verbose= False)
-        print(datetime.datetime.now(),"done")
         trajectories = self.get_detection_trajectories(results)
         np.save(file_name,trajectories)
 
