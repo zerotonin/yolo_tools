@@ -43,7 +43,7 @@ class YOLO_detector:
             try:
                 coordinates.append(self.get_best_tracking_results(frame_result))
             except:
-                coordinates.append([])
+                coordinates.append([np.nan for _ in range(8)])
 
         return np.array(coordinates)
 
