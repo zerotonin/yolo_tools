@@ -347,14 +347,13 @@ class Trajectories(Base):
     trial = relationship("Trial", back_populates="trajectories")
 
 class DatabaseHandler:
-    def __init__(self, db_filepath):
+    def __init__(self, connection_string):
         """
         Initializes the database handler with a connection string.
         
         Args:
             connection_string (str): The database connection string.
         """
-        connection_string =f'sqlite:///{db_filepath}'
         self.engine = create_engine(connection_string)
         self.Session = sessionmaker(bind=self.engine)
         if connection_string.startswith('sqlite:///'):
