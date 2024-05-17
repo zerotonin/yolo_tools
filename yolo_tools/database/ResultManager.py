@@ -51,11 +51,11 @@ class ResultManager:
             date_time               = date_time_obj,
             fps                     = self.metadata_df.fps[0],
             video_file_path         = self.metadata_df.video_file_path[0],
-            experiment_type         = self.metadata_df.experiment_type[0],
-            experimenter_id         = self.metadata_df.experimenter_id[0],
-            number_of_arenas        = self.metadata_df.number_of_arenas[0],
-            number_of_arena_rows    = self.metadata_df.number_of_arena_rows[0],
-            number_of_arena_columns = self.metadata_df.number_of_arena_columns[0])
+            experiment_type         = int(self.metadata_df.experiment_type[0]),
+            experimenter_id         = int(self.metadata_df.experimenter_id[0]),
+            number_of_arenas        = int(self.metadata_df.number_of_arenas[0]),
+            number_of_arena_rows    = int(self.metadata_df.number_of_arena_rows[0]),
+            number_of_arena_columns = int(self.metadata_df.number_of_arena_columns[0]))
         with self.db_handler as db:
             db.add_record(experiment)
             self.experiment_id = experiment.id
