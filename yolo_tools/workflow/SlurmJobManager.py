@@ -154,13 +154,13 @@ class SlurmJobManager:
 
 
 
-    def manage_workflow(self, num_splits):
+    def manage_workflow(self, num_splits,wait_on_job_before_start = None):
         """
         Manages the full workflow of splitting, tracking, analyzing, and compiling results.
         """
         # Step 1: Create and submit the split job
         split_script_filepath = self.create_video_splitting_slurm_script()
-        split_job_id = self.submit_job(split_script_filepath)
+        split_job_id = self.submit_job(split_script_filepath,wait_on_job_before_start)
         
 
         # Step 2: Submit tracking and analysis jobs
