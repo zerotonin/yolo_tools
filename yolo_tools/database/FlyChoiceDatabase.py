@@ -443,9 +443,18 @@ class DatabaseHandler:
                     two_choice_decision.decision_from_negative_num,
                     two_choice_decision.duration_after_positive,
                     two_choice_decision.duration_after_negative,
+                    stimulus_01.name AS stimulus_01_name,
+                    stimulus_01.type AS stimulus_01_type,
+                    stimulus_01.amplitude AS stimulus_01_amplitude,
+                    stimulus_01.amplitude_unit AS stimulus_01_amplitude_unit,
+                    GROUP_CONCAT(DISTINCT stimulus_01_attr.name) AS stimulus_01_attributes,
+                    stimulus_02.name AS stimulus_02_name,
+                    stimulus_02.type AS stimulus_02_type,
+                    stimulus_02.amplitude AS stimulus_02_amplitude,
+                    stimulus_02.amplitude_unit AS stimulus_02_amplitude_unit,
+                    GROUP_CONCAT(DISTINCT stimulus_02_attr.name) AS stimulus_02_attributes,
                     GROUP_CONCAT(DISTINCT arena_attribute.name) AS arena_attributes,
-                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes,
-                    GROUP_CONCAT(DISTINCT stimuli_attribute.name) AS stimulus_attributes
+                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes
                 FROM 
                     trial
                 JOIN 
@@ -475,9 +484,19 @@ class DatabaseHandler:
                 LEFT JOIN 
                     trial_stimuli_association ON trial.id = trial_stimuli_association.trial_id
                 LEFT JOIN 
-                    stimulus ON trial_stimuli_association.stimulus_id = stimulus.id
+                    stimulus AS stimulus_01 ON trial.stimuli_01 = stimulus_01.id
                 LEFT JOIN 
-                    stimulus_attributes_association ON stimulus.id = stimulus_attributes_association.stimulus_id
+                    stimulus AS stimulus_02 ON trial.stimuli_02 = stimulus_02.id
+                LEFT JOIN 
+                    stimulus_attributes_association AS stimulus_01_assoc ON stimulus_01.id = stimulus_01_assoc.stimulus_id
+                LEFT JOIN 
+                    stimuli_attribute AS stimulus_01_attr ON stimulus_01_assoc.attribute_id = stimulus_01_attr.id
+                LEFT JOIN 
+                    stimulus_attributes_association AS stimulus_02_assoc ON stimulus_02.id = stimulus_02_assoc.stimulus_id
+                LEFT JOIN 
+                    stimuli_attribute AS stimulus_02_attr ON stimulus_02_assoc.attribute_id = stimulus_02_attr.id
+                LEFT JOIN 
+                    stimulus_attributes_association ON stimulus_01.id = stimulus_attributes_association.stimulus_id OR stimulus_02.id = stimulus_attributes_association.stimulus_id
                 LEFT JOIN 
                     stimuli_attribute ON stimulus_attributes_association.attribute_id = stimuli_attribute.id
                 WHERE 
