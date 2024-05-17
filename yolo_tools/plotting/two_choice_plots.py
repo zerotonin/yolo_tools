@@ -98,7 +98,7 @@ def plot_trajectory(df, fps,stim_left,stim_right):
     return fig
 
 # database url
-db_filepath = '/home/geuba03p/fly_choice_test.db'
+db_filepath = '/home/geuba03p/fly_choice.db'
 db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
 
 df = db_handler.get_two_choice_results()
@@ -113,7 +113,7 @@ quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 'fraction_le
 
 
 # Example usage
-tid = 33
+tid = 15
 tra_df =db_handler.get_trajectory_for_trial(tid)
 row = df.iloc[tid,:]
 stim_left = f'{row.stimulus_01_name} {row.stimulus_01_amplitude} {row.stimulus_01_amplitude_unit}'
