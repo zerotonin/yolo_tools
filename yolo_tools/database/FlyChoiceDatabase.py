@@ -395,6 +395,7 @@ class DatabaseHandler:
         Creates the database tables and prints an ASCII art message indicating creation.
         """
         Base.metadata.create_all(self.engine)
+        self.create_views()
         print(r"""
         *********************************************
         *                                           *
@@ -402,6 +403,87 @@ class DatabaseHandler:
         *                                           *
         *********************************************
         """)
+
+    def create_views(self):
+        """
+        Creates the necessary SQL views in the database.
+        """
+        with self.engine.connect() as connection:
+            connection.execute("""
+                CREATE VIEW IF NOT EXISTS two_choice_results AS
+                SELECT 
+                    trial.id AS trial_id,
+                    trial.arena_number,
+                    experiment.date_time AS experiment_date_time,
+                    experiment.fps AS experiment_fps,
+                    experiment.video_file_path AS experiment_video_file_path,
+                    experiment.number_of_arenas AS experiment_number_of_arenas,
+                    experiment.number_of_arena_rows AS experiment_number_of_arena_rows,
+                    experiment.number_of_arena_columns AS experiment_number_of_arena_columns,
+                    experimenter.name AS experimenter_name,
+                    choice_experiment_type.name AS experiment_type_name,
+                    fly.is_female AS fly_is_female,
+                    fly.age_day_after_eclosion AS fly_age_day_after_eclosion,
+                    genotype.shortname AS genotype_shortname,
+                    genotype.genotype AS genotype_description,
+                    arena.name AS arena_name,
+                    locomotor.distance_walked_mm,
+                    locomotor.max_speed_mmPs,
+                    locomotor.avg_speed_mmPs,
+                    two_choice_decision.fraction_left,
+                    two_choice_decision.fraction_right,
+                    two_choice_decision.fraction_middle,
+                    two_choice_decision.fraction_positive,
+                    two_choice_decision.fraction_negative,
+                    two_choice_decision.preference_index,
+                    two_choice_decision.decision_to_positive_num,
+                    two_choice_decision.decision_from_positive_num,
+                    two_choice_decision.decision_to_negative_num,
+                    two_choice_decision.decision_from_negative_num,
+                    two_choice_decision.duration_after_positive,
+                    two_choice_decision.duration_after_negative,
+                    GROUP_CONCAT(DISTINCT arena_attribute.name) AS arena_attributes,
+                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes,
+                    GROUP_CONCAT(DISTINCT stimuli_attribute.name) AS stimulus_attributes
+                FROM 
+                    trial
+                JOIN 
+                    experiment ON trial.experiment_id = experiment.id
+                JOIN 
+                    experimenter ON experiment.experimenter_id = experimenter.id
+                JOIN 
+                    choice_experiment_type ON experiment.experiment_type = choice_experiment_type.id
+                JOIN 
+                    fly ON trial.fly_id = fly.id
+                JOIN 
+                    genotype ON fly.genotype_id = genotype.id
+                JOIN 
+                    arena ON trial.arena_id = arena.id
+                LEFT JOIN 
+                    locomotor ON trial.id = locomotor.trial_id
+                LEFT JOIN 
+                    two_choice_decision ON trial.id = two_choice_decision.trial_id
+                LEFT JOIN 
+                    arena_attributes_association ON arena.id = arena_attributes_association.arena_id
+                LEFT JOIN 
+                    arena_attribute ON arena_attributes_association.attribute_id = arena_attribute.id
+                LEFT JOIN 
+                    fly_attributes_association ON fly.id = fly_attributes_association.fly_id
+                LEFT JOIN 
+                    fly_attribute ON fly_attributes_association.attribute_id = fly_attribute.id
+                LEFT JOIN 
+                    trial_stimuli_association ON trial.id = trial_stimuli_association.trial_id
+                LEFT JOIN 
+                    stimulus ON trial_stimuli_association.stimulus_id = stimulus.id
+                LEFT JOIN 
+                    stimulus_attributes_association ON stimulus.id = stimulus_attributes_association.stimulus_id
+                LEFT JOIN 
+                    stimuli_attribute ON stimulus_attributes_association.attribute_id = stimuli_attribute.id
+                WHERE 
+                    choice_experiment_type.name = '2-choice'
+                GROUP BY 
+                    trial.id;
+            """)
 
 
     def execute_query(self, query, params=None):
