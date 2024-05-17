@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Table, Boolean, event, and_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+import pandas as pd
 
 Base = declarative_base()
 
@@ -593,3 +594,14 @@ class DatabaseHandler:
         
         return None
 
+    def get_two_choice_results(self):
+        """
+        Retrieves the data from the two_choice_results view and returns it as a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: The data from the two_choice_results view.
+        """
+        query = "SELECT * FROM two_choice_results"
+        with self.engine.connect() as connection:
+            df = pd.read_sql(query, connection)
+        return df
