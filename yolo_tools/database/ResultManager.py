@@ -50,7 +50,7 @@ class ResultManager:
         experiment = Experiment(
             date_time               = date_time_obj,
             fps                     = self.metadata_df.fps[0],
-            video_file_path         = self.metadata_df.fps[0],
+            video_file_path         = self.metadata_df.video_file_path[0],
             experiment_type         = self.metadata_df.experiment_type[0],
             experimenter_id         = self.metadata_df.experimenter_id[0],
             number_of_arenas        = self.metadata_df.number_of_arenas[0],
