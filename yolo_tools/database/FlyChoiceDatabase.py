@@ -624,3 +624,15 @@ class DatabaseHandler:
         with self.engine.connect() as connection:
             df = pd.read_sql(query, connection)
         return df
+
+    def get_trajectory_for_trial(self,trial_id):
+        """
+        Retrieves the data from the two_choice_results view and returns it as a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: The data from the two_choice_results view.
+        """
+        query = "SELECT * FROM two_choice_results"
+        with self.engine.connect() as connection:
+            df = pd.read_sql(f'SELECT * FROM trajectories WHERE trial_id = {trial_id}', connection)
+        return df
