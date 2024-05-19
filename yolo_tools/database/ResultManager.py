@@ -1,5 +1,6 @@
 import os
 import json
+import math
 import argparse
 import datetime
 import numpy as np
@@ -26,6 +27,36 @@ class ResultManager:
         self.metadata_df = None
         self.experiment_id = None
 
+    @staticmethod
+    def parse_integer(value):
+        """
+        Parses the fly attribute value, converting NaN to None and ensuring the value is an integer.
+
+        Args:
+            value: The value to parse.
+
+        Returns:
+            The parsed value or None if the value is NaN.
+        """
+        if value is None or (isinstance(value, float) and math.isnan(value)):
+            return None
+        return int(value)
+    
+    @staticmethod
+    def parse_float_point_num(value):
+        """
+        Parses the fly attribute value, converting NaN to None and ensuring the value is an integer.
+
+        Args:
+            value: The value to parse.
+
+        Returns:
+            The parsed value or None if the value is NaN.
+        """
+        if value is None or (isinstance(value, int) and math.isnan(value)):
+            return None
+        return float(value)
+
     def read_metadata(self):
         """
         Read metadata from a CSV file and store it in a DataFrame.
@@ -49,13 +80,13 @@ class ResultManager:
         date_time_obj = datetime.datetime.strptime(date_time_str, '%Y-%m-%d %H:%M:%S')
         experiment = Experiment(
             date_time               = date_time_obj,
-            fps                     = float(self.metadata_df.fps[0]),
+            fps                     = self.parse_float_point_num(self.metadata_df.fps[0]),
             video_file_path         = str(self.metadata_df.video_file_path[0]),
-            experiment_type         = int(self.metadata_df.experiment_type[0]),
-            experimenter_id         = int(self.metadata_df.experimenter_id[0]),
-            number_of_arenas        = int(self.metadata_df.number_of_arenas[0]),
-            number_of_arena_rows    = int(self.metadata_df.number_of_arena_rows[0]),
-            number_of_arena_columns = int(self.metadata_df.number_of_arena_columns[0]))
+            experiment_type         = self.parse_integer(self.metadata_df.experiment_type[0]),
+            experimenter_id         = self.parse_integer(self.metadata_df.experimenter_id[0]),
+            number_of_arenas        = self.parse_integer(self.metadata_df.number_of_arenas[0]),
+            number_of_arena_rows    = self.parse_integer(self.metadata_df.number_of_arena_rows[0]),
+            number_of_arena_columns = self.parse_integer(self.metadata_df.number_of_arena_columns[0]))
         with self.db_handler as db:
             db.add_record(experiment)
             self.experiment_id = experiment.id
@@ -69,14 +100,14 @@ class ResultManager:
             row (pd.Series): A DataFrame row containing the fly's attributes.
         """
         new_fly = Fly(
-            is_female=row['is_female'],
-            genotype_id=str(row['genotype_id']),
-            age_day_after_eclosion=float(row['age_day_after_eclosion']),
-            fly_attribute_1=int(row.get('fly_attribute_1')),
-            fly_attribute_2=int(row.get('fly_attribute_2')),
-            fly_attribute_3=int(row.get('fly_attribute_3')),
-            fly_attribute_4=int(row.get('fly_attribute_4')),
-            fly_attribute_5=int(row.get('fly_attribute_5'))
+            is_female              = row['is_female'],
+            genotype_id            = str(row['genotype_id']),
+            age_day_after_eclosion = self.parse_float_point_num(row['age_day_after_eclosion']),
+            fly_attribute_1        = self.parse_integer(row.get('fly_attribute_1')),
+            fly_attribute_2        = self.parse_integer(row.get('fly_attribute_2')),
+            fly_attribute_3        = self.parse_integer(row.get('fly_attribute_3')),
+            fly_attribute_4        = self.parse_integer(row.get('fly_attribute_4')),
+            fly_attribute_5        = self.parse_integer(row.get('fly_attribute_5'))
         )
         with self.db_handler as db:
             db.add_record(new_fly)
@@ -102,20 +133,20 @@ class ResultManager:
     
     def insert_trial(self,idx,row):
 
-        new_trial = Trial(arena_number= int(row['arena_number']),
-                        experiment_id = int(row['experiment_id']),
-                        fly_id        = int(row['fly_id']),
-                        arena_id      = int(row['arena_id']),
-                        stimuli_01    = int(row['stimuli_01']),
-                        stimuli_02    = int(row['stimuli_02']),
-                        stimuli_03    = int(row['stimuli_03']),
-                        stimuli_04    = int(row['stimuli_04']),
-                        stimuli_05    = int(row['stimuli_05']),
-                        stimuli_06    = int(row['stimuli_06']),
-                        stimuli_07    = int(row['stimuli_07']),
-                        stimuli_08    = int(row['stimuli_08']),
-                        stimuli_09    = int(row['stimuli_09']),
-                        stimuli_10    = int(row['stimuli_10']))
+        new_trial = Trial(arena_number= self.parse_integer(row['arena_number']),
+                        experiment_id = self.parse_integer(row['experiment_id']),
+                        fly_id        = self.parse_integer(row['fly_id']),
+                        arena_id      = self.parse_integer(row['arena_id']),
+                        stimuli_01    = self.parse_integer(row['stimuli_01']),
+                        stimuli_02    = self.parse_integer(row['stimuli_02']),
+                        stimuli_03    = self.parse_integer(row['stimuli_03']),
+                        stimuli_04    = self.parse_integer(row['stimuli_04']),
+                        stimuli_05    = self.parse_integer(row['stimuli_05']),
+                        stimuli_06    = self.parse_integer(row['stimuli_06']),
+                        stimuli_07    = self.parse_integer(row['stimuli_07']),
+                        stimuli_08    = self.parse_integer(row['stimuli_08']),
+                        stimuli_09    = self.parse_integer(row['stimuli_09']),
+                        stimuli_10    = self.parse_integer(row['stimuli_10']))
         
         with self.db_handler as db:
             db.add_record(new_trial)
@@ -137,19 +168,19 @@ class ResultManager:
         four_field_matrix = np.load(four_field_file_path)
         decision_duration_matrix = np.load(duration_file_path)
 
-        new_decision_entry = TwoChoiceDecision(trial_id = int(row['trial_id']),
-                                               fraction_left = float(decision_results['fraction_left']),
-                                               fraction_right = float(decision_results['fraction_right']), 
-                                               fraction_middle = float(decision_results['fraction_middle']), 
-                                               fraction_positive = float(decision_results['fraction_positive']), 
-                                               fraction_negative = float(decision_results['fraction_negative']), 
-                                               preference_index = float(decision_results['preference_index']), 
-                                               decision_to_positive_num = float(four_field_matrix[0,0]),
-                                               decision_from_positive_num = float(four_field_matrix[1,0]),
-                                               decision_to_negative_num = float(four_field_matrix[0,1]),
-                                               decision_from_negative_num = float(four_field_matrix[1,1]),
-                                               duration_after_positive = float(decision_duration_matrix[0,0]),
-                                               duration_after_negative = float(decision_duration_matrix[0,1]))
+        new_decision_entry = TwoChoiceDecision(trial_id                   = self.parse_integer(row['trial_id']),
+                                               fraction_left              = self.parse_float_point_num(decision_results['fraction_left']),
+                                               fraction_right             = self.parse_float_point_num(decision_results['fraction_right']), 
+                                               fraction_middle            = self.parse_float_point_num(decision_results['fraction_middle']), 
+                                               fraction_positive          = self.parse_float_point_num(decision_results['fraction_positive']), 
+                                               fraction_negative          = self.parse_float_point_num(decision_results['fraction_negative']), 
+                                               preference_index           = self.parse_float_point_num(decision_results['preference_index']), 
+                                               decision_to_positive_num   = self.parse_float_point_num(four_field_matrix[0,0]),
+                                               decision_from_positive_num = self.parse_float_point_num(four_field_matrix[1,0]),
+                                               decision_to_negative_num   = self.parse_float_point_num(four_field_matrix[0,1]),
+                                               decision_from_negative_num = self.parse_float_point_num(four_field_matrix[1,1]),
+                                               duration_after_positive    = self.parse_float_point_num(decision_duration_matrix[0,0]),
+                                               duration_after_negative    = self.parse_float_point_num(decision_duration_matrix[0,1]))
 
         with self.db_handler as db:
             db.add_record(new_decision_entry)
@@ -163,10 +194,10 @@ class ResultManager:
         with open(json_file_path, 'r') as json_file:
             locomotor_results = json.load(json_file)
         
-        new_locomotor_entry = Locomotor(trial_id = int(row['trial_id']),
-                                        distance_walked_mm = float(locomotor_results['distance_walked']),
-                                        max_speed_mmPs = float(locomotor_results['max_speed']),
-                                        avg_speed_mmPs = float(locomotor_results['avg_speed']))
+        new_locomotor_entry = Locomotor(trial_id           = self.parse_integer(row['trial_id']),
+                                        distance_walked_mm = self.parse_float_point_num(locomotor_results['distance_walked']),
+                                        max_speed_mmPs     = self.parse_float_point_num(locomotor_results['max_speed']),
+                                        avg_speed_mmPs     = self.parse_float_point_num(locomotor_results['avg_speed']))
         with self.db_handler as db:
             db.add_record(new_locomotor_entry)
             db.session.flush()  # Ensure ID is assigned
@@ -180,9 +211,9 @@ class ResultManager:
 
         with self.db_handler as db:
             for frame_i in range(trajectory_mm.shape[0]):
-                new_entry = Trajectories(trial_id = int(row['trial_id']),
-                                        pos_x_mm_arena_centered = float(trajectory_mm[frame_i,0]),
-                                        pos_y_mm_arena_centered = float(trajectory_mm[frame_i,1]))
+                new_entry = Trajectories(trial_id               = self.parse_integer(row['trial_id']),
+                                        pos_x_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,0]),
+                                        pos_y_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,1]))
                 db.add_record(new_entry)
             db.session.flush()  # Ensure ID is assigned
 
