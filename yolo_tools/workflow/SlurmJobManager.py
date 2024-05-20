@@ -181,3 +181,17 @@ class SlurmJobManager:
         self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
 
 
+    def rerun_traj_analysis(self, num_splits):
+        """
+        Rerun the analysis.
+        """
+
+
+        # Step 2: Submit tracking and analysis jobs
+        analysis_jobs = []
+        for split_i in range(num_splits):
+           
+            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
+            analysis_job_id = self.submit_job(ana_script_filepath)
+            analysis_jobs.append(analysis_job_id)
+
