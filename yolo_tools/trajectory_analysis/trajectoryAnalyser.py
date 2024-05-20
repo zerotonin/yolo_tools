@@ -83,7 +83,7 @@ class trajectoryAnalyser:
         - The fly's position is computed as the midpoint of its bounding box for each frame.
         - Filtering fly positions is optional and can be used to smooth the trajectory.
         """
-        self.arena_imageNorm = np.mean(trajectories[:,:4], axis=0)
+        self.arena_imageNorm = np.nanmedian(trajectories[:,:4], axis=0)
         self.arena_midline = 0.5 * (self.arena_imageNorm [2] + self.arena_imageNorm [0])
 
         pos_x = 0.5 * (trajectories[:, 4] + trajectories[:, 6])
@@ -101,8 +101,9 @@ class trajectoryAnalyser:
 
     def get_arena_centered_fly_trace(self):
         self.fly_tra_arenaNorm = np.zeros(shape= self.fly_tra_imageNorm.shape)
+        arena_median_pos = np.nanmedian(self.arena_imageNorm)
         self.fly_tra_arenaNorm[:,0] = (self.fly_tra_imageNorm[:,0] - self.arena_imageNorm[0]) / (self.arena_imageNorm[2] - self.arena_imageNorm[0])
-        self.fly_tra_imageNorm[:,1] = (self.fly_tra_imageNorm[:,1] - self.arena_imageNorm[1]) / (self.arena_imageNorm[3] - self.arena_imageNorm[1])
+        self.fly_tra_arenaNorm[:,1] = (self.fly_tra_imageNorm[:,1] - self.arena_imageNorm[1]) / (self.arena_imageNorm[3] - self.arena_imageNorm[1])
 
 
     def get_fly_trace_mm(self):
