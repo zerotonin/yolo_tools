@@ -171,7 +171,7 @@ class SlurmJobManager:
             track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
             
             
-            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[0] == self.meta_data_table.stimuli_01[split_i])
+            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
             analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
             analysis_jobs.append(analysis_job_id)
 
