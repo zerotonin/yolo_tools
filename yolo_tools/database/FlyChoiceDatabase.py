@@ -347,6 +347,49 @@ class Trajectories(Base):
     # Relationship to Trial
     trial = relationship("Trial", back_populates="trajectories")
 
+class TwoChoiceDecisionTiming(Base):
+    """
+    Represents the timing of decisions within a two-choice trial.
+
+    Attributes:
+        id (Integer): The primary key.
+        trial_id (Integer): Foreign key linking back to the associated `Trial`.
+        time_sec (Float): The time in seconds when the decision happened.
+        decision_type_id (Integer): Foreign key linking to the `TwoChoiceDecisionTypes` table.
+    """
+    __tablename__ = 'two_choice_decision_timing'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    trial_id = Column(Integer, ForeignKey('trial.id'), nullable=False)
+    time_sec = Column(Float, nullable=False)
+    decision_type_id = Column(Integer, ForeignKey('two_choice_decision_types.id'), nullable=False)
+    
+    # Relationships
+    trial = relationship("Trial", back_populates="two_choice_decision_timings")
+    decision_type = relationship("TwoChoiceDecisionTypes", back_populates="decision_timings")
+
+class TwoChoiceDecisionTypes(Base):
+    """
+    Represents the types of decisions within a two-choice trial.
+
+    Attributes:
+        id (Integer): The primary key.
+        identifier (Integer): The identifier used in the trajectory analysis scripts.
+        name (String): The name of the decision type.
+        description (String): A description of the decision type.
+    """
+    __tablename__ = 'two_choice_decision_types'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    identifier = Column(Integer, nullable=False, unique=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    
+    # Relationship
+    decision_timings = relationship("TwoChoiceDecisionTiming", back_populates="decision_type")
+
+
+
 class DatabaseHandler:
     def __init__(self, connection_string):
         """
