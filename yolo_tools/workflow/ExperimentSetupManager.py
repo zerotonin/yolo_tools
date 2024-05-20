@@ -110,7 +110,9 @@ class ExperimentSetupManager:
                                           self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
         self.stim_layout = self.manage_preset('stim_layout', self.stimulus_manager.enter_stimuli_for_experiment,
                                          self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
-        self.expected_attrative_stim_id = self.manage_preset('expected_attrative_stim_id',self.stimulus_manager.enter_expected_attractive_stimuli)
+        self.stim_list = list(set([item for sublist in self.stim_layout for item in sublist]))
+        self.stim_list.sort()
+        self.expected_attrative_stim_id = self.manage_preset('expected_attrative_stim_id',self.stimulus_manager.enter_expected_attractive_stimuli,self.stim_list)
         self.flies = self.manage_preset('flies', self.fly_manager.enter_flies_for_experiment)
 
         if self.check_loadable_preset('fly_layout'):
