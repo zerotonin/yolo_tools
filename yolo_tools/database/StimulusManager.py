@@ -101,11 +101,12 @@ class StimulusManager:
 
         return stimuli_list
     
-    def enter_expected_attractive_stimuli(self):
+    def enter_expected_attractive_stimuli(self,stim_list):
         self._clear_screen()
         self.show_stimuli()
 
-        print("\nEnter stimulus ID of the stimulus that should be defined attractive or non-aversive and has a PI of =1.")
+        print("\nEnter the ID of the stimulus that should be defined attractive or non-aversive and has a PI of +1.")
+        print(f'Chosen stimuli: {stim_list}\n')
         self.expected_attractive_stim_id = input("Enter the attractive / non-aversive stimulus ID : ")
         return self.expected_attractive_stim_id
 
