@@ -12,6 +12,7 @@ class StimulusManager:
             db_handler (DatabaseHandler): The database handler instance to manage database operations.
         """
         self.db_handler = db_handler
+        self.expected_attractive_stim_id = None
     
 
     def _clear_screen(self):
@@ -99,6 +100,15 @@ class StimulusManager:
                 break
 
         return stimuli_list
+    
+    def enter_expected_attractive_stimuli(self):
+        self._clear_screen()
+        self.show_stimuli()
+
+        print("\nEnter stimulus ID of the stimulus that should be defined attractive or non-aversive and has a PI of =1.")
+        self.expected_attractive_stim_id = input("Enter the attractive / non-aversive stimulus ID : ")
+        return self.expected_attractive_stim_id
+
 
     def enter_stimuli_for_experiment(self, number_of_arenas, number_of_arena_rows, number_of_arena_columns):
         """
