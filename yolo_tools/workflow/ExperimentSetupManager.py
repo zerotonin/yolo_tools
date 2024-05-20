@@ -321,6 +321,10 @@ class ExperimentSetupManager:
         self.meta_data_table = pd.DataFrame(meta_data_dict)
         self.meta_data_table.to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
 
-    def run_slurm_jobs(self, wait_on_process = None): 
+    def run_full_work_flow(self, wait_on_process = None): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
         self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'],wait_on_process)
+
+    def rerun_trajectory_analysis(self): 
+        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
+        self.slurm_job_manager.rerun_traj_analysis(self.arena_info['arena_num'])
