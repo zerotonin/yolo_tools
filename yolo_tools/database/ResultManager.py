@@ -204,18 +204,36 @@ class ResultManager:
 
 
 
-    def insert_trajectory_data(self,row):
-        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
-        trajectory_file_path = self.file_manager.create_result_filepath(locomotor_base_path,'tra_mm')
-        trajectory_mm = np.load(trajectory_file_path)
+    # def insert_trajectory_data(self,row):
+    #     locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
+    #     trajectory_file_path = self.file_manager.create_result_filepath(locomotor_base_path,'tra_mm')
+    #     trajectory_mm = np.load(trajectory_file_path)
 
+    #     with self.db_handler as db:
+    #         for frame_i in range(trajectory_mm.shape[0]):
+    #             new_entry = Trajectories(trial_id               = self.parse_integer(row['trial_id']),
+    #                                     pos_x_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,0]),
+    #                                     pos_y_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,1]))
+    #             db.add_record(new_entry)
+    #         db.session.flush()  # Ensure ID is assigned
+    def insert_trajectory_data(self, row):
+        locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
+        trajectory_file_path = self.file_manager.create_result_filepath(locomotor_base_path, 'tra_mm')
+        trajectory_mm = np.load(trajectory_file_path)
+        
+        entries = []
+        for frame_i in range(trajectory_mm.shape[0]):
+            new_entry = Trajectories(
+                trial_id=self.parse_integer(row['trial_id']),
+                pos_x_mm_arena_centered=self.parse_float_point_num(trajectory_mm[frame_i, 0]),
+                pos_y_mm_arena_centered=self.parse_float_point_num(trajectory_mm[frame_i, 1])
+            )
+            entries.append(new_entry)
+        
         with self.db_handler as db:
-            for frame_i in range(trajectory_mm.shape[0]):
-                new_entry = Trajectories(trial_id               = self.parse_integer(row['trial_id']),
-                                        pos_x_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,0]),
-                                        pos_y_mm_arena_centered = self.parse_float_point_num(trajectory_mm[frame_i,1]))
-                db.add_record(new_entry)
+            db.session.bulk_save_objects(entries)
             db.session.flush()  # Ensure ID is assigned
+            db.session.commit()
 
 
     def process_metadata(self):
