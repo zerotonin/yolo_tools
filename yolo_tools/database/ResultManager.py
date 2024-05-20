@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from yolo_tools.database.FlyChoiceDatabase import *
 from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
+from tqdm import tqdm
 
 class ResultManager:
     def __init__(self, db_url,meta_data_csv_path,result_base_path):
@@ -243,7 +244,7 @@ class ResultManager:
         """
         self.insert_experiment() 
          
-        for idx, row in self.metadata_df.iterrows():
+        for idx, row in tqdm(self.metadata_df.iterrows(),desc='writing flies into db'):
 
             self.check_and_if_needed_insert_fly(idx,row)
             self.insert_trial(idx,row)
