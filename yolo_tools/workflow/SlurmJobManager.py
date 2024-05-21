@@ -195,3 +195,7 @@ class SlurmJobManager:
             analysis_job_id = self.submit_job(ana_script_filepath)
             analysis_jobs.append(analysis_job_id)
 
+        # Step 3: Create and submit the final job that depends on all analysis jobs
+        sql_script_filepath =self.create_sql_entry_slurm_script()
+        all_dependencies = ":".join(str(job_id) for job_id in analysis_jobs)
+        self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
