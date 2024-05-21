@@ -317,12 +317,14 @@ class TwoChoiceDecision(Base):
     fraction_positive = Column(Float)
     fraction_negative = Column(Float)
     preference_index = Column(Float)
+    decision_duration_index = Column(Float)
     decision_to_positive_num = Column(Float)
     decision_from_positive_num = Column(Float)
     decision_to_negative_num = Column(Float)
     decision_from_negative_num = Column(Float)
     duration_after_positive = Column(Float)
     duration_after_negative = Column(Float)
+    time_of_first_decision_elapsed_sec = Column(Float)
 
     # Relationship to Trial
     trial = relationship("Trial", back_populates="two_choice_decision")
