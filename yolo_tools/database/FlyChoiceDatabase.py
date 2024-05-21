@@ -484,12 +484,14 @@ class DatabaseHandler:
                     two_choice_decision.fraction_positive,
                     two_choice_decision.fraction_negative,
                     two_choice_decision.preference_index,
+                    two_choice_decision.decision_duration_index,
                     two_choice_decision.decision_to_positive_num,
                     two_choice_decision.decision_from_positive_num,
                     two_choice_decision.decision_to_negative_num,
                     two_choice_decision.decision_from_negative_num,
                     two_choice_decision.duration_after_positive,
                     two_choice_decision.duration_after_negative,
+                    two_choice_decision.time_of_first_decision_elapsed_sec,
                     stimulus_01.name AS stimulus_01_name,
                     stimulus_01.type AS stimulus_01_type,
                     stimulus_01.amplitude AS stimulus_01_amplitude,
@@ -501,7 +503,8 @@ class DatabaseHandler:
                     stimulus_02.amplitude_unit AS stimulus_02_amplitude_unit,
                     GROUP_CONCAT(DISTINCT stimulus_02_attr.name) AS stimulus_02_attributes,
                     GROUP_CONCAT(DISTINCT arena_attribute.name) AS arena_attributes,
-                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes
+                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes,
+                    GROUP_CONCAT(DISTINCT stimuli_attribute.name) AS stimulus_attributes
                 FROM 
                     trial
                 JOIN 
