@@ -269,7 +269,7 @@ class trajectoryAnalyser:
         self.decision_dict['fraction_left']   = np.count_nonzero(self.zone_occupation == self.LEFT) / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_right']  = np.count_nonzero(self.zone_occupation == self.RIGHT)  / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_middle'] = np.count_nonzero(self.zone_occupation == self.NEUTRAL)  / self.fly_tra_arenaNorm.shape[0]
-        # Get fractions based on stimu
+        # Get fractions based on stimulus
         self.decision_dict['fraction_positive'] = np.count_nonzero(self.zone_occupation_normalised == self.LEFT)  / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_negative'] = np.count_nonzero(self.zone_occupation_normalised == self.RIGHT) / self.fly_tra_arenaNorm.shape[0]
 
@@ -284,7 +284,7 @@ class trajectoryAnalyser:
         #caculate preference indices
         self.decision_dict['preference_index'] =  self.calc_Michelson_contrast(self.decision_dict['fraction_positive'],self.decision_dict['fraction_negative'])
         self.decision_dict['decision_duration_index']  = self.calc_Michelson_contrast(self.decision_dict['decision_duration_matrix'][0,0],self.decision_dict['decision_duration_matrix'][0,1])
-
+        self.decision_dict['time_decision_record'] = np.vstack((self.decision_dict['transition_times'],self.decision_dict['transition_directions'])).T
 
     def _collate_decisions(self):
         """
@@ -486,7 +486,7 @@ def main():
 
 
     choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index','time_of_first_decision_elapsed_sec']
-    choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix']
+    choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'time_decision_record', 'decision_four_field_matrix', 'decision_duration_matrix']
     choice_json_dict = {key: traAna.decision_dict.get(key, None) for key in choice_json_keys}
     file_manager = AnalysisFileManager()
 
