@@ -239,6 +239,9 @@ class ResultManager:
             db.session.flush()  # Ensure ID is assigned
             db.session.commit()
 
+    def insert_decision_timing(self,row):
+        decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_number'])
+
 
     def process_metadata(self):
         """

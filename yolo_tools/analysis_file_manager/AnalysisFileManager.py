@@ -98,7 +98,7 @@ class AnalysisFileManager:
             raise ValueError(f"No {mode} file was selected.")
     
     def create_result_filepath(self,base_path,data_type):
-        npy_data_types = ['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix', 'tra_mm']
+        npy_data_types = ['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix', 'tra_mm', 'time_decision_record']
         json_data_types = ['choice_json','locomotor_json']
         if data_type in npy_data_types:
            return  base_path+data_type+'.npy'
