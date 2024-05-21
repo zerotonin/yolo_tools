@@ -278,12 +278,13 @@ class trajectoryAnalyser:
         self.decision_dict['transition_times'] = np.nonzero(self.decision_dict['transitions'])[0]
         self.decision_dict['transition_directions'] = self.decision_dict['transitions'][self.decision_dict['transition_times']]
         self.decision_dict['transition_durations'] = np.diff(np.append(self.decision_dict['transition_times'], self.fly_tra_arenaNorm.shape[0]))    
+        self.decision_dict['time_of_first_decision_elapsed_sec'] = self.decision_dict['transition_times'][0]/self.fps if len(self.decision_dict['transition_times']) >0 else None
         self._collate_decisions()
 
         #caculate preference indices
         self.decision_dict['preference_index'] =  self.calc_Michelson_contrast(self.decision_dict['fraction_positive'],self.decision_dict['fraction_negative'])
         self.decision_dict['decision_duration_index']  = self.calc_Michelson_contrast(self.decision_dict['decision_duration_matrix'][0,0],self.decision_dict['decision_duration_matrix'][0,1])
-            
+
 
     def _collate_decisions(self):
         """
