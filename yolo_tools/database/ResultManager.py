@@ -240,8 +240,33 @@ class ResultManager:
             db.session.commit()
 
     def insert_decision_timing(self,row):
+        # get the decision time matrix
         decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_number'])
+        time_decision_path = self.file_manager.create_result_filepath(decision_base_path,'time_decision_record')
+        time_decision = np.load(time_decision_path)
 
+        #get the decision type keys
+        with self.db_handler as db:
+            records = db.get_all_two_choice_decision_types()
+            # Convert to a dictionary with identifier as key and id as value
+            decision_types_dict = {record.identifier: record.id for record in records}
+        
+        
+        #make entry objects
+        entries = []
+        for dec_i in range(time_decision.shape[0]):
+            new_entry = TwoChoiceDecisionTiming(
+                trial_id=self.parse_integer(row['trial_id']),
+                time_sec=self.parse_float_point_num(time_decision[dec_i, 0]),
+                decision_type_id=self.parse_integer(decision_types_dict[time_decision[dec_i, 1]])
+            )
+            entries.append(new_entry)
+            
+        #bulk entry
+        with self.db_handler as db:
+            db.session.bulk_save_objects(entries)
+            db.session.flush()  # Ensure ID is assigned
+            db.session.commit()
 
     def process_metadata(self):
         """
