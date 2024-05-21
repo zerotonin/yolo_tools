@@ -176,6 +176,7 @@ class ResultManager:
                                                fraction_positive                  = self.parse_float_point_num(decision_results['fraction_positive']), 
                                                fraction_negative                  = self.parse_float_point_num(decision_results['fraction_negative']), 
                                                preference_index                   = self.parse_float_point_num(decision_results['preference_index']), 
+                                               decision_duration_index            = self.parse_float_point_num(decision_results['decision_duration_index']), 
                                                decision_to_positive_num           = self.parse_float_point_num(four_field_matrix[0,0]),
                                                decision_from_positive_num         = self.parse_float_point_num(four_field_matrix[1,0]),
                                                decision_to_negative_num           = self.parse_float_point_num(four_field_matrix[0,1]),
