@@ -64,6 +64,7 @@ class SlurmJobManager:
         content += f'#SBATCH --output={self.file_base_dir}/slurm_logs/%x.out\n'
         content += f'#SBATCH --error={self.file_base_dir}/slurm_logs/%x.err\n'
         content += f'\n'
+        content += f'sleep 5 # wait on auto mount\n'
         content += f'{python_command}'
 
         # Write the SLURM script to a file
