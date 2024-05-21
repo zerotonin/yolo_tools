@@ -264,6 +264,8 @@ class Trial(Base):
     locomotor_data = relationship("Locomotor", back_populates="trial", uselist=False)
     two_choice_decision = relationship("TwoChoiceDecision", back_populates="trial", uselist=False)
     trajectories = relationship("Trajectories", back_populates="trial")
+    two_choice_decision_timings = relationship("TwoChoiceDecisionTiming", back_populates="trial")
+   
     
 class Locomotor(Base):
     """
