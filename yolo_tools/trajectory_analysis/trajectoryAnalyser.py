@@ -485,7 +485,7 @@ def main():
     traAna.analyse_trajectory(trajectories, args.midline_tolerance, args.positive_stimulus_on_left, args.filter_trajectory)
 
 
-    choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index']
+    choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index','time_of_first_decision_elapsed_sec']
     choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix']
     choice_json_dict = {key: traAna.decision_dict.get(key, None) for key in choice_json_keys}
     file_manager = AnalysisFileManager()
