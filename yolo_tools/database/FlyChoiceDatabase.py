@@ -264,7 +264,7 @@ class Trial(Base):
     locomotor_data = relationship("Locomotor", back_populates="trial", uselist=False)
     two_choice_decision = relationship("TwoChoiceDecision", back_populates="trial", uselist=False)
     trajectories = relationship("Trajectories", back_populates="trial")
-    two_choice_decision_timings = relationship("TwoChoiceDecisionTiming", back_populates="trial")
+    two_choice_decision_timing = relationship("TwoChoiceDecisionTiming", back_populates="trial")
    
     
 class Locomotor(Base):
@@ -369,7 +369,7 @@ class TwoChoiceDecisionTiming(Base):
     decision_type_id = Column(Integer, ForeignKey('two_choice_decision_types.id'), nullable=False)
     
     # Relationships
-    trial = relationship("Trial", back_populates="two_choice_decision_timings")
+    trial = relationship("Trial", back_populates="two_choice_decision_timing")
     decision_type = relationship("TwoChoiceDecisionTypes", back_populates="decision_timings")
 
 class TwoChoiceDecisionTypes(Base):
