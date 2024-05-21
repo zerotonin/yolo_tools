@@ -325,6 +325,7 @@ class ExperimentSetupManager:
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
         self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'],wait_on_process)
 
-    def rerun_trajectory_analysis(self): 
+    def rerun_trajectory_analysis(self,wait_on_process= None): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
-        self.slurm_job_manager.rerun_traj_analysis(self.arena_info['arena_num'])
+        last_job_id = self.slurm_job_manager.rerun_traj_analysis(self.arena_info['arena_num'],wait_on_process)
+        return last_job_id
