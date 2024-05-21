@@ -34,4 +34,5 @@ if __name__ == "__main__":
         if video_file_path:
             experiment_setup.get_video_info()
             experiment_setup.write_meta_data_table()
-            experiment_setup.rerun_trajectory_analysis()
+            current_run_id = experiment_setup.rerun_trajectory_analysis(last_run_id)
+            last_run_id = current_run_id
