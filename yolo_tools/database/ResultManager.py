@@ -169,19 +169,21 @@ class ResultManager:
         four_field_matrix = np.load(four_field_file_path)
         decision_duration_matrix = np.load(duration_file_path)
 
-        new_decision_entry = TwoChoiceDecision(trial_id                   = self.parse_integer(row['trial_id']),
-                                               fraction_left              = self.parse_float_point_num(decision_results['fraction_left']),
-                                               fraction_right             = self.parse_float_point_num(decision_results['fraction_right']), 
-                                               fraction_middle            = self.parse_float_point_num(decision_results['fraction_middle']), 
-                                               fraction_positive          = self.parse_float_point_num(decision_results['fraction_positive']), 
-                                               fraction_negative          = self.parse_float_point_num(decision_results['fraction_negative']), 
-                                               preference_index           = self.parse_float_point_num(decision_results['preference_index']), 
-                                               decision_to_positive_num   = self.parse_float_point_num(four_field_matrix[0,0]),
-                                               decision_from_positive_num = self.parse_float_point_num(four_field_matrix[1,0]),
-                                               decision_to_negative_num   = self.parse_float_point_num(four_field_matrix[0,1]),
-                                               decision_from_negative_num = self.parse_float_point_num(four_field_matrix[1,1]),
-                                               duration_after_positive    = self.parse_float_point_num(decision_duration_matrix[0,0]),
-                                               duration_after_negative    = self.parse_float_point_num(decision_duration_matrix[0,1]))
+        new_decision_entry = TwoChoiceDecision(trial_id                           = self.parse_integer(row['trial_id']),
+                                               fraction_left                      = self.parse_float_point_num(decision_results['fraction_left']),
+                                               fraction_right                     = self.parse_float_point_num(decision_results['fraction_right']), 
+                                               fraction_middle                    = self.parse_float_point_num(decision_results['fraction_middle']), 
+                                               fraction_positive                  = self.parse_float_point_num(decision_results['fraction_positive']), 
+                                               fraction_negative                  = self.parse_float_point_num(decision_results['fraction_negative']), 
+                                               preference_index                   = self.parse_float_point_num(decision_results['preference_index']), 
+                                               decision_to_positive_num           = self.parse_float_point_num(four_field_matrix[0,0]),
+                                               decision_from_positive_num         = self.parse_float_point_num(four_field_matrix[1,0]),
+                                               decision_to_negative_num           = self.parse_float_point_num(four_field_matrix[0,1]),
+                                               decision_from_negative_num         = self.parse_float_point_num(four_field_matrix[1,1]),
+                                               duration_after_positive            = self.parse_float_point_num(decision_duration_matrix[0,0]),
+                                               duration_after_negative            = self.parse_float_point_num(decision_duration_matrix[0,1]),
+                                               time_of_first_decision_elapsed_sec = self.parse_float_point_num(decision_results['time_of_first_decision_elapsed_sec']))
+        
 
         with self.db_handler as db:
             db.add_record(new_decision_entry)
