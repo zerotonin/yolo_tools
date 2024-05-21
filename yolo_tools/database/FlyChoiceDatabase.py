@@ -439,6 +439,8 @@ class DatabaseHandler:
         Creates the database tables and prints an ASCII art message indicating creation.
         """
         Base.metadata.create_all(self.engine)
+        self.populate_two_choice_decision_types()
+        self.make_two_choice_decision_types_read_only()
         self.create_views()
         print(r"""
         *********************************************
@@ -679,3 +681,25 @@ class DatabaseHandler:
         with self.engine.connect() as connection:
             df = pd.read_sql(f'SELECT * FROM trajectories WHERE trial_id = {trial_id}', connection)
         return df
+    
+    def populate_two_choice_decision_types(self):
+        predefined_types = [
+            (1, 'from neutral to negative'),
+            (-1, 'from negative to neutral'),
+            (-2, 'from neutral to positive'),
+            (2, 'from positive to neutral'),
+            (3, 'from positive to negative'),
+            (-3, 'from negative to positive')
+        ]
+
+        with self.Session() as session:
+            for identifier, description in predefined_types:
+                type_entry = TwoChoiceDecisionTypes(identifier=identifier, name=f'Type {identifier}', description=description)
+                session.add(type_entry)
+            session.commit()
+
+    def make_two_choice_decision_types_read_only(self):
+        with self.engine.connect() as connection:
+            connection.execute('CREATE TRIGGER no_insert_two_choice_decision_types AFTER INSERT ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "INSERT not allowed"); END;')
+            connection.execute('CREATE TRIGGER no_update_two_choice_decision_types AFTER UPDATE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "UPDATE not allowed"); END;')
+            connection.execute('CREATE TRIGGER no_delete_two_choice_decision_types AFTER DELETE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "DELETE not allowed"); END;')
