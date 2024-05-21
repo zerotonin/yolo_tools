@@ -261,7 +261,7 @@ class ResultManager:
                 decision_type_id=self.parse_integer(decision_types_dict[time_decision[dec_i, 1]])
             )
             entries.append(new_entry)
-            
+
         #bulk entry
         with self.db_handler as db:
             db.session.bulk_save_objects(entries)
@@ -282,6 +282,7 @@ class ResultManager:
             self.insert_decision_result(row)
             self.insert_locomotor_result(row)
             self.insert_trajectory_data(row)
+            self.insert_decision_timing(row)
     
         self.update_metadata_file()
 
