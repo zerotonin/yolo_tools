@@ -708,3 +708,15 @@ class DatabaseHandler:
             connection.execute('CREATE TRIGGER no_insert_two_choice_decision_types AFTER INSERT ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "INSERT not allowed"); END;')
             connection.execute('CREATE TRIGGER no_update_two_choice_decision_types AFTER UPDATE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "UPDATE not allowed"); END;')
             connection.execute('CREATE TRIGGER no_delete_two_choice_decision_types AFTER DELETE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "DELETE not allowed"); END;')
+    
+    
+    def get_all_two_choice_decision_types(self):
+        """
+        Retrieves all entries from the two_choice_decision_types table and returns them as a list of dictionaries.
+
+        Returns:
+            list: A list of dictionaries, each representing an entry in the two_choice_decision_types table.
+        """
+        with self.session as session:
+            records = session.query(TwoChoiceDecisionTypes).all()
+            return records
