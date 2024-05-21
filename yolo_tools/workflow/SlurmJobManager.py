@@ -181,7 +181,7 @@ class SlurmJobManager:
         self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
 
 
-    def rerun_traj_analysis(self, num_splits):
+    def rerun_traj_analysis(self, num_splits,old_dependency=None):
         """
         Rerun the analysis.
         """
@@ -192,10 +192,11 @@ class SlurmJobManager:
         for split_i in range(num_splits):
            
             ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
-            analysis_job_id = self.submit_job(ana_script_filepath)
+            analysis_job_id = self.submit_job(ana_script_filepath,dependency_id=old_dependency)
             analysis_jobs.append(analysis_job_id)
 
         # Step 3: Create and submit the final job that depends on all analysis jobs
         sql_script_filepath =self.create_sql_entry_slurm_script()
         all_dependencies = ":".join(str(job_id) for job_id in analysis_jobs)
-        self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
+        last_job_id = self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
+        return last_job_id
