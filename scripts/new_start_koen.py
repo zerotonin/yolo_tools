@@ -42,6 +42,6 @@ if __name__ == "__main__":
         experiment_setup.write_meta_data_table()
         go = input("Do you want to run this job? (y/n)")
         if go =='y':
-            experiment_setup.run_slurm_jobs()
+            experiment_setup.run_full_work_flow()
         else:
             print(f'you chose: {go}, therefore we did not start the jobs')
