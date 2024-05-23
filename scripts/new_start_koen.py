@@ -1,5 +1,6 @@
 from yolo_tools.workflow.ExperimentSetupManager import ExperimentSetupManager
 import json
+import os
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
@@ -20,6 +21,8 @@ if __name__ == "__main__":
     base_output_path = f'{server_path}/analysis_folders/{folder_name}'
     video_file_path = f'{server_path}/new_vids/{mp4_filepath}'
     
+    # Make the folder
+    os.makedirs(base_output_path, exist_ok=True)
 
     # Load JSON data from file
     with open('config/path_config_local.json', 'r') as json_file:
