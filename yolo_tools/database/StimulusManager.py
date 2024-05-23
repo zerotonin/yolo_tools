@@ -116,7 +116,7 @@ class StimulusManager:
         Main method to start the stimuli assignment for an experiment.
         Asks the user for the pattern type and generates a formatted table of stimuli assignments.
         """
-        pattern = input("Choose a pattern (uniform, checkerboard, horizontal, vertical, individual): ").lower()
+        pattern = input("Choose a stimulus pattern (uniform, checkerboard, horizontal, vertical, individual): ").lower()
         pattern_functions = {
             'uniform': self.pattern_uniform,
             'horizontal': self.pattern_horizontal,

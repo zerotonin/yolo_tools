@@ -125,7 +125,7 @@ class ArenaManager:
         """
         Main method to start the arena assignment for an experiment.
         """
-        print("Choose a pattern (uniform, individual):")
+        print("Choose an arena pattern (uniform, individual):")
         pattern = input().lower()
         pattern_functions = {
             'uniform': self.pattern_uniform,
