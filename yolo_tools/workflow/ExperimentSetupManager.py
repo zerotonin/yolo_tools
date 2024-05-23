@@ -110,7 +110,11 @@ class ExperimentSetupManager:
                                           self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
         self.stim_layout = self.manage_preset('stim_layout', self.stimulus_manager.enter_stimuli_for_experiment,
                                          self.arena_info['arena_num'], self.arena_info['arena_rows'], self.arena_info['arena_cols'])
+        self.stim_list = list(set([item for sublist in self.stim_layout for item in sublist]))
+        self.stim_list.sort()
+        self.expected_attractive_stim_id = self.manage_preset('expected_attractive_stim_id',self.stimulus_manager.enter_expected_attractive_stimuli,self.stim_list)
         self.flies = self.manage_preset('flies', self.fly_manager.enter_flies_for_experiment)
+
         if self.check_loadable_preset('fly_layout'):
             self.fly_layout = self.load_preset('fly_layout')
         else:
@@ -305,6 +309,9 @@ class ExperimentSetupManager:
         meta_data_dict['stimuli_09'] = stimulus_list[8] 
         meta_data_dict['stimuli_10'] = stimulus_list[9] 
 
+        meta_data_dict['expected_attractive_stim_id']         = [self.expected_attractive_stim_id for _ in range(arena_num)] 
+
+
         # Preallocation
         meta_data_dict['fly_id'] = [None for _ in range(arena_num)]
         meta_data_dict['experiment_id'] = [None for _ in range(arena_num)]
@@ -314,6 +321,11 @@ class ExperimentSetupManager:
         self.meta_data_table = pd.DataFrame(meta_data_dict)
         self.meta_data_table.to_csv(self.file_manager.file_dict['meta_data_csv_file'],index=False)
 
-    def run_slurm_jobs(self): 
+    def run_full_work_flow(self, wait_on_process = None): 
         self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
-        self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'])
+        self.slurm_job_manager.manage_workflow(self.arena_info['arena_num'],wait_on_process)
+
+    def rerun_trajectory_analysis(self,wait_on_process= None): 
+        self.slurm_job_manager = SlurmJobManager(self.file_manager,self.arena_info['arena_num'],self.meta_data_table,self.gpu_parttition)
+        last_job_id = self.slurm_job_manager.rerun_traj_analysis(self.arena_info['arena_num'],wait_on_process)
+        return last_job_id

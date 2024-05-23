@@ -264,6 +264,8 @@ class Trial(Base):
     locomotor_data = relationship("Locomotor", back_populates="trial", uselist=False)
     two_choice_decision = relationship("TwoChoiceDecision", back_populates="trial", uselist=False)
     trajectories = relationship("Trajectories", back_populates="trial")
+    two_choice_decision_timing = relationship("TwoChoiceDecisionTiming", back_populates="trial")
+   
     
 class Locomotor(Base):
     """
@@ -317,12 +319,14 @@ class TwoChoiceDecision(Base):
     fraction_positive = Column(Float)
     fraction_negative = Column(Float)
     preference_index = Column(Float)
+    decision_duration_index = Column(Float)
     decision_to_positive_num = Column(Float)
     decision_from_positive_num = Column(Float)
     decision_to_negative_num = Column(Float)
     decision_from_negative_num = Column(Float)
     duration_after_positive = Column(Float)
     duration_after_negative = Column(Float)
+    time_of_first_decision_elapsed_sec = Column(Float)
 
     # Relationship to Trial
     trial = relationship("Trial", back_populates="two_choice_decision")
@@ -346,6 +350,49 @@ class Trajectories(Base):
 
     # Relationship to Trial
     trial = relationship("Trial", back_populates="trajectories")
+
+class TwoChoiceDecisionTiming(Base):
+    """
+    Represents the timing of decisions within a two-choice trial.
+
+    Attributes:
+        id (Integer): The primary key.
+        trial_id (Integer): Foreign key linking back to the associated `Trial`.
+        time_sec (Float): The time in seconds when the decision happened.
+        decision_type_id (Integer): Foreign key linking to the `TwoChoiceDecisionTypes` table.
+    """
+    __tablename__ = 'two_choice_decision_timing'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    trial_id = Column(Integer, ForeignKey('trial.id'), nullable=False)
+    time_sec = Column(Float, nullable=False)
+    decision_type_id = Column(Integer, ForeignKey('two_choice_decision_types.id'), nullable=False)
+    
+    # Relationships
+    trial = relationship("Trial", back_populates="two_choice_decision_timing")
+    decision_type = relationship("TwoChoiceDecisionTypes", back_populates="decision_timings")
+
+class TwoChoiceDecisionTypes(Base):
+    """
+    Represents the types of decisions within a two-choice trial.
+
+    Attributes:
+        id (Integer): The primary key.
+        identifier (Integer): The identifier used in the trajectory analysis scripts.
+        name (String): The name of the decision type.
+        description (String): A description of the decision type.
+    """
+    __tablename__ = 'two_choice_decision_types'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    identifier = Column(Integer, nullable=False, unique=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+    
+    # Relationship
+    decision_timings = relationship("TwoChoiceDecisionTiming", back_populates="decision_type")
+
+
 
 class DatabaseHandler:
     def __init__(self, connection_string):
@@ -396,6 +443,8 @@ class DatabaseHandler:
         Creates the database tables and prints an ASCII art message indicating creation.
         """
         Base.metadata.create_all(self.engine)
+        self.populate_two_choice_decision_types()
+        self.make_two_choice_decision_types_read_only()
         self.create_views()
         print(r"""
         *********************************************
@@ -437,24 +486,29 @@ class DatabaseHandler:
                     two_choice_decision.fraction_positive,
                     two_choice_decision.fraction_negative,
                     two_choice_decision.preference_index,
+                    two_choice_decision.decision_duration_index,
                     two_choice_decision.decision_to_positive_num,
                     two_choice_decision.decision_from_positive_num,
                     two_choice_decision.decision_to_negative_num,
                     two_choice_decision.decision_from_negative_num,
                     two_choice_decision.duration_after_positive,
                     two_choice_decision.duration_after_negative,
+                    two_choice_decision.time_of_first_decision_elapsed_sec,
+                    trial.stimuli_01 AS stimulus_01_id,
                     stimulus_01.name AS stimulus_01_name,
                     stimulus_01.type AS stimulus_01_type,
                     stimulus_01.amplitude AS stimulus_01_amplitude,
                     stimulus_01.amplitude_unit AS stimulus_01_amplitude_unit,
                     GROUP_CONCAT(DISTINCT stimulus_01_attr.name) AS stimulus_01_attributes,
+                    trial.stimuli_02 AS stimulus_02_id,
                     stimulus_02.name AS stimulus_02_name,
                     stimulus_02.type AS stimulus_02_type,
                     stimulus_02.amplitude AS stimulus_02_amplitude,
                     stimulus_02.amplitude_unit AS stimulus_02_amplitude_unit,
                     GROUP_CONCAT(DISTINCT stimulus_02_attr.name) AS stimulus_02_attributes,
                     GROUP_CONCAT(DISTINCT arena_attribute.name) AS arena_attributes,
-                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes
+                    GROUP_CONCAT(DISTINCT fly_attribute.name) AS fly_attributes,
+                    GROUP_CONCAT(DISTINCT stimuli_attribute.name) AS stimulus_attributes
                 FROM 
                     trial
                 JOIN 
@@ -636,3 +690,37 @@ class DatabaseHandler:
         with self.engine.connect() as connection:
             df = pd.read_sql(f'SELECT * FROM trajectories WHERE trial_id = {trial_id}', connection)
         return df
+    
+    def populate_two_choice_decision_types(self):
+        predefined_types = [
+            (1, 'from neutral to negative'),
+            (-1, 'from negative to neutral'),
+            (-2, 'from neutral to positive'),
+            (2, 'from positive to neutral'),
+            (3, 'from positive to negative'),
+            (-3, 'from negative to positive')
+        ]
+
+        with self.Session() as session:
+            for identifier, description in predefined_types:
+                type_entry = TwoChoiceDecisionTypes(identifier=identifier, name=f'Type {identifier}', description=description)
+                session.add(type_entry)
+            session.commit()
+
+    def make_two_choice_decision_types_read_only(self):
+        with self.engine.connect() as connection:
+            connection.execute('CREATE TRIGGER no_insert_two_choice_decision_types AFTER INSERT ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "INSERT not allowed"); END;')
+            connection.execute('CREATE TRIGGER no_update_two_choice_decision_types AFTER UPDATE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "UPDATE not allowed"); END;')
+            connection.execute('CREATE TRIGGER no_delete_two_choice_decision_types AFTER DELETE ON two_choice_decision_types BEGIN SELECT RAISE(FAIL, "DELETE not allowed"); END;')
+    
+    
+    def get_all_two_choice_decision_types(self):
+        """
+        Retrieves all entries from the two_choice_decision_types table and returns them as a list of dictionaries.
+
+        Returns:
+            list: A list of dictionaries, each representing an entry in the two_choice_decision_types table.
+        """
+        with self.session as session:
+            records = session.query(TwoChoiceDecisionTypes).all()
+            return records

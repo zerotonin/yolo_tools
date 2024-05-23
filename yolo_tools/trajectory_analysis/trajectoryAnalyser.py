@@ -83,7 +83,7 @@ class trajectoryAnalyser:
         - The fly's position is computed as the midpoint of its bounding box for each frame.
         - Filtering fly positions is optional and can be used to smooth the trajectory.
         """
-        self.arena_imageNorm = np.mean(trajectories[:,:4], axis=0)
+        self.arena_imageNorm = np.nanmedian(trajectories[:,:4], axis=0)
         self.arena_midline = 0.5 * (self.arena_imageNorm [2] + self.arena_imageNorm [0])
 
         pos_x = 0.5 * (trajectories[:, 4] + trajectories[:, 6])
@@ -101,8 +101,9 @@ class trajectoryAnalyser:
 
     def get_arena_centered_fly_trace(self):
         self.fly_tra_arenaNorm = np.zeros(shape= self.fly_tra_imageNorm.shape)
+        arena_median_pos = np.nanmedian(self.arena_imageNorm)
         self.fly_tra_arenaNorm[:,0] = (self.fly_tra_imageNorm[:,0] - self.arena_imageNorm[0]) / (self.arena_imageNorm[2] - self.arena_imageNorm[0])
-        self.fly_tra_imageNorm[:,1] = (self.fly_tra_imageNorm[:,1] - self.arena_imageNorm[1]) / (self.arena_imageNorm[3] - self.arena_imageNorm[1])
+        self.fly_tra_arenaNorm[:,1] = (self.fly_tra_imageNorm[:,1] - self.arena_imageNorm[1]) / (self.arena_imageNorm[3] - self.arena_imageNorm[1])
 
 
     def get_fly_trace_mm(self):
@@ -268,7 +269,7 @@ class trajectoryAnalyser:
         self.decision_dict['fraction_left']   = np.count_nonzero(self.zone_occupation == self.LEFT) / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_right']  = np.count_nonzero(self.zone_occupation == self.RIGHT)  / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_middle'] = np.count_nonzero(self.zone_occupation == self.NEUTRAL)  / self.fly_tra_arenaNorm.shape[0]
-        # Get fractions based on stimu
+        # Get fractions based on stimulus
         self.decision_dict['fraction_positive'] = np.count_nonzero(self.zone_occupation_normalised == self.LEFT)  / self.fly_tra_arenaNorm.shape[0]
         self.decision_dict['fraction_negative'] = np.count_nonzero(self.zone_occupation_normalised == self.RIGHT) / self.fly_tra_arenaNorm.shape[0]
 
@@ -277,12 +278,13 @@ class trajectoryAnalyser:
         self.decision_dict['transition_times'] = np.nonzero(self.decision_dict['transitions'])[0]
         self.decision_dict['transition_directions'] = self.decision_dict['transitions'][self.decision_dict['transition_times']]
         self.decision_dict['transition_durations'] = np.diff(np.append(self.decision_dict['transition_times'], self.fly_tra_arenaNorm.shape[0]))    
+        self.decision_dict['time_of_first_decision_elapsed_sec'] = self.decision_dict['transition_times'][0]/self.fps if len(self.decision_dict['transition_times']) >0 else None
         self._collate_decisions()
 
         #caculate preference indices
         self.decision_dict['preference_index'] =  self.calc_Michelson_contrast(self.decision_dict['fraction_positive'],self.decision_dict['fraction_negative'])
         self.decision_dict['decision_duration_index']  = self.calc_Michelson_contrast(self.decision_dict['decision_duration_matrix'][0,0],self.decision_dict['decision_duration_matrix'][0,1])
-            
+        self.decision_dict['time_decision_record'] = np.vstack((self.decision_dict['transition_times'],self.decision_dict['transition_directions'])).T
 
     def _collate_decisions(self):
         """
@@ -483,8 +485,8 @@ def main():
     traAna.analyse_trajectory(trajectories, args.midline_tolerance, args.positive_stimulus_on_left, args.filter_trajectory)
 
 
-    choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index']
-    choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'decision_four_field_matrix', 'decision_duration_matrix']
+    choice_json_keys = ['fraction_left', 'fraction_right', 'fraction_middle', 'fraction_positive', 'fraction_negative', 'preference_index', 'decision_duration_index','time_of_first_decision_elapsed_sec']
+    choice_numpy_keys =['transitions', 'transition_times', 'transition_directions', 'transition_durations', 'time_decision_record', 'decision_four_field_matrix', 'decision_duration_matrix']
     choice_json_dict = {key: traAna.decision_dict.get(key, None) for key in choice_json_keys}
     file_manager = AnalysisFileManager()
 

@@ -64,6 +64,7 @@ class SlurmJobManager:
         content += f'#SBATCH --output={self.file_base_dir}/slurm_logs/%x.out\n'
         content += f'#SBATCH --error={self.file_base_dir}/slurm_logs/%x.err\n'
         content += f'\n'
+        content += f'sleep 5 # wait on auto mount\n'
         content += f'{python_command}'
 
         # Write the SLURM script to a file
@@ -154,13 +155,13 @@ class SlurmJobManager:
 
 
 
-    def manage_workflow(self, num_splits):
+    def manage_workflow(self, num_splits,wait_on_job_before_start = None):
         """
         Manages the full workflow of splitting, tracking, analyzing, and compiling results.
         """
         # Step 1: Create and submit the split job
         split_script_filepath = self.create_video_splitting_slurm_script()
-        split_job_id = self.submit_job(split_script_filepath)
+        split_job_id = self.submit_job(split_script_filepath,wait_on_job_before_start)
         
 
         # Step 2: Submit tracking and analysis jobs
@@ -171,7 +172,7 @@ class SlurmJobManager:
             track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
             
             
-            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[0] == self.meta_data_table.stimuli_01[split_i])
+            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
             analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
             analysis_jobs.append(analysis_job_id)
 
@@ -181,3 +182,22 @@ class SlurmJobManager:
         self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
 
 
+    def rerun_traj_analysis(self, num_splits,old_dependency=None):
+        """
+        Rerun the analysis.
+        """
+
+
+        # Step 2: Submit tracking and analysis jobs
+        analysis_jobs = []
+        for split_i in range(num_splits):
+           
+            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
+            analysis_job_id = self.submit_job(ana_script_filepath,dependency_id=old_dependency)
+            analysis_jobs.append(analysis_job_id)
+
+        # Step 3: Create and submit the final job that depends on all analysis jobs
+        sql_script_filepath =self.create_sql_entry_slurm_script()
+        all_dependencies = ":".join(str(job_id) for job_id in analysis_jobs)
+        last_job_id = self.submit_job(sql_script_filepath, dependency_id=all_dependencies)
+        return last_job_id
