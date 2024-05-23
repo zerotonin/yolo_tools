@@ -70,6 +70,44 @@ class ResultManager:
         Save the updated metadata DataFrame back to the CSV.
         """
         self.metadata_df.to_csv(self.meta_data_csv_path, index=False)
+    
+    def check_files_loadable(self):
+        """
+        Check if all files referenced in the metadata are loadable. If any files are not loadable,
+        print the list of unloadable files and raise an error.
+        """
+        unloadable_files = []
+
+        for idx, row in self.metadata_df.iterrows():
+            try:
+                decision_base_path = self.file_manager.create_decision_result_base_path(row['arena_number'])
+                json_file_path = self.file_manager.create_result_filepath(decision_base_path, 'choice_json')
+                four_field_file_path = self.file_manager.create_result_filepath(decision_base_path, 'decision_four_field_matrix')
+                duration_file_path = self.file_manager.create_result_filepath(decision_base_path, 'decision_duration_matrix')
+
+                with open(json_file_path, 'r') as json_file:
+                    json.load(json_file)
+                np.load(four_field_file_path)
+                np.load(duration_file_path)
+
+                locomotor_base_path = self.file_manager.create_locomotor_result_base_path(row['arena_number'])
+                json_file_path = self.file_manager.create_result_filepath(locomotor_base_path, 'locomotor_json')
+                trajectory_file_path = self.file_manager.create_result_filepath(locomotor_base_path, 'tra_mm')
+                time_decision_path = self.file_manager.create_result_filepath(decision_base_path, 'time_decision_record')
+
+                with open(json_file_path, 'r') as json_file:
+                    json.load(json_file)
+                np.load(trajectory_file_path)
+                np.load(time_decision_path)
+
+            except Exception as e:
+                unloadable_files.append((row['arena_number'], str(e)))
+
+        if unloadable_files:
+            for file_info in unloadable_files:
+                print(f"Unloadable file for arena {file_info[0]}: {file_info[1]}")
+            raise RuntimeError("Some files could not be loaded. Please check the unloadable files above.")
+
 
 
     def insert_experiment(self):
@@ -303,6 +341,9 @@ def main():
 
     # Read metadata to ensure everything is loaded correctly
     result_manager.read_metadata()
+
+    # Check if all files are accesible
+    result_manager.check_files_loadable()
 
     # Process metadata which involves inserting data into the database
     result_manager.process_metadata()
