@@ -17,7 +17,7 @@ if __name__ == "__main__":
     ##############
 
     server_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen'
-    base_output_path = f'{server_path}/analysis_folders/{foler_name}'
+    base_output_path = f'{server_path}/analysis_folders/{folder_name}'
     video_file_path = f'{server_path}/new_vids/{mp4_filepath}'
     
 
