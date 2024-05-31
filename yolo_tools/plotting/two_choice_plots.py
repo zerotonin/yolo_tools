@@ -106,21 +106,27 @@ def create_identifier(df):
         df['stimulus_02_amplitude'].astype(str) + df['stimulus_02_amplitude_unit'].astype(str)
     )
     return df
-
+def create_integer_identifier(df):
+    df['int_identifier'] = df.apply(
+        lambda row: ' '.join(map(str, sorted([row['stimulus_01_id'], row['stimulus_02_id']]))),
+        axis=1
+    )
+    return df
 
 # database url
-db_filepath = '/home/geuba03p/fly_choice.db'
+db_filepath = '/home/geuba03p/food_experiments/fly_choice.db'
 db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
 
 df = db_handler.get_two_choice_results()
 not_far_enough = df.distance_walked_mm.isna() | (df.distance_walked_mm <100)
 df = df.loc[not_far_enough == False,:]
 df = create_identifier(df)
+df = create_integer_identifier(df)
 
 figure_list = list()
-for experiment_identifier in df.identifier.unique():
+for experiment_identifier in df.int_identifier.unique():
 
-    df_subset = df.loc[df.identifier == experiment_identifier]
+    df_subset = df.loc[df.int_identifier == experiment_identifier]
 
 
     quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 'fraction_left', 'fraction_right',
@@ -133,13 +139,13 @@ for experiment_identifier in df.identifier.unique():
 
     quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 
             'fraction_middle', 'fraction_positive', 'fraction_negative',
-            'preference_index']
+            'preference_index', 'decision_duration_index']
 
 
-    # for q in quants:
-    #     fig = boxplot_by_genotype(df_subset,q,experiment_identifier)
-    #     fig_name =f'{experiment_identifier}_{q}'
-    #     figure_list.append((fig,fig_name))
+    for q in quants:
+        fig = boxplot_by_genotype(df_subset,q,df_subset.identifier.iloc[0])
+        fig_name =f'{df_subset.identifier.iloc[0]}_{q}'
+        figure_list.append((fig,fig_name))
 
 
 # Example usage
@@ -161,3 +167,23 @@ for fig_data in figure_list:
 plt.show()
 
 print('wait')
+def plot_time_vs_distance(df):
+    # Ensure the 'experiment_date_time' column is in datetime format
+    df['experiment_date_time'] = pd.to_datetime(df['experiment_date_time'], errors='coerce')
+    
+    # Drop rows with invalid datetime values
+    df = df.dropna(subset=['experiment_date_time'])
+    
+    # Extract the time part from the datetime field and create a new column 'time'
+    df['time'] = df['experiment_date_time'].dt.strftime('%H:%M:%S')
+    
+    # Sort the dataframe by the 'time' column
+    df = df.sort_values(by='time')
+    
+    # Plot using seaborn
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(data=df, x='time', y='distance_walked_mm', notch=True)
+    plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
+    plt.show()
+
+plot_time_vs_distance(df)
