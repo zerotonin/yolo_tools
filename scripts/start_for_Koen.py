@@ -3,8 +3,8 @@ import json
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
-    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/Column1Male_Agarose1p_Left_Agarose1p_Fructose26.2p_Right/'
-    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_04_10__14-41-42_FirstcolumnMale_agarose1pLeft_agarose1pfructose26-2pRight.mp4'
+    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/2024_05_29__11-59-19_first_collumn_female_1p_agarose_L_1p_agarose_3p_salt_R/'
+    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_05_29__11-59-19_first_collumn_female_1p_agarose_L_1p_agarose_3p_salt_R.mp4'
     
 
     # Load JSON data from file
@@ -23,4 +23,4 @@ if __name__ == "__main__":
     if video_file_path:
         experiment_setup.get_video_info()
         experiment_setup.write_meta_data_table()
-        experiment_setup.run_slurm_jobs()
+        experiment_setup.run_full_work_flow()
