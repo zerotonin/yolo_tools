@@ -78,7 +78,7 @@ class SlurmJobManager:
         content += f'#SBATCH --nodes={script_parameters['nodes']}\n'
         content += f'#SBATCH --mem={script_parameters['memory']}G\n'
         content += f'#SBATCH --ntasks-per-node={script_parameters['ntasks_per_node']}\n'
-        content += f"#SBATCH --time={self.format_duration_for_sbatch(script_parameters['runtime_sec'])}"
+        content += f"#SBATCH --time={self.format_duration_for_sbatch(script_parameters['runtime_sec'])}\n"
         content += f'#SBATCH --output={self.file_base_dir}/slurm_logs/%x.out\n'
         content += f'#SBATCH --error={self.file_base_dir}/slurm_logs/%x.err\n'
         content += f'\n'
