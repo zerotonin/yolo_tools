@@ -36,15 +36,33 @@ class VideoInfoExtractor:
         self.fps = cap.get(cv2.CAP_PROP_FPS)
         cap.release()
 
+    def detect_duration(self):
+        """
+        Detects the duration of the video in seconds using OpenCV.
+        """
+        cap = cv2.VideoCapture(str(self.video_path))
+        if not cap.isOpened():
+            raise IOError("Cannot open the video file.")
+        
+        # Get the total frame count and FPS
+        total_frames = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        
+        # Calculate the duration in seconds
+        self.duration = total_frames / fps
+        cap.release()
+
     def get_video_info(self):
         """
-        Processes the video file to extract date, time, and FPS.
+        Processes the video file to extract date, time, FPS, and duration.
         Returns a dictionary with the extracted information.
         """
         self.extract_datetime()
         self.detect_fps()
+        self.detect_duration()
         return {
             'date': self.date,
             'time': self.time,
-            'fps': self.fps
+            'fps': self.fps,
+            'duration': self.duration
         }
