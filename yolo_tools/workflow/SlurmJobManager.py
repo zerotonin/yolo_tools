@@ -14,11 +14,11 @@ class SlurmJobManager:
         self.runtime_factor = 1 # This factor is to caculate the time each stepn (splitting,tracking,analysing) needs given the video duration.
         # 1 is for a yolov8 mini running on small framed videos of Goettiung v1 2-choice arena, detecting the fly and arena
     
-    def format_duration_for_sbatch(self):
+    def format_duration_for_sbatch(self,duration_sec):
         """
         Formats the duration in seconds to the SBATCH time format (D-HH:MM:SS).
         """
-        seconds = int(self.video_duration_sec*self.runtime_factor)
+        seconds = int(duration_sec*self.runtime_factor)
         days, seconds = divmod(seconds, 86400)
         hours, seconds = divmod(seconds, 3600)
         minutes, seconds = divmod(seconds, 60)
