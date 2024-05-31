@@ -11,6 +11,21 @@ class SlurmJobManager:
         self.meta_data_table = meta_data_table
         self.video_duration_sec = video_duration_sec
         self.gpu_partion = gpu_partition
+        self.runtime_factor = 1 # This factor is to caculate the time each stepn (splitting,tracking,analysing) needs given the video duration.
+        # 1 is for a yolov8 mini running on small framed videos of Goettiung v1 2-choice arena, detecting the fly and arena
+    
+    def format_duration_for_sbatch(self):
+        """
+        Formats the duration in seconds to the SBATCH time format (D-HH:MM:SS).
+        """
+        seconds = int(self.video_duration_sec*self.runtime_factor)
+        days, seconds = divmod(seconds, 86400)
+        hours, seconds = divmod(seconds, 3600)
+        minutes, seconds = divmod(seconds, 60)
+        if days > 0:
+            return f"{days}-{hours:02}:{minutes:02}:{seconds:02}"
+        else:
+            return f"{hours:02}:{minutes:02}:{seconds:02}"
 
     def submit_job(self, script_path, dependency_id=None):
         """
@@ -45,6 +60,7 @@ class SlurmJobManager:
                 - gpus_per_task (int): Number of GPUs per task.
                 - nodes (int): Number of nodes to use.
                 - ntasks_per_node (int): Number of tasks per node.
+                - runtime_sec(num): How long the script can run at max in seconds
         """
         
         # Build the command line for the Python script with additional variables
@@ -62,6 +78,7 @@ class SlurmJobManager:
         content += f'#SBATCH --nodes={script_parameters['nodes']}\n'
         content += f'#SBATCH --mem={script_parameters['memory']}G\n'
         content += f'#SBATCH --ntasks-per-node={script_parameters['ntasks_per_node']}\n'
+        content += f"#SBATCH --time={self.format_duration_for_sbatch(script_parameters['runtime_sec'])}"
         content += f'#SBATCH --output={self.file_base_dir}/slurm_logs/%x.out\n'
         content += f'#SBATCH --error={self.file_base_dir}/slurm_logs/%x.err\n'
         content += f'\n'
