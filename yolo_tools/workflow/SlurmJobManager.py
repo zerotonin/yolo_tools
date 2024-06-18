@@ -83,6 +83,8 @@ class SlurmJobManager:
         content += f'#SBATCH --error={self.file_base_dir}/slurm_logs/%x.err\n'
         content += f'\n'
         content += f'sleep 5 # wait on auto mount\n'
+        content += f'source ~/conda.sh\n' # This should come from the filemanager
+        content += f'conda activate yolov8\n'
         content += f'{python_command}'
 
         # Write the SLURM script to a file
