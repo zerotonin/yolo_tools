@@ -3,6 +3,7 @@ from fuzzywuzzy import fuzz
 import os
 from tabulate import tabulate  # If you're using tabulate
 import shutil
+import argparse
 
 class AnnotationConverter:
     def __init__(self, output_dir, class_dict, tag):
@@ -131,21 +132,36 @@ class AnnotationConverter:
                 self._write_YOLO_annotation(txt_output_path, class_id, obj, img_width, img_height)
 
 
-# Example Usage:
-xml_folder = '/home/geuba03p/label_test/labeldDataLena'
-output_folder = '/home/geuba03p/output'  
-class_dict = {'arena': 0, 'fly': 1}  
-tag = 'food_2Choice'
 
-converter = AnnotationConverter(output_folder, class_dict, tag)
+def main():
+    parser = argparse.ArgumentParser(description="Convert XML annotations to YOLO format.")
+    parser.add_argument("xml_folder", help="Path to the folder containing XML files.")
+    parser.add_argument("output_folder", help="Path to the output folder.")
+    parser.add_argument("--tag", help="Tag to prefix the output file names.", default="")
+    parser.add_argument("--class_dict", type=str, help="Path to a JSON file containing the class dictionary.")
 
-file_count = 0
-for root, _, filenames in os.walk(xml_folder):
-    for xml_filename in filenames:
-        if xml_filename.endswith('.xml'):
-            try:
-                xml_path = os.path.join(root, xml_filename)   
-                converter.convert_XML_to_YOLO(xml_path, file_count)
-                file_count += 1
-            except:
-                print(f'error transforming: {xml_filename}')
+    args = parser.parse_args()
+
+    if args.class_dict:
+        import json
+        with open(args.class_dict, "r") as f:
+            class_dict = json.load(f)
+    else:
+        # Example class dictionary
+        class_dict = {'arena': 0, 'fly': 1}  
+        
+    converter = AnnotationConverter(args.output_folder, class_dict, args.tag)
+
+    file_count = 0
+    for root, _, filenames in os.walk(args.xml_folder):
+        for xml_filename in filenames:
+            if xml_filename.endswith('.xml'):
+                try:
+                    xml_path = os.path.join(root, xml_filename)   
+                    converter.convert_XML_to_YOLO(xml_path, file_count)
+                    file_count += 1
+                except:
+                    print(f'error transforming: {xml_filename}')
+
+if __name__ == "__main__":
+    main()
