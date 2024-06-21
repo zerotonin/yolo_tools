@@ -123,7 +123,7 @@ class AnalysisFileManager:
         return os.path.join(self.path_dict['preprocessed_single_videos'],splitname)
 
 
-    def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter,yolo_weights,conda_env_name,conda_script_position):
+    def setup_experiment_paths(self, base_output_path, db_file, video_file,python_interpreter,yolo_weights,conda_script_position,conda_env_name):
         """
         Sets up and verifies all paths necessary for an experiment, including the database file,
         video file, and output directory. It initializes the experiment's directory structure
