@@ -3,8 +3,8 @@ import json
 
 # Example usage of the setup_experiments method
 if __name__ == "__main__":
-    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/2024_05_29__11-59-19_first_collumn_female_1p_agarose_L_1p_agarose_3p_salt_R/'
-    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_05_29__11-59-19_first_collumn_female_1p_agarose_L_1p_agarose_3p_salt_R.mp4'
+    base_output_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/analysis_folders/2024_06_13__16-04-07_first_collumn_female_1p_agarose_15_1p_fructose_L_1p_agarose_26_3p_fructose_R'
+    video_file_path = '/projects/sciences/zoology/geurten_lab/food_experiments/koen/new_vids/2024_06_13__16-04-07_first_collumn_female_1p_agarose_15_1p_fructose_L_1p_agarose_26_3p_fructose_R.mp4'
     
 
     # Load JSON data from file
@@ -19,8 +19,7 @@ if __name__ == "__main__":
                                               path_config['python_interp'],
                                               path_config['yolo_weights'],
                                               path_config['conda_script_position'],
-                                              path_config['conda_env_name'],
-					                          gpu_partition="aoraki_gpu_L40")
+                                              path_config['conda_env_name'], gpu_partition="aoraki_gpu_L40")
     experiment_setup.setup_experiments()
     experiment_setup.display_experiment_overview()
     experiment_setup.display_experiment_overview_arena_wise()
