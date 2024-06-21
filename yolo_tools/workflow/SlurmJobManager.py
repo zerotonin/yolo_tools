@@ -61,6 +61,7 @@ class SlurmJobManager:
             python_command = ''
             for scipt_vars in script_parameters['script_variables']:
                     python_command += f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {scipt_vars}&\n"
+            python_command = python_command[:-3] # to get rid of the last &
         else:
             python_command = f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {script_parameters['script_variables']}"
         
