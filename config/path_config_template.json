@@ -1,5 +1,7 @@
 {
     "db_file_path": "/projects/sciences/zoology/geurten_lab/food_experiments/database/fly_choice.db",
     "python_interp": "~/miniconda3/envs/yolov8/bin/python",
-    "yolo_weights": "/projects/sciences/zoology/geurten_lab/AI_inferenceGraphs/choiceVids_2chamberSep/best.pt"
+    "yolo_weights": "/projects/sciences/zoology/geurten_lab/AI_inferenceGraphs/choiceVids_2chamberSep/best.pt",
+    "conda_env_name": "conda environment name",
+    "conda_script_position": "/path/to/your/conda/activator_script.sh"
 }
