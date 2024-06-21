@@ -100,7 +100,7 @@ class SlurmJobManager:
         arena_id_str = f'{str(min(arena_list)).zfill(2)}-{str(max(arena_list)).zfill(2)}'
 
         script_parameters = dict()
-        script_parameters['partition'] =  self.gpu_partion
+        script_parameters['partition'] =  self.gpu_partition
         script_parameters['gpus_per_task'] = gpus_per_task
         script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'track_arena_{arena_id_str}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
