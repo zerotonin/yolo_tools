@@ -61,7 +61,7 @@ class SlurmJobManager:
             python_command = ''
             for scipt_vars in script_parameters['script_variables']:
                     python_command += f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {scipt_vars}&\n"
-            python_command = python_command[:-3] # to get rid of the last &
+            #python_command = python_command[:-2] # to get rid of the last &
         else:
             python_command = f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {script_parameters['script_variables']}"
         
@@ -85,6 +85,8 @@ class SlurmJobManager:
         content += f'source {self.file_manager.file_dict['conda_script_position']}\n' # This should come from the filemanager
         content += f'conda activate {self.file_manager.file_dict['conda_env_name']}\n'
         content += f'{python_command}'
+        content += f'\nwait\n'
+
 
         # Write the SLURM script to a file
         with open(script_parameters['filename'], 'w') as f:
