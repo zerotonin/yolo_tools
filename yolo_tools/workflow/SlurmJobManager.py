@@ -2,35 +2,29 @@ import subprocess
 import os
 
 class SlurmJobManager:
-    def __init__(self, analysis_file_manager,arena_num,meta_data_table,video_duration_sec,gpu_partition = 'aoraki_gpu'):
+    def __init__(self, analysis_file_manager, arena_num, meta_data_table, video_duration_sec, gpu_partition='aoraki_gpu'):
         self.file_manager = analysis_file_manager
-        self.file_base_dir =  self.file_manager.path_dict['output_file_path']
+        self.file_base_dir = self.file_manager.path_dict['output_file_path']
         self.user_name = os.getlogin()
-        self.python_path =  self.file_manager.file_dict['python_interpreter']
+        self.python_path = self.file_manager.file_dict['python_interpreter']
         self.arena_num = arena_num
         self.meta_data_table = meta_data_table
         self.video_duration_sec = video_duration_sec
-        self.gpu_partion = gpu_partition
-        self.runtime_factor = 1 # This factor is to caculate the time each stepn (splitting,tracking,analysing) needs given the video duration.
-        # 1 is for a yolov8 mini running on small framed videos of Goettiung v1 2-choice arena, detecting the fly and arena
+        self.gpu_partition = gpu_partition
+        self.runtime_factor = 1  # This factor is to calculate the time each step (splitting, tracking, analyzing) needs given the video duration.
     
     def format_duration_for_sbatch(self,duration_sec):
-        """
-        Formats the duration in seconds to the SBATCH time format (D-HH:MM:SS).
-        """
+        """ Formats the duration in seconds to the SBATCH time format (D-HH:MM:SS)."""
         seconds = int(duration_sec*self.runtime_factor)
         days, seconds = divmod(seconds, 86400)
         hours, seconds = divmod(seconds, 3600)
         minutes, seconds = divmod(seconds, 60)
         if days > 0:
             return f"{days}-{hours:02}:{minutes:02}:{seconds:02}"
-        else:
-            return f"{hours:02}:{minutes:02}:{seconds:02}"
+        return f"{hours:02}:{minutes:02}:{seconds:02}"
 
     def submit_job(self, script_path, dependency_id=None):
-        """
-        Submits a job to the SLURM scheduler with an optional dependency.
-        """
+        """ Submits a job to the SLURM scheduler with an optional dependency."""
         cmd = ['sbatch']
         if dependency_id:
             cmd.append(f'--dependency=afterok:{dependency_id}')
@@ -40,8 +34,7 @@ class SlurmJobManager:
             job_id = result.stdout.strip().split()[-1]
             print(f'Job {job_id} submitted.')
             return job_id
-        else:
-            raise Exception(f"Failed to submit job: {result.stderr}")
+        raise Exception(f"Failed to submit job: {result.stderr}")
 
 
 
@@ -64,7 +57,12 @@ class SlurmJobManager:
         """
         
         # Build the command line for the Python script with additional variables
-        python_command = f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {script_parameters['script_variables']}"
+        if type(script_parameters['script_variables']) == list:
+            python_command = ''
+            for scipt_vars in script_parameters['script_variables']:
+                    python_command += f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {scipt_vars}&\n"
+        else:
+            python_command = f"{self.python_path} -m yolo_tools.{script_parameters['module']}.{script_parameters['python_script']} {script_parameters['script_variables']}"
         
         # Construct the SLURM script content
         content =  f'#!/bin/bash\n'
@@ -91,19 +89,25 @@ class SlurmJobManager:
         with open(script_parameters['filename'], 'w') as f:
             f.write(content)
 
-    def create_tracking_slurm_script(self,split_video_fileposition,arena_num,gpus_per_task =1, memory_GB_int = 16, nodes = 1, cpus_per_task = 1, ntasks = 1):
-        
+    def create_tracking_slurm_script(self,gpu_jobs,gpus_per_task =1, memory_GB_int = 16, nodes = 1, cpus_per_task = 1, ntasks = 1):
 
-        script_variables = f'--video_path {split_video_fileposition}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(arena_num)}'
+
+        script_variable_list = list()        
+        for split_i in gpu_jobs:
+            script_variable_list.append(f'--video_path { self.file_manager.anticipate_split_video_position(split_i)}  --apriori_classes 0 1 --apriori_class_names arena fly --yolo_weights {self.file_manager.file_dict['yolo_weights']} --output_file {self.file_manager.create_yolo_trajectory_filepath(split_i)}')
+        
+        arena_list = list(gpu_jobs)
+        arena_id_str = f'{str(min(arena_list)).zfill(2)}-{str(max(arena_list)).zfill(2)}'
+
         script_parameters = dict()
         script_parameters['partition'] =  self.gpu_partion
         script_parameters['gpus_per_task'] = gpus_per_task
-        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'track_arena_{str(arena_num).zfill(2)}.sh')
+        script_parameters['filename'] = os.path.join(self.file_manager.path_dict['slurm_scripts'], f'track_arena_{arena_id_str}.sh')
         script_parameters['cpus_per_task'] = cpus_per_task
         script_parameters['python_script'] = f'videoAnalyser'
-        script_parameters['jobname'] =  f'track_arena_{str(arena_num).zfill(2)}'
+        script_parameters['jobname'] =  f'track_arena_{arena_id_str}'
         script_parameters['memory'] = memory_GB_int
-        script_parameters['script_variables'] = script_variables
+        script_parameters['script_variables'] = script_variable_list
         script_parameters['nodes'] = nodes
         script_parameters['ntasks_per_node'] = ntasks
         script_parameters['module'] = 'detection'
@@ -177,28 +181,32 @@ class SlurmJobManager:
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
 
+    def chunk_list(self, job_list, chunk_size):
+        """Split the data into chunks of chunk_size."""
+        return [job_list[i:i + chunk_size] for i in range(0, len(job_list), chunk_size)]
 
 
-    def manage_workflow(self, num_splits,wait_on_job_before_start = None):
+    def manage_workflow(self, num_splits,wait_on_job_before_start = None,gpu_chunk_size = 4):
         """
         Manages the full workflow of splitting, tracking, analyzing, and compiling results.
         """
         # Step 1: Create and submit the split job
         split_script_filepath = self.create_video_splitting_slurm_script()
         split_job_id = self.submit_job(split_script_filepath,wait_on_job_before_start)
-        
 
         # Step 2: Submit tracking and analysis jobs
+        gpu_job_chunks = self.chunk_list(range(num_splits),gpu_chunk_size)
         analysis_jobs = []
-        for split_i in range(num_splits):
+
+        for gpu_jobs in gpu_job_chunks:
             
-            track_script_filepath = self.create_tracking_slurm_script(self.file_manager.anticipate_split_video_position(split_i),split_i)
+            track_script_filepath = self.create_tracking_slurm_script(gpu_jobs)
             track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
             
-            
-            ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
-            analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
-            analysis_jobs.append(analysis_job_id)
+            for split_i in gpu_jobs:
+                ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
+                analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
+                analysis_jobs.append(analysis_job_id)
 
         # Step 3: Create and submit the final job that depends on all analysis jobs
         sql_script_filepath =self.create_sql_entry_slurm_script()
