@@ -20,10 +20,4 @@ if __name__ == "__main__":
                                               path_config['yolo_weights'],
                                               path_config['conda_script_position'],
                                               path_config['conda_env_name'], gpu_partition="aoraki_gpu_L40")
-    experiment_setup.setup_experiments()
-    experiment_setup.display_experiment_overview()
-    experiment_setup.display_experiment_overview_arena_wise()
-    if video_file_path:
-        experiment_setup.get_video_info()
-        experiment_setup.write_meta_data_table()
-        experiment_setup.run_full_work_flow()
+    experiment_setup.arena_manager.enter_arenas_for_experiment()

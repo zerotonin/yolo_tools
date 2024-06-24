@@ -2,7 +2,9 @@
 name: yolov8  # Give your environment a name
 channels:
   - pytorch  # Prioritize PyTorch channel
+  - nvidia
   - conda-forge 
+
 dependencies:
   - python>=3.8 
   - numpy
@@ -10,7 +12,8 @@ dependencies:
   - pandas 
   - matplotlib
   - scikit-learn
-  - pytorch  # Install PyTorch and its dependencies 
+  - pytorch  # Install PyTorch and its dependencies
+  - pytorch-cuda=11.8 
   - torchvision 
   - ultralytics  
   - fuzzywuzzy
