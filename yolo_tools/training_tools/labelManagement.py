@@ -6,17 +6,61 @@ import shutil
 import argparse
 
 class AnnotationConverter:
+    """
+    A class to convert XML annotations to YOLO format, handling potential misspellings and 
+    organizing the output into a specified directory structure.
+
+    This class provides methods to:
+    - Create necessary output folders.
+    - Handle misspelled class names by suggesting possible matches.
+    - Generate filenames for images and annotations.
+    - Retrieve image paths from XML files.
+    - Copy images to the output directory.
+    - Update class dictionary with correct or ignored class names.
+    - Write YOLO annotations based on XML input.
+    - Convert XML annotations to YOLO format.
+
+    Attributes:
+        output_dir (str): The directory where the output will be saved.
+        class_dict (dict): A dictionary mapping class names to class IDs.
+        tag (str): A tag to prefix the output file names.
+    """
     def __init__(self, output_dir, class_dict, tag):
+        """
+        Create the necessary output folders for images and annotations.
+
+        The method ensures the existence of the 'original_images' and 'annotations'
+        subdirectories within the specified output directory.
+        """
         self.output_dir = output_dir
         self.class_dict = class_dict
         self.tag = tag
         self._create_output_folders()
 
     def _create_output_folders(self):
+        """
+        Handle misspelled class names by suggesting possible matches and allowing user input.
+
+        Args:
+            misspelled_word (str): The misspelled class name.
+            default_match (str): The default suggested match for the misspelled word.
+
+        Returns:
+            str or None: The corrected class name chosen by the user, or None if ignored.
+        """
         os.makedirs(os.path.join(self.output_dir, "original_images"), exist_ok=True)
         os.makedirs(os.path.join(self.output_dir, "annotations"), exist_ok=True)
 
     def _handle_misspelled_class(self, misspelled_word,default_match):
+        """
+        Find the closest match for a misspelled class name using fuzzy matching.
+
+        Args:
+            misspelled_word (str): The misspelled class name.
+
+        Returns:
+            tuple: The best matching class name and its similarity score.
+        """
         best_match = default_match
         while True:
             print("Potential Misspelling Detected!")
@@ -52,12 +96,31 @@ class AnnotationConverter:
         return best_match 
 
     def _find_closest_match(self, misspelled_word):
+        """
+        Generate new filenames for the image and annotation files.
+
+        Args:
+            xml_filename (str): The original XML filename.
+            file_no (int): The file number to be included in the new filename.
+
+        Returns:
+            tuple: The new image filename and the new annotation filename.
+        """
         ratios = [(class_name, fuzz.ratio(misspelled_word, class_name)) 
                 for class_name in self.class_dict.keys()]
         best_match, best_score = max(ratios, key=lambda item: item[1])
         return best_match, best_score
 
     def _generate_filenames(self, xml_filename, file_no):
+        """
+        Get the image path corresponding to an XML file.
+
+        Args:
+            xml_file (str): The path to the XML file.
+
+        Returns:
+            str: The path to the corresponding image file.
+        """
         file_no = str(file_no)
         xml_base_name, xml_extension = os.path.splitext(xml_filename)  
         new_img_filename = f"image_{self.tag}_{file_no.zfill(4)}{xml_extension}"  
@@ -65,20 +128,52 @@ class AnnotationConverter:
         return new_img_filename, new_txt_filename
 
     def _get_image_path(self, xml_file):
+        """
+        Copy the image file to the output directory with a new filename.
+
+        Args:
+            img_path (str): The original path to the image file.
+            new_img_filename (str): The new filename for the image file.
+        """
         img_base_name, _ = os.path.splitext(os.path.basename(xml_file))
         return os.path.join(os.path.dirname(xml_file), img_base_name + '.png')  
 
     def _copy_image(self, img_path, new_img_filename):
+        """
+        Update the class dictionary with the correct class name or mark it as ignored.
+
+        Args:
+            misspelled_word (str): The misspelled class name.
+            correct_name (str or None): The correct class name, or None if ignored.
+        """
         img_output_path = os.path.join(self.output_dir, "original_images", new_img_filename)
         shutil.copyfile(img_path, img_output_path)
 
     def _update_class_dictionary(self, misspelled_word, correct_name):
+        """
+        Handle unknown class names by finding the closest match and updating the dictionary.
+
+        Args:
+            class_name (str): The unknown class name.
+
+        Returns:
+            str: The corrected class name.
+        """
         if correct_name == None:
             self.class_dict[misspelled_word] = None
         else:
             self.class_dict[misspelled_word] = self.class_dict[correct_name]
 
     def _handle_unknown_class(self, class_name):
+        """
+        Get the class ID for a given class name, handling unknown classes if necessary.
+
+        Args:
+            class_name (str): The class name.
+
+        Returns:
+            int or None: The class ID, or None if the class is ignored.
+        """
         best_match, best_score = self._find_closest_match(class_name)
         correct_name = self._handle_misspelled_class(class_name, best_match)
         self._update_class_dictionary(class_name, correct_name)  
@@ -95,6 +190,16 @@ class AnnotationConverter:
     
 
     def _write_YOLO_annotation(self, txt_output_path, class_id, obj, img_width, img_height):
+        """
+        Write the YOLO annotation for a given object.
+
+        Args:
+            txt_output_path (str): The path to the output text file.
+            class_id (int): The class ID of the object.
+            obj (xml.etree.ElementTree.Element): The XML element of the object.
+            img_width (int): The width of the image.
+            img_height (int): The height of the image.
+        """
                
         bndbox = obj.find('bndbox')
         xmin = int(bndbox.find('xmin').text)
@@ -110,7 +215,14 @@ class AnnotationConverter:
         with open(txt_output_path, 'a') as txt_file:  # Using append mode 
             txt_file.write(f"{class_id} {box_cx:.6f} {box_cy:.6f} {box_w:.6f} {box_h:.6f}\n")
 
-    def convert_XML_to_YOLO(self, xml_file, file_no):    
+    def convert_XML_to_YOLO(self, xml_file, file_no):
+        """
+        Convert an XML annotation file to YOLO format and save the output.
+
+        Args:
+            xml_file (str): The path to the XML file.
+            file_no (int): The file number to be included in the new filename.
+        """    
         tree = ET.parse(xml_file)
         root = tree.getroot()
 
