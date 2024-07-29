@@ -18,4 +18,4 @@ epochs=200
 #classes
 
 
-python -m yolo_tools.training_tools.train_bash_compatible -d $dataset_dir -i $images_dir -l $labels_dir -c $config_file -n $model_name -e $epochs
+~/miniconda3/envs/yolov8/bin/python -m yolo_tools.training_tools.train_bash_compatible -d $dataset_dir -i $images_dir -l $labels_dir -c $config_file -n $model_name -e $epochs
