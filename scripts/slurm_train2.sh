@@ -14,7 +14,7 @@ images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_
 labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/annotations'
 config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/fly_arena_3Clin.yaml'
 model_name='fly_arena_3Clin'
-epochs=200
+epochs=600
 #classes
 
 
