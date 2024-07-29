@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=clust_go1
+#SBATCH --job-name=train_yolov8_2
 #SBATCH --account=geuba03p
 #SBATCH --partition=aoraki_gpu_H100,aoraki_gpu,aoraki_gpu_L40
 #SBATCH --nodes=1
