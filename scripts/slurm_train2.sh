@@ -9,11 +9,11 @@
 #SBATCH --mem=20GB
 
 # python -m yolo_tools.training_tools.train_bash_compatible  -d <dataset_dir> -i <images_dir> -l <labels_dir> -c <config_file> [-n <model_name>] [-e <epochs>] [--classes <class1> <class2> ...]
-dataset_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_circular/dataset'
-images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_circular/frames'
-labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_circular/annotations'
-config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_circular/fly_arena_3Ccirc.yaml'
-model_name='fly_arena_3Ccirc'
+dataset_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/dataset'
+images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/frames'
+labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/annotations'
+config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/koen_3_chambers_linear/fly_arena_3Clin.yaml'
+model_name='fly_arena_3Clin'
 epochs=200
 #classes
 
