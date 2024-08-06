@@ -27,7 +27,6 @@ class AnnotationConverterForResNet:
         Create the main output folder if it does not exist.
         """
         os.makedirs(self.output_dir, exist_ok=True)
-       # print("output folder created?")
 
     def _generate_filename(self, xml_filename, file_no):
         """
@@ -44,7 +43,6 @@ class AnnotationConverterForResNet:
         xml_base_name, xml_extension = os.path.splitext(xml_filename)
         new_img_filename = f"image_{self.tag}_{file_no.zfill(4)}{xml_extension}"
         return new_img_filename
-    #print("new filename?")
 
     def _get_image_path(self, xml_file):
         """
@@ -58,8 +56,6 @@ class AnnotationConverterForResNet:
         """
         img_base_name, _ = os.path.splitext(os.path.basename(xml_file))
         return os.path.join(os.path.dirname(xml_file), img_base_name + '.png')
-    #print("image path?")
-    # .endung variabel gestalten für die unterschiedlichen converter? Da der Rest fast gleich ist????
 
     def _copy_image(self, img_path, class_name, new_img_filename):
         """
@@ -74,7 +70,6 @@ class AnnotationConverterForResNet:
         os.makedirs(class_dir, exist_ok=True)
         img_output_path = os.path.join(class_dir, new_img_filename)
         shutil.copyfile(img_path, img_output_path)
-       # print("copy image?")
 
     def convert_XML_to_ResNet(self, xml_file, file_no):
         """
@@ -94,7 +89,6 @@ class AnnotationConverterForResNet:
         for obj in root.findall('object'):
             class_name = obj.find('name').text
             self._copy_image(img_path, class_name, new_img_filename)
-           # print("converted?")
 
 
 def main():
@@ -120,11 +114,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # python convert_xml_to_resnet.py /path/to/xml_folder /path/to/output_folder --tag mydataset
-
-    # funktioniert nicht
-    # Error transforming xml filename.... wo ist der fehler?
-
-    # Png bilder müssen im selben ordner wie xml bilder sein... 
-    # Funktioniert
