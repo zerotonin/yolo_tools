@@ -124,6 +124,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    # python convert_to_mask_rcnn.py <xml_folder> <output_file> --class_dict <class_dict.json>
-    # python convert_to_mask_rcnn.py annotations output_annotations.json
