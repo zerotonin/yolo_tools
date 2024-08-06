@@ -127,17 +127,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # test = AnnotationConverter()
-
-    # Command line:
-    # python script_name.py path/to/xml_folder path/to/output_folder --tag some_tag --class_dict path/to/class_dict.json
-    # python Test_RetinaNetConverter.py D:/Lena_Daten/Dokumente/Studium/Master_thesis/boderLessFoodArena_labeld/boderLessFoodArena_labeld/ D:/Lena_Daten/Dokumente/Studium/Master_thesis/json_files/
-
-
-    # This command processes all XML files in path/to/xml_folder, \n
-    # converts their annotations to COCO format, and saves the results in path/to/output_folder.\n
-    # The --tag argument is optional and can be used to prefix filenames, \n
-    # while --class_dict specifies a JSON file with the class-to-ID mapping.
-
-    # png bilder müssen in selben ordner wie xml sein...
-    # Funktioniert??? Aber annotaion ordner ist leer
