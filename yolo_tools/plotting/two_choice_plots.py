@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
+#from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
 
 
 def boxplot_by_genotype(df,quantification = 'prefrence_index', experiment_title= '', notch = True):
@@ -98,10 +98,11 @@ def plot_trajectory(df, fps,stim_left,stim_right):
     return fig
 
 def create_identifier(df):
-    df['identifier'] = (
+    df['stimulus_01_id'] = (
         df['stimulus_01_name'].astype(str) + ' ' +
-        df['stimulus_01_amplitude'].astype(str) + df['stimulus_01_amplitude_unit'].astype(str) +
-        ' vs. ' +
+        df['stimulus_01_amplitude'].astype(str) + df['stimulus_01_amplitude_unit'].astype(str)
+    )
+    df['stimulus_02_id'] = (
         df['stimulus_02_name'].astype(str) + ' ' +
         df['stimulus_02_amplitude'].astype(str) + df['stimulus_02_amplitude_unit'].astype(str)
     )
@@ -114,10 +115,10 @@ def create_integer_identifier(df):
     return df
 
 # database url
-db_filepath = '/home/geuba03p/food_experiments/fly_choice.db'
-db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
-
-df = db_handler.get_two_choice_results()
+#db_filepath = '/home/geuba03p/fly_choice.db'
+#db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
+# df = db_handler.get_two_choice_results()
+df = pd.read_csv('/home/geuba03p/two_choice_results.csv')
 not_far_enough = df.distance_walked_mm.isna() | (df.distance_walked_mm <100)
 df = df.loc[not_far_enough == False,:]
 df = create_identifier(df)
@@ -143,14 +144,14 @@ for experiment_identifier in df.int_identifier.unique():
 
 
     for q in quants:
-        fig = boxplot_by_genotype(df_subset,q,df_subset.identifier.iloc[0])
-        fig_name =f'{df_subset.identifier.iloc[0]}_{q}'
+        fig = boxplot_by_genotype(df_subset,q,df_subset.int_identifier.iloc[0])
+        fig_name =f'{df_subset.int_identifier.iloc[0]}_{q}'
         figure_list.append((fig,fig_name))
 
 
 # Example usage
 tid = 154
-tra_df =db_handler.get_trajectory_for_trial(tid)
+tra_df = db_handler.get_trajectory_for_trial(tid)
 row = df.loc[df.trial_id ==tid,:]
 stim_left = f'{row.stimulus_01_name.iloc[0]} {row.stimulus_01_amplitude.iloc[0]} {row.stimulus_01_amplitude_unit.iloc[0]}'
 stim_right = f'{row.stimulus_02_name.iloc[0]} {row.stimulus_02_amplitude.iloc[0]} {row.stimulus_02_amplitude_unit.iloc[0]}'
