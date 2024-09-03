@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/geuba03p/PyProjects/yolo_tools/yolo_tools/training_tools/train_bash_compatible.py", line 85, in <module>
+    main()
+  File "/home/geuba03p/PyProjects/yolo_tools/yolo_tools/training_tools/train_bash_compatible.py", line 53, in main
+    YoloWrapper.create_dataset(large_field_images_path, labels_path, dataset_path)
+  File "/home/geuba03p/PyProjects/yolo_tools/yolo_tools/training_tools/YoloWrapper.py", line 379, in create_dataset
+    training_dataset, val_dataset, train_labels, val_labels = train_test_split(
+                                                              ^^^^^^^^^^^^^^^^^
+  File "/home/geuba03p/miniconda3/envs/yolov8/lib/python3.12/site-packages/sklearn/utils/_param_validation.py", line 213, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/geuba03p/miniconda3/envs/yolov8/lib/python3.12/site-packages/sklearn/model_selection/_split.py", line 2657, in train_test_split
+    arrays = indexable(*arrays)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/geuba03p/miniconda3/envs/yolov8/lib/python3.12/site-packages/sklearn/utils/validation.py", line 514, in indexable
+    check_consistent_length(*result)
+  File "/home/geuba03p/miniconda3/envs/yolov8/lib/python3.12/site-packages/sklearn/utils/validation.py", line 457, in check_consistent_length
+    raise ValueError(
+ValueError: Found input variables with inconsistent numbers of samples: [100, 101]
+Creating YOLO dataset...

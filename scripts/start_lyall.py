@@ -53,7 +53,6 @@ if __name__ == "__main__":
     if video_file_path:
         experiment_setup.get_video_info()
         experiment_setup.write_meta_data_table()
-        experiment_setup.run_full_work_flow()
         go = input("Do you want to run this job? (y/n)")
         if go =='y':
             experiment_setup.run_full_work_flow()
