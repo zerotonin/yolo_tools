@@ -9,8 +9,8 @@ if __name__ == "__main__":
     # INPUT VARIABLES #
     ###################
 
-    folder_name  = '2024_09_02__16-04-22' # folder where this should be saved
-    mp4_filepath = '2024_09_02__16-04-22.mp4' # file name of the video file  you want to analyse
+    folder_name  = '2024_09_03__16-30-46' # folder where this should be saved
+    mp4_filepath = '2024_09_03__16-30-46.mp4' # file name of the video file  you want to analyse
     aoraki_gpu_partition = 'aoraki_gpu_L40' # 'aoraki_gpu' 'aoraki_gpu_L40' 'aoraki_gpu_H100'
 
     ##############
