@@ -44,7 +44,9 @@ class SlurmJobManager:
 
         Args:
             script_parameters (dict): Parameters for the SLURM script including:
-                - partition (str): The partition where the job should run.
+                - partition (str): The partition where the job should run. 
+                                    If set to "all_aoraki_gpus" it will execute on:
+                                    aoraki_gpu_L40, aoraki_gpu_A100_40GB, aoraki_gpu_A100_80GB, aoraki_gpu_H100
                 - filename (str): The filename for the SLURM script.
                 - python_script (str): Path to the Python script to execute.
                 - jobname (str): Name of the job.
@@ -69,7 +71,10 @@ class SlurmJobManager:
         content =  f'#!/bin/bash\n'
         content += f'#SBATCH --job-name={script_parameters['jobname']}\n'
         content += f'#SBATCH --account={self.user_name}\n'
-        content += f'#SBATCH --partition={script_parameters['partition']}\n'
+        if script_parameters['partition'] == 'all_aoraki_gpus':
+            content += f'#SBATCH --partition=aoraki_gpu_L40,aoraki_gpu_A100_40GB,aoraki_gpu_A100_80GB,aoraki_gpu_H100\n'
+        else:
+            content += f'#SBATCH --partition={script_parameters['partition']}\n'
         content += f'#SBATCH --cpus-per-task={script_parameters['cpus_per_task']}\n'
         if script_parameters['partition'] != 'aoraki':
             content += f'#SBATCH --gpus-per-task={script_parameters['gpus_per_task']}\n'
