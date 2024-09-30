@@ -8,6 +8,7 @@ import pandas as pd
 from yolo_tools.database.FlyChoiceDatabase import *
 from yolo_tools.analysis_file_manager.AnalysisFileManager import AnalysisFileManager
 from tqdm import tqdm
+import warnings
 
 class ResultManager:
     def __init__(self, db_url,meta_data_csv_path,result_base_path):
@@ -108,7 +109,7 @@ class ResultManager:
         if unloadable_files:
             for file_info in unloadable_files:
                 print(f"Unloadable file for arena {file_info[0]}: {file_info[1]}")
-            raise Warning("Some files could not be loaded. Please check the unloadable files above.")
+            warnings.warn("Some files could not be loaded. Please check the unloadable files above.")
         return unloadable_indices
 
 
