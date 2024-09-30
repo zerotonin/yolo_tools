@@ -115,9 +115,10 @@ def create_integer_identifier(df):
     return df
 
 # database url
-#db_filepath = '/home/geuba03p/fly_choice.db'
-#db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
+# db_filepath = '/home/geuba03p/fly_choice.db'
+# db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
 # df = db_handler.get_two_choice_results()
+# df.to_csv('/home/geuba03p/two_choice_results.csv',index =False)
 df = pd.read_csv('/home/geuba03p/two_choice_results.csv')
 not_far_enough = df.distance_walked_mm.isna() | (df.distance_walked_mm <100)
 df = df.loc[not_far_enough == False,:]
