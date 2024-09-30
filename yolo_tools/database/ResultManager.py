@@ -103,7 +103,7 @@ class ResultManager:
 
             except Exception as e:
                 unloadable_files.append((row['arena_number'], str(e)))
-                unloadable_indices.append[idx]
+                unloadable_indices.append(idx)
 
         if unloadable_files:
             for file_info in unloadable_files:
