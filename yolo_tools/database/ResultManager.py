@@ -77,6 +77,7 @@ class ResultManager:
         print the list of unloadable files and raise an error.
         """
         unloadable_files = []
+        unloadable_indices = []
 
         for idx, row in self.metadata_df.iterrows():
             try:
@@ -102,12 +103,13 @@ class ResultManager:
 
             except Exception as e:
                 unloadable_files.append((row['arena_number'], str(e)))
+                unloadable_indices.append[idx]
 
         if unloadable_files:
             for file_info in unloadable_files:
                 print(f"Unloadable file for arena {file_info[0]}: {file_info[1]}")
-            raise RuntimeError("Some files could not be loaded. Please check the unloadable files above.")
-
+            raise Warning("Some files could not be loaded. Please check the unloadable files above.")
+        return unloadable_indices
 
 
     def insert_experiment(self):
@@ -306,7 +308,7 @@ class ResultManager:
             db.session.flush()  # Ensure ID is assigned
             db.session.commit()
 
-    def process_metadata(self):
+    def process_metadata(self,unloadable_indices):
         """
         Process each row in the metadata DataFrame to create experiments, flies, and trials.
         Assumes that `insert_experiment` has already been called and set `self.experiment_id`.
@@ -315,12 +317,14 @@ class ResultManager:
          
         for idx, row in tqdm(self.metadata_df.iterrows(),desc='writing flies into db'):
 
-            self.check_and_if_needed_insert_fly(idx,row)
-            self.insert_trial(idx,row)
-            self.insert_decision_result(row)
-            self.insert_locomotor_result(row)
-            self.insert_trajectory_data(row)
-            self.insert_decision_timing(row)
+            if idx not in unloadable_indices:
+
+                self.check_and_if_needed_insert_fly(idx,row)
+                self.insert_trial(idx,row)
+                self.insert_decision_result(row)
+                self.insert_locomotor_result(row)
+                self.insert_trajectory_data(row)
+                self.insert_decision_timing(row)
     
         self.update_metadata_file()
 
@@ -343,10 +347,10 @@ def main():
     result_manager.read_metadata()
 
     # Check if all files are accesible
-    result_manager.check_files_loadable()
+    unloadable_indices = result_manager.check_files_loadable()
 
     # Process metadata which involves inserting data into the database
-    result_manager.process_metadata()
+    result_manager.process_metadata(unloadable_indices)
 
     # Optionally, print a message or handle further tasks
     print("Data processing complete.")
