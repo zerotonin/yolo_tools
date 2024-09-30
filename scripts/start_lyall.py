@@ -10,8 +10,7 @@ if __name__ == "__main__":
     # INPUT VARIABLES #
     ###################
 
-    for mp4_filepath in ['2024_09_12__09-30-00.mp4', '2024_09_23__09-15-00.mp4',
-                        '2024_09_13__09-40-13.mp4', '2024_09_27__09-30-00.mp4']:
+    for mp4_filepath in ['s2024_09_13__09-40-13.mp4', '2024_09_27__09-30-00.mp4']:
         # file name of the video file  you want to analyse
         
 
