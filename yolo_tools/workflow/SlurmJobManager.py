@@ -184,7 +184,7 @@ class SlurmJobManager:
         script_parameters['nodes'] = nodes
         script_parameters['ntasks_per_node'] = ntasks
         script_parameters['module'] = 'video_preprocessing'
-        script_parameters['runtime_sec'] = self.video_duration_sec*0.33
+        script_parameters['runtime_sec'] = self.video_duration_sec*0.66
 
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
