@@ -212,7 +212,9 @@ class SlurmJobManager:
             track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
             
             for split_i in gpu_jobs:
-                ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
+                # Is the expected attractive stimu;lus on the left (stimulus)
+                is_attractive_on_the_left = self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i]
+                ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,is_attractive_on_the_left)
                 analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
                 analysis_jobs.append(analysis_job_id)
 
