@@ -44,7 +44,9 @@ class SlurmJobManager:
 
         Args:
             script_parameters (dict): Parameters for the SLURM script including:
-                - partition (str): The partition where the job should run.
+                - partition (str): The partition where the job should run. 
+                                    If set to "all_aoraki_gpus" it will execute on:
+                                    aoraki_gpu_L40, aoraki_gpu_A100_40GB, aoraki_gpu_A100_80GB, aoraki_gpu_H100
                 - filename (str): The filename for the SLURM script.
                 - python_script (str): Path to the Python script to execute.
                 - jobname (str): Name of the job.
@@ -69,7 +71,10 @@ class SlurmJobManager:
         content =  f'#!/bin/bash\n'
         content += f'#SBATCH --job-name={script_parameters['jobname']}\n'
         content += f'#SBATCH --account={self.user_name}\n'
-        content += f'#SBATCH --partition={script_parameters['partition']}\n'
+        if script_parameters['partition'] == 'all_aoraki_gpus':
+            content += f'#SBATCH --partition=aoraki_gpu_L40,aoraki_gpu_A100_40GB,aoraki_gpu_A100_80GB,aoraki_gpu_H100\n'
+        else:
+            content += f'#SBATCH --partition={script_parameters['partition']}\n'
         content += f'#SBATCH --cpus-per-task={script_parameters['cpus_per_task']}\n'
         if script_parameters['partition'] != 'aoraki':
             content += f'#SBATCH --gpus-per-task={script_parameters['gpus_per_task']}\n'
@@ -179,7 +184,7 @@ class SlurmJobManager:
         script_parameters['nodes'] = nodes
         script_parameters['ntasks_per_node'] = ntasks
         script_parameters['module'] = 'video_preprocessing'
-        script_parameters['runtime_sec'] = self.video_duration_sec*0.33
+        script_parameters['runtime_sec'] = self.video_duration_sec*0.66
 
         self.create_slurm_script(script_parameters)
         return script_parameters['filename']
@@ -207,7 +212,9 @@ class SlurmJobManager:
             track_job_id = self.submit_job(track_script_filepath, dependency_id=split_job_id)
             
             for split_i in gpu_jobs:
-                ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i])
+                # Is the expected attractive stimu;lus on the left (stimulus)
+                is_attractive_on_the_left = self.meta_data_table.stimuli_01[split_i] == self.meta_data_table.expected_attractive_stim_id[split_i]
+                ana_script_filepath =self.create_trajectory_analysis_slurm_script(split_i,is_attractive_on_the_left)
                 analysis_job_id = self.submit_job(ana_script_filepath, dependency_id=track_job_id)
                 analysis_jobs.append(analysis_job_id)
 
