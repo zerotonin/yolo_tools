@@ -5,7 +5,7 @@ import numpy as np
 #from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
 
 
-def boxplot_by_genotype(df,quantification = 'prefrence_index', experiment_title= '', notch = True):
+def boxplot_by_genotype(df,quantification = 'preference_index', experiment_title= '', notch = True):
     """
     Plots the preference index by genotype with sex as the hue using seaborn boxplots.
 
@@ -122,6 +122,7 @@ def create_integer_identifier(df):
 df = pd.read_csv('/home/geuba03p/two_choice_results.csv')
 not_far_enough = df.distance_walked_mm.isna() | (df.distance_walked_mm <100)
 df = df.loc[not_far_enough == False,:]
+df['preference_index'] = df['preference_index'] *-1
 df = create_identifier(df)
 df = create_integer_identifier(df)
 
@@ -142,12 +143,14 @@ for experiment_identifier in df.int_identifier.unique():
     quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 
             'fraction_middle', 'fraction_positive', 'fraction_negative',
             'preference_index', 'decision_duration_index']
-
+    
+    quants = ['preference_index']
 
     for q in quants:
         fig = boxplot_by_genotype(df_subset,q,df_subset.int_identifier.iloc[0])
         fig_name =f'{df_subset.int_identifier.iloc[0]}_{q}'
         figure_list.append((fig,fig_name))
+        #plt.show()
 
 
 # Example usage
@@ -189,3 +192,8 @@ def plot_time_vs_distance(df):
     plt.show()
 
 plot_time_vs_distance(df)
+
+for date_time in df.experiment_date_time.unique():
+    plot_df = df.loc[df.experiment_date_time == date_time]
+    boxplot_by_genotype(plot_df, experiment_title= date_time)
+plt.show()
