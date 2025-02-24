@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1
-#SBATCH --time=06:00:00
+#SBATCH --time=10:00:00
 #SBATCH --mem=20GB
 
 sleep 5  # wait on auto mount (if needed)
