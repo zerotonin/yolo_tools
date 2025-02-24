@@ -17,8 +17,8 @@ conda activate yolov8
   --model yolo11 \
   --pretrained yolo11l.pt \
   --data /projects/sciences/zoology/geurten_lab/AI_trainData/charon_data_2025/data.yaml \
-  --epochs 2 \
-  --batch_size 3 \
+  --epochs 1000 \
+  --batch_size 10 \
   --imgsz 640 \
   --project /home/geuba03p/object_det_comparison \
   --name charon_run \
