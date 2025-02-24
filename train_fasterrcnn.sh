@@ -14,7 +14,7 @@ conda activate yolov8
 
 /home/geuba03p/miniconda3/envs/yolov8/bin/python /home/geuba03p/PyProjects/yolo_tools/single_model_train.py \
   --model fasterrcnn \
-  --data_dir /projects/sciences/zoology/geurten_labB/AI_trainData/COCO_annotations_RetinaNet_MaskRCNN/ \
+  --data_dir /projects/sciences/zoology/geurten_lab/AI_trainData/COCO_annotations_RetinaNet_MaskRCNN/ \
   --output_parent /home/geuba03p/object_det_comparison \
   --num_classes 3 \
   --batch_size 3 \
