@@ -5,6 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1
+#SBATCH --cpus-per-task=8
 #SBATCH --time=24:00:00
 #SBATCH --mem=20GB
 
@@ -21,7 +22,7 @@ conda activate yolov8
   --pretrained /home/geuba03p/object_det_comparison/charon_run3/weights/last.pt \
   --data /projects/sciences/zoology/geurten_lab/AI_trainData/charon_data_2025/data.yaml \
   --epochs 1000 \
-  --batch_size 1 \
+  --batch_size 6 \
   --imgsz 640 \
   --project /home/geuba03p/object_det_comparison \
   --name charon_run \
