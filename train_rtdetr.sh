@@ -18,7 +18,7 @@ conda activate yolov8
 
 /home/geuba03p/miniconda3/envs/yolov8/bin/python /home/geuba03p/PyProjects/yolo_tools/single_ultralytics_train.py \
   --model yolo11 \
-  --pretrained /home/geuba03p/object_det_comparison/charon_run/weights/last.pt \
+  --pretrained /home/geuba03p/object_det_comparison/charon_run3/weights/last.pt \
   --data /projects/sciences/zoology/geurten_lab/AI_trainData/charon_data_2025/data.yaml \
   --epochs 1000 \
   --batch_size 10 \
