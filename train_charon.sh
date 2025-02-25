@@ -21,7 +21,7 @@ conda activate yolov8
   --pretrained /home/geuba03p/object_det_comparison/charon_run3/weights/last.pt \
   --data /projects/sciences/zoology/geurten_lab/AI_trainData/charon_data_2025/data.yaml \
   --epochs 1000 \
-  --batch_size 10 \
+  --batch_size 1 \
   --imgsz 640 \
   --project /home/geuba03p/object_det_comparison \
   --name charon_run \
