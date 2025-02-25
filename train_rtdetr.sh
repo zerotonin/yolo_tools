@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=train_rtdetr
 #SBATCH --account=geuba03p
-#SBATCH --partition=aoraki_gpu_H100,aoraki_gpu,aoraki_gpu_L40
+#SBATCH --partition=aoraki_gpu_H100,aoraki_gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1
-#SBATCH --time=10:00:00
+#SBATCH --time=24:00:00
 #SBATCH --mem=20GB
 
 sleep 5
