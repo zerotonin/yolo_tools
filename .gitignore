@@ -1,6 +1,8 @@
 *.pt
 *.npy
 *.cpython*
+*.out
+
 training_runs/*
 *.db
 test_flies.json
