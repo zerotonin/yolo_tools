@@ -9,6 +9,11 @@ and print both the trial info and the frame-by-frame path.
 import os
 import sqlite3
 import pandas as pd
+script_dir   = os.path.dirname(__file__)
+project_root = os.path.abspath(os.path.join(script_dir, '..'))
+# add yolo_tools package to import path
+sys.path.insert(0, project_root)
+from yolo_tools.plotting.two_choice_plots import plot_trajectory
 
 # ===== User parameters: edit these three =====
 DB_PATH      = 'data/fly_choice.db'
