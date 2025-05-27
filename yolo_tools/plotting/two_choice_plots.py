@@ -2,7 +2,36 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
-#from yolo_tools.database.FlyChoiceDatabase import DatabaseHandler
+import os
+import matplotlib as mpl
+
+# ensure SVG text stays as text
+mpl.rcParams['svg.fonttype'] = 'none'
+
+def save_figure(fig, directory, filename_without_ext, dpi=300):
+    """
+    Save a Matplotlib figure as PNG and SVG, with text preserved as text in the SVG.
+
+    Parameters
+    ----------
+    fig : matplotlib.figure.Figure
+        The figure to save.
+    directory : str
+        Path to the folder where files will be written. Created if missing.
+    filename_without_ext : str
+        Base filename, without extension.
+    dpi : int, default 300
+        Resolution for the PNG.
+    """
+    os.makedirs(directory, exist_ok=True)
+    base = os.path.join(directory, filename_without_ext)
+
+    # PNG
+    fig.savefig(base + '.png', dpi=dpi, bbox_inches='tight')
+
+    # SVG (text remains as text because svg.fonttype='none')
+    fig.savefig(base + '.svg', bbox_inches='tight')
+
 
 
 def boxplot_by_genotype(df,quantification = 'preference_index', experiment_title= '', notch = True):
@@ -114,64 +143,6 @@ def create_integer_identifier(df):
     )
     return df
 
-# database url
-# db_filepath = '/home/geuba03p/fly_choice.db'
-# db_handler = DatabaseHandler(f'sqlite:///{db_filepath}')
-# df = db_handler.get_two_choice_results()
-# df.to_csv('/home/geuba03p/two_choice_results.csv',index =False)
-df = pd.read_csv('/home/geuba03p/two_choice_results.csv')
-not_far_enough = df.distance_walked_mm.isna() | (df.distance_walked_mm <100)
-df = df.loc[not_far_enough == False,:]
-df['preference_index'] = df['preference_index'] *-1
-df = create_identifier(df)
-df = create_integer_identifier(df)
-
-figure_list = list()
-for experiment_identifier in df.int_identifier.unique():
-
-    df_subset = df.loc[df.int_identifier == experiment_identifier]
-
-
-    quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 'fraction_left', 'fraction_right',
-            'fraction_middle', 'fraction_positive', 'fraction_negative',
-            'preference_index', 'decision_to_positive_num',
-            'decision_from_positive_num', 'decision_to_negative_num',
-            'decision_from_negative_num', 'duration_after_positive',
-            'duration_after_negative']
-
-
-    quants = ['distance_walked_mm', 'max_speed_mmPs', 'avg_speed_mmPs', 
-            'fraction_middle', 'fraction_positive', 'fraction_negative',
-            'preference_index', 'decision_duration_index']
-    
-    quants = ['preference_index']
-
-    for q in quants:
-        fig = boxplot_by_genotype(df_subset,q,df_subset.int_identifier.iloc[0])
-        fig_name =f'{df_subset.int_identifier.iloc[0]}_{q}'
-        figure_list.append((fig,fig_name))
-        #plt.show()
-
-
-# Example usage
-tid = 154
-tra_df = db_handler.get_trajectory_for_trial(tid)
-row = df.loc[df.trial_id ==tid,:]
-stim_left = f'{row.stimulus_01_name.iloc[0]} {row.stimulus_01_amplitude.iloc[0]} {row.stimulus_01_amplitude_unit.iloc[0]}'
-stim_right = f'{row.stimulus_02_name.iloc[0]} {row.stimulus_02_amplitude.iloc[0]} {row.stimulus_02_amplitude_unit.iloc[0]}'
-fig = plot_trajectory(tra_df,df.experiment_fps[0], stim_left, stim_right)
-figure_list.append((fig,'example_trajectory'))
-
-save_dir =  '/home/geuba03p/koen_figs'
-for fig_data in figure_list:
-    fig, fig_name = fig_data
-    for ext in ['svg','png']:
-        fig.savefig(f'{save_dir}/{fig_name}.{ext}')
-
-
-plt.show()
-
-print('wait')
 def plot_time_vs_distance(df):
     # Ensure the 'experiment_date_time' column is in datetime format
     df['experiment_date_time'] = pd.to_datetime(df['experiment_date_time'], errors='coerce')
@@ -191,9 +162,3 @@ def plot_time_vs_distance(df):
     plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
     plt.show()
 
-plot_time_vs_distance(df)
-
-for date_time in df.experiment_date_time.unique():
-    plot_df = df.loc[df.experiment_date_time == date_time]
-    boxplot_by_genotype(plot_df, experiment_title= date_time)
-plt.show()
