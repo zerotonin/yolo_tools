@@ -126,21 +126,26 @@ class SingleFolderConverter:
         source_image = self.source_dir / self.subfolder_name / filename
         
         if not source_image.exists():
-            print(f"Warning: Image not found: {source_image}")
+            # Debug: print what we're looking for
+            tqdm.write(f"  DEBUG: Looking for: {source_image}")
+            tqdm.write(f"  DEBUG: Subfolder exists: {(self.source_dir / self.subfolder_name).exists()}")
+            if (self.source_dir / self.subfolder_name).exists():
+                files = list((self.source_dir / self.subfolder_name).glob("*"))
+                tqdm.write(f"  DEBUG: Files in subfolder: {[f.name for f in files[:5]]}")
             return False
         
         # Get image dimensions first (needed for bounding box clipping)
         try:
             img_width, img_height = self.get_image_dimensions(source_image)
         except Exception as e:
-            print(f"Error reading image {source_image}: {e}")
+            tqdm.write(f"Error reading image {source_image}: {e}")
             return False
         
         # Get bounding box
         bbox = self.get_bounding_box(row, img_width, img_height)
         
         if bbox is None:
-            print(f"Warning: No valid keypoints for {filename}")
+            tqdm.write(f"Warning: No valid keypoints for {filename}")
             return False
         
         # Convert to YOLO format
@@ -174,6 +179,10 @@ class SingleFolderConverter:
         # Read CSV
         df = self.read_csv()
         
+        # Debug: Print first few rows to understand structure
+        tqdm.write(f"\n  DEBUG: CSV has {len(df)} rows")
+        tqdm.write(f"  DEBUG: First row columns [0:3]: {df.iloc[0, 0:3].tolist() if len(df) > 0 else 'empty'}")
+        
         # Create output directories
         images_dir = self.output_dir / "images"
         labels_dir = self.output_dir / "labels"
@@ -185,8 +194,9 @@ class SingleFolderConverter:
                             total=len(df), 
                             desc=f"  {self.subfolder_name}",
                             leave=False):
-            # Skip header rows
-            if row.iloc[0] == 'labeled-data':
+            # Only process rows that start with 'labeled-data' (these are the actual data rows)
+            # Skip header rows (scorer, bodyparts, coords)
+            if row.iloc[0] != 'labeled-data':
                 continue
             
             if self.process_image(row, images_dir, labels_dir):
@@ -315,8 +325,8 @@ def main():
     """Main function to run the converter"""
     
     # Configuration
-    LABELED_DATA_DIR = "/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-Bart-2025-02-21/labeled-data"  # Your DLC labeled-data directory
-    OUTPUT_DIR = "/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data"        # Output directory for YOLO format
+    LABELED_DATA_DIR = "labeled-data"  # Your DLC labeled-data directory
+    OUTPUT_DIR = "yolo_dataset"        # Output directory for YOLO format
     CLASS_ID = 0                        # Class ID for your animal
     PADDING_PERCENT = 0.1               # 10% padding around bounding box
     
