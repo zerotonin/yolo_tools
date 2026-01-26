@@ -28,6 +28,8 @@ class YoloWrapper:
             model_weights = 'yolov8s.pt'
         elif model_weights == 'medium':
             model_weights = 'yolov8m.pt'
+        elif model_weights == '11medium':
+            model_weights = 'yolov11m.pt'
         elif (not Path(model_weights).exists()) or (Path(model_weights).suffix != '.pt'):
             raise ValueError('The parameter model_weight should be "nano", "small" or a'
                              'path to a .pt file with saved weights')
