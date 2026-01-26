@@ -68,15 +68,16 @@ process_video() {
     # Set which GPU to use for this process
     export CUDA_VISIBLE_DEVICES=$gpu_id
     
-    # Run YOLO detection
-    ~/miniconda3/envs/yolov8/bin/python -m yolo_tools.detection.videoAnalyser \
+    # Run YOLO detection with new videoDetectorWithOutput
+    ~/miniconda3/envs/yolov8/bin/python -m yolo_tools.detection.videoDetectorWithOutput \
         --video_path "$video_path" \
         --apriori_classes 0 \
         --apriori_class_names weta \
         --yolo_weights "$YOLO_WEIGHTS" \
-        --output_dir "$OUTPUT_DIR" \
+        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \
         --save_video \
-        --video_name "${video_name}_yolo_labelled.mp4" \
+        --output_video "$OUTPUT_DIR/${video_name}_yolo_labelled.mp4" \
+        --no_progress \
         2>&1 | sed "s/^/[GPU $gpu_id] /"
     
     local exit_code=$?
@@ -153,7 +154,12 @@ echo ""
 # List output files
 if [ -d "$OUTPUT_DIR" ]; then
     echo "Output files:"
-    ls -lh "$OUTPUT_DIR" | grep -E '\.mp4|\.csv' | awk '{print "  " $9 " (" $5 ")"}'
+    echo ""
+    echo "Trajectories (.npy):"
+    ls -lh "$OUTPUT_DIR"/*.npy 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}'
+    echo ""
+    echo "Labeled videos (.mp4):"
+    ls -lh "$OUTPUT_DIR"/*.mp4 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}'
 fi
 
 echo ""
