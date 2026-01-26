@@ -10,9 +10,9 @@
 
 # python -m yolo_tools.training_tools.train_bash_compatible  -d <dataset_dir> -i <images_dir> -l <labels_dir> -c <config_file> [-n <model_name>] [-e <epochs>] [--classes <class1> <class2> ...]
 dataset_dir='/projects/sciences/zoology/geurten_lab/AI_inferenceGraphs/weta_yolo_model'
-images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_yolo2/images'
-labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_yolo2/labels'
-config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_yolo2/dataset.yaml'
+images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/images'
+labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/labels'
+config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/dataset.yaml'
 model_name='weta_yolo_model'
 epochs=600
 #classes
