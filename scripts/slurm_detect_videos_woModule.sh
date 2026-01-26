@@ -1,15 +1,40 @@
 #!/bin/bash
-#SBATCH --job-name=yolo_detect_thora
+#SBATCH --job-name=yolo_detect_weta
 #SBATCH --account=geuba03p
 #SBATCH --partition=aoraki_gpu_H100,aoraki_gpu,aoraki_gpu_L40
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1
 #SBATCH --cpus-per-task=16
-#SBATCH --time=04:00:00
+#SBATCH --time=08:00:00
 #SBATCH --mem=40GB
 #SBATCH --output=yolo_detect_%j.out
 #SBATCH --error=yolo_detect_%j.err
+
+# ============================================================
+# CONFIGURATION - MODIFY THESE VARIABLES
+# ============================================================
+
+# Which species to process
+SPECIES="h_thoracica"  # Options: h_maori, h_thoracica, h_crassidens
+
+# Video input/output settings
+VIDEO_DIR="/projects/sciences/zoology/geurten_lab/weta_videos_cropped/${SPECIES}"
+VIDEO_OUTPUT_DIR="${VIDEO_DIR}/yolo_videos_$(date +%Y%m%d_%H%M%S)"
+TRAJECTORY_OUTPUT_DIR="${VIDEO_DIR}/yolo_trajectories_$(date +%Y%m%d_%H%M%S)"
+
+# Video writing control
+SAVE_VIDEOS=false  # Set to false to skip video generation (MUCH faster, less disk space)
+
+# YOLO model weights
+YOLO_WEIGHTS="/home/geuba03p/PyProjects/yolo_tools/runs/detect/weta_yolo_11medium/weights/best.pt"
+
+# Processing settings
+MAX_PARALLEL=8  # Number of parallel processes
+
+# ============================================================
+# END CONFIGURATION
+# ============================================================
 
 # Wait for fileserver to be ready
 echo "Waiting for fileserver to mount..."
@@ -29,19 +54,22 @@ echo ""
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate yolov8
 
-# Configuration
-VIDEO_DIR="/projects/sciences/zoology/geurten_lab/weta_videos_cropped/h_thoracica" # 	h_maori h_thoracica h_crassidens
-YOLO_WEIGHTS="/home/geuba03p/PyProjects/yolo_tools/runs/detect/weta_yolo_11medium/weights/best.pt"
-OUTPUT_DIR="${VIDEO_DIR}/yolo_detections_$(date +%Y%m%d_%H%M%S)"
-MAX_PARALLEL=4  # Number of parallel processes on H100
-
-# Create output directory
-mkdir -p "$OUTPUT_DIR"
+# Create output directories
+mkdir -p "$TRAJECTORY_OUTPUT_DIR"
+if [ "$SAVE_VIDEOS" = true ]; then
+    mkdir -p "$VIDEO_OUTPUT_DIR"
+fi
 
 echo "Configuration:"
+echo "  Species: $SPECIES"
 echo "  Video directory: $VIDEO_DIR"
 echo "  YOLO weights: $YOLO_WEIGHTS"
-echo "  Output directory: $OUTPUT_DIR"
+echo "  Trajectory output: $TRAJECTORY_OUTPUT_DIR"
+if [ "$SAVE_VIDEOS" = true ]; then
+    echo "  Video output: $VIDEO_OUTPUT_DIR"
+else
+    echo "  Video output: DISABLED (trajectories only)"
+fi
 echo "  Max parallel jobs: $MAX_PARALLEL"
 echo ""
 
@@ -68,17 +96,21 @@ process_video() {
     # Set which GPU to use for this process
     export CUDA_VISIBLE_DEVICES=$gpu_id
     
-    # Run YOLO detection with new videoDetectorWithOutput
-    ~/miniconda3/envs/yolov8/bin/python -m yolo_tools.detection.videoDetectorWithOutput \
-        --video_path "$video_path" \
+    # Build command based on whether we're saving videos
+    local cmd="~/miniconda3/envs/yolov8/bin/python -m yolo_tools.detection.videoDetectorWithOutput \
+        --video_path \"$video_path\" \
         --apriori_classes 0 \
         --apriori_class_names weta \
-        --yolo_weights "$YOLO_WEIGHTS" \
-        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \
- 	--save_video \
-        --output_video "$OUTPUT_DIR/${video_name}_yolo_labelled.mp4" \
-        --no_progress \
-        2>&1 | sed "s/^/[GPU $gpu_id] /"
+        --yolo_weights \"$YOLO_WEIGHTS\" \
+        --output_file \"$TRAJECTORY_OUTPUT_DIR/${video_name}_trajectories.npy\" \
+        --no_progress"
+    
+    if [ "$SAVE_VIDEOS" = true ]; then
+        cmd="$cmd --save_video --output_video \"$VIDEO_OUTPUT_DIR/${video_name}_yolo_labelled.mp4\""
+    fi
+    
+    # Run YOLO detection
+    eval $cmd 2>&1 | sed "s/^/[GPU $gpu_id] /"
     
     local exit_code=$?
     
@@ -92,7 +124,7 @@ process_video() {
 }
 
 export -f process_video
-export OUTPUT_DIR YOLO_WEIGHTS
+export TRAJECTORY_OUTPUT_DIR VIDEO_OUTPUT_DIR YOLO_WEIGHTS SAVE_VIDEOS
 
 # Get list of all video files
 mapfile -t VIDEO_FILES < <(find "$VIDEO_DIR" -maxdepth 1 -name "*.mp4" -type f | sort)
@@ -148,18 +180,27 @@ echo "Total videos: $total"
 echo "Successfully processed: $processed"
 echo "Failed: $failed"
 echo ""
-echo "Results saved to: $OUTPUT_DIR"
+echo "Results saved to:"
+echo "  Trajectories: $TRAJECTORY_OUTPUT_DIR"
+if [ "$SAVE_VIDEOS" = true ]; then
+    echo "  Videos: $VIDEO_OUTPUT_DIR"
+fi
 echo ""
 
 # List output files
-if [ -d "$OUTPUT_DIR" ]; then
-    echo "Output files:"
-    echo ""
-    echo "Trajectories (.npy):"
-    ls -lh "$OUTPUT_DIR"/*.npy 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}'
+echo "Output files:"
+echo ""
+echo "Trajectories (.npy):"
+ls -lh "$TRAJECTORY_OUTPUT_DIR"/*.npy 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}' | head -10
+traj_count=$(ls -1 "$TRAJECTORY_OUTPUT_DIR"/*.npy 2>/dev/null | wc -l)
+echo "  Total: $traj_count files"
+
+if [ "$SAVE_VIDEOS" = true ]; then
     echo ""
     echo "Labeled videos (.mp4):"
-    ls -lh "$OUTPUT_DIR"/*.mp4 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}'
+    ls -lh "$VIDEO_OUTPUT_DIR"/*.mp4 2>/dev/null | awk '{print "  " $9 " (" $5 ")"}' | head -10
+    video_count=$(ls -1 "$VIDEO_OUTPUT_DIR"/*.mp4 2>/dev/null | wc -l)
+    echo "  Total: $video_count files"
 fi
 
 echo ""
