@@ -2,6 +2,7 @@
 *.npy
 *.cpython*
 *.out
+*.err
 
 training_runs/*
 *.db

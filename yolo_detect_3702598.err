@@ -1,3 +1,0 @@
-slurmstepd: error: *** JOB 3702598 ON aoraki31 CANCELLED AT 2026-01-27T06:54:53 DUE TO TIME LIMIT ***
-slurmstepd: error: container_p_join: open failed for /weka/slurmtmp/aoraki31/3702598/.ns: No such file or directory
-slurmstepd: error: container_g_join(3702598): No such file or directory
