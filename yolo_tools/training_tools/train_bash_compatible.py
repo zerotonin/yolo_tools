@@ -38,6 +38,8 @@ def main():
                         help='Name for the trained model (default: yolo_model).')
     parser.add_argument('-e', '--epochs', type=int, default=200,
                         help='Number of training epochs (default: 200).')
+    parser.add_argument('-w', '--weights', type=str, default='small',
+                        help='Model weights to use (default: small).')
     parser.add_argument('--classes', nargs='+', default=['arena', 'fly'],
                         help='List of class names in the order they appear in the training data (default: arena fly).')
     args = parser.parse_args()
@@ -63,7 +65,7 @@ def main():
 
     # Train the YOLO model
     print("Training YOLO model...")
-    model = YoloWrapper('small')  # Assuming 'small' refers to a model size/type
+    model = YoloWrapper(args.weights)  # Using the weights argument passed from command line
     model.train(config_path, epochs=args.epochs, name=args.name)
     print("YOLO model training completed.")
 
