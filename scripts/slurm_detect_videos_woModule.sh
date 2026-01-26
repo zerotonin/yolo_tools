@@ -31,7 +31,7 @@ conda activate yolov8
 
 # Configuration
 VIDEO_DIR="/projects/sciences/zoology/geurten_lab/weta_videos_cropped/test_vids"
-YOLO_WEIGHTS="/home/geuba03p/PyProjects/yolo_tools/runs/detect/weta_yolo_model/weights/best.pt"
+YOLO_WEIGHTS="/home/geuba03p/PyProjects/yolo_tools/runs/detect/weta_yolo_11medium/weights/best.pt"
 OUTPUT_DIR="${VIDEO_DIR}/yolo_detections_$(date +%Y%m%d_%H%M%S)"
 MAX_PARALLEL=4  # Number of parallel processes on H100
 
