@@ -37,9 +37,14 @@ class SingleFolderConverter:
         """Read DeepLabCut CSV with multi-level headers"""
         return pd.read_csv(self.csv_file, header=[0, 1, 2])
     
-    def get_bounding_box(self, row: pd.Series) -> Optional[Tuple[float, float, float, float]]:
+    def get_bounding_box(self, row: pd.Series, img_width: int, img_height: int) -> Optional[Tuple[float, float, float, float]]:
         """
         Calculate bounding box from all keypoints in a row
+        
+        Args:
+            row: DataFrame row containing keypoint coordinates
+            img_width: Image width in pixels
+            img_height: Image height in pixels
         
         Returns:
             Tuple of (x_center, y_center, width, height) in pixel coordinates or None
@@ -68,10 +73,11 @@ class SingleFolderConverter:
         x_padding = width * self.padding_percent
         y_padding = height * self.padding_percent
         
+        # Apply padding and clip to image boundaries
         x_min = max(0, x_min - x_padding)
         y_min = max(0, y_min - y_padding)
-        x_max = x_max + x_padding
-        y_max = y_max + y_padding
+        x_max = min(img_width, x_max + x_padding)
+        y_max = min(img_height, y_max + y_padding)
         
         x_center = (x_min + x_max) / 2
         y_center = (y_min + y_max) / 2
@@ -123,18 +129,18 @@ class SingleFolderConverter:
             print(f"Warning: Image not found: {source_image}")
             return False
         
-        # Get bounding box
-        bbox = self.get_bounding_box(row)
-        
-        if bbox is None:
-            print(f"Warning: No valid keypoints for {filename}")
-            return False
-        
-        # Get image dimensions
+        # Get image dimensions first (needed for bounding box clipping)
         try:
             img_width, img_height = self.get_image_dimensions(source_image)
         except Exception as e:
             print(f"Error reading image {source_image}: {e}")
+            return False
+        
+        # Get bounding box
+        bbox = self.get_bounding_box(row, img_width, img_height)
+        
+        if bbox is None:
+            print(f"Warning: No valid keypoints for {filename}")
             return False
         
         # Convert to YOLO format
