@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=yolo_detect_weta
+#SBATCH --job-name=yolo_detect_thora
 #SBATCH --account=geuba03p
 #SBATCH --partition=aoraki_gpu_H100,aoraki_gpu,aoraki_gpu_L40
 #SBATCH --nodes=1
@@ -30,7 +30,7 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate yolov8
 
 # Configuration
-VIDEO_DIR="/projects/sciences/zoology/geurten_lab/weta_videos_cropped/h_crassidens" # 	h_maori h_thoracica
+VIDEO_DIR="/projects/sciences/zoology/geurten_lab/weta_videos_cropped/h_thoracica" # 	h_maori h_thoracica h_crassidens
 YOLO_WEIGHTS="/home/geuba03p/PyProjects/yolo_tools/runs/detect/weta_yolo_11medium/weights/best.pt"
 OUTPUT_DIR="${VIDEO_DIR}/yolo_detections_$(date +%Y%m%d_%H%M%S)"
 MAX_PARALLEL=4  # Number of parallel processes on H100
@@ -74,7 +74,8 @@ process_video() {
         --apriori_classes 0 \
         --apriori_class_names weta \
         --yolo_weights "$YOLO_WEIGHTS" \
-        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \  #--save_video \
+        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \
+ 	--save_video \
         --output_video "$OUTPUT_DIR/${video_name}_yolo_labelled.mp4" \
         --no_progress \
         2>&1 | sed "s/^/[GPU $gpu_id] /"
