@@ -13,9 +13,10 @@ dataset_dir='/projects/sciences/zoology/geurten_lab/AI_inferenceGraphs/weta_yolo
 images_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/images'
 labels_dir='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/labels'
 config_file='/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data/dataset.yaml'
-model_name='weta_yolo_model'
+weight_type='11medium'
+model_name='weta_yolo_11medium'
 epochs=600
 #classes
 
 
-~/miniconda3/envs/yolov8/bin/python -m yolo_tools.training_tools.train_bash_compatible -d $dataset_dir -i $images_dir -l $labels_dir -c $config_file -n $model_name -e $epochs
+~/miniconda3/envs/yolov8/bin/python -m yolo_tools.training_tools.train_bash_compatible -d $dataset_dir -i $images_dir -l $labels_dir -c $config_file -n $model_name -w $weight_type -e $epochs
