@@ -211,7 +211,7 @@ class DeepLabCutConverter:
     """Converts all DeepLabCut annotations to YOLO format by processing all subfolders"""
     
     def __init__(self, labeled_data_dir: str, output_dir: str, 
-                 class_id: int = 0, padding_percent: float = 0.1):
+                 class_id: int = 0, padding_percent: float = 0.1, create_split: bool = False):
         """
         Initialize converter for entire DLC project
         
@@ -220,11 +220,13 @@ class DeepLabCutConverter:
             output_dir: Output directory for YOLO format dataset
             class_id: Class ID for the animal (default: 0)
             padding_percent: Padding around bounding box (default: 0.1 = 10%)
+            create_split: If True, creates train/val split structure. If False, creates flat structure (default: False)
         """
         self.labeled_data_dir = Path(labeled_data_dir)
         self.output_dir = Path(output_dir)
         self.class_id = class_id
         self.padding_percent = padding_percent
+        self.create_split = create_split
         
         self.total_processed = 0
         self.total_skipped = 0
@@ -288,10 +290,25 @@ class DeepLabCutConverter:
     
     def create_dataset_yaml(self) -> None:
         """Create YOLO dataset configuration file"""
-        yaml_content = f"""# YOLO Dataset Configuration
+        if self.create_split:
+            # For pre-split structure
+            yaml_content = f"""# YOLO Dataset Configuration
 path: {self.output_dir.absolute()}
-train: images
-val: images
+train: images/train
+val: images/val
+
+# Classes
+nc: 1  # number of classes
+names: ['animal']  # class names
+"""
+        else:
+            # For flat structure (YoloWrapper will do the split)
+            yaml_content = f"""# YOLO Dataset Configuration (flat structure for YoloWrapper)
+# Use YoloWrapper.create_dataset() to create train/val split
+
+path: {self.output_dir.absolute()}
+images_dir: images
+labels_dir: labels
 
 # Classes
 nc: 1  # number of classes
@@ -315,9 +332,16 @@ names: ['animal']  # class names
         print(f"  - Images: {self.output_dir / 'images'}")
         print(f"  - Labels: {self.output_dir / 'labels'}")
         print(f"  - Config: {self.output_dir / 'dataset.yaml'}")
-        print("\nNext steps:")
-        print("  Train with: yolo train data=dataset.yaml model=yolov8n.pt split=0.8")
-        print("  (YOLO will automatically split 80% train / 20% val)")
+        
+        if self.create_split:
+            print("\nDataset structure: Pre-split (train/val folders created)")
+            print("\nNext steps:")
+            print("  Train with: yolo train data=dataset.yaml model=yolov8n.pt")
+        else:
+            print("\nDataset structure: Flat (all files in images/ and labels/)")
+            print("\nNext steps:")
+            print("  Use YoloWrapper.create_dataset() to create train/val split")
+            print("  Or train directly with your training script")
         print("="*60)
 
 
@@ -329,13 +353,15 @@ def main():
     OUTPUT_DIR = "/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data"        # Output directory for YOLO format
     CLASS_ID = 0                        # Class ID for your animal
     PADDING_PERCENT = 0.1               # 10% padding around bounding box
+    CREATE_SPLIT = False                # False = flat structure for YoloWrapper, True = pre-split train/val
     
     # Create converter and run
     converter = DeepLabCutConverter(
         labeled_data_dir=LABELED_DATA_DIR,
         output_dir=OUTPUT_DIR,
         class_id=CLASS_ID,
-        padding_percent=PADDING_PERCENT
+        padding_percent=PADDING_PERCENT,
+        create_split=CREATE_SPLIT
     )
     
     converter.convert()
@@ -343,3 +369,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
