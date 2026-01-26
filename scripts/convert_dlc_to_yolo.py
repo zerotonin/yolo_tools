@@ -325,8 +325,8 @@ def main():
     """Main function to run the converter"""
     
     # Configuration
-    LABELED_DATA_DIR = "labeled-data"  # Your DLC labeled-data directory
-    OUTPUT_DIR = "yolo_dataset"        # Output directory for YOLO format
+    LABELED_DATA_DIR = "/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-Bart-2025-02-21/labeled-data"  # Your DLC labeled-data directory
+    OUTPUT_DIR = "/projects/sciences/zoology/geurten_lab/AI_trainData/weta_temperature-yoloformat-data"        # Output directory for YOLO format
     CLASS_ID = 0                        # Class ID for your animal
     PADDING_PERCENT = 0.1               # 10% padding around bounding box
     
