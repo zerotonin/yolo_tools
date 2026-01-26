@@ -74,8 +74,7 @@ process_video() {
         --apriori_classes 0 \
         --apriori_class_names weta \
         --yolo_weights "$YOLO_WEIGHTS" \
-        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \
-        --save_video \
+        --output_file "$OUTPUT_DIR/${video_name}_trajectories.npy" \  #--save_video \
         --output_video "$OUTPUT_DIR/${video_name}_yolo_labelled.mp4" \
         --no_progress \
         2>&1 | sed "s/^/[GPU $gpu_id] /"
