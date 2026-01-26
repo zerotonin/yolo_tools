@@ -122,20 +122,6 @@ class YOLO_VideoDetector(YOLO_detector):
         print(f"  FPS: {fps}")
         print(f"  Total frames: {total_frames}")
         
-        # Setup video writer if needed
-        video_writer = None
-        if video_output is not None:
-            video_output = Path(video_output)
-            video_output.parent.mkdir(parents=True, exist_ok=True)
-            
-            # Use H264 codec for better compatibility
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            video_writer = cv2.VideoWriter(str(video_output), fourcc, fps, (width, height))
-            
-            if not video_writer.isOpened():
-                print(f"Warning: Could not open video writer for {video_output}")
-                video_writer = None
-        
         # Run YOLO tracking
         print(f"\nRunning YOLO detection on: {Path(self.video_path).name}")
         results = self.yolo_fly.model.track(
@@ -146,14 +132,15 @@ class YOLO_VideoDetector(YOLO_detector):
             verbose=False
         )
         
-        # Process results
+        # Process results - collect all data first
         coordinates = []
+        frames_for_video = [] if video_output is not None else None
         frame_count = 0
         
         # Determine max frames for progress bar
         max_iter = self.max_frames if self.max_frames is not None else total_frames
         
-        pbar = tqdm(total=max_iter, desc="Processing", disable=not show_progress)
+        pbar = tqdm(total=max_iter, desc="Detecting", disable=not show_progress)
         
         for frame_result in results:
             # Get trajectories
@@ -164,11 +151,11 @@ class YOLO_VideoDetector(YOLO_detector):
                 num_values = len(self.apriori_classes) * 4
                 coordinates.append([np.nan] * num_values)
             
-            # Draw and save frame if video output is requested
-            if video_writer is not None:
+            # Store frame for later video writing (if needed)
+            if frames_for_video is not None:
                 frame = frame_result.orig_img.copy()
                 frame = self.draw_detections_on_frame(frame, frame_result)
-                video_writer.write(frame)
+                frames_for_video.append(frame)
             
             frame_count += 1
             pbar.update(1)
@@ -179,16 +166,28 @@ class YOLO_VideoDetector(YOLO_detector):
         
         pbar.close()
         
-        # Save trajectories
+        # PRIORITY 1: Save trajectories FIRST (fast, critical data)
         trajectories = np.array(coordinates)
         trajectory_output.parent.mkdir(parents=True, exist_ok=True)
         np.save(trajectory_output, trajectories)
         print(f"\n✓ Saved trajectories: {trajectory_output} (shape: {trajectories.shape})")
         
-        # Clean up video writer
-        if video_writer is not None:
-            video_writer.release()
-            print(f"✓ Saved labeled video: {video_output}")
+        # PRIORITY 2: Write video AFTER trajectories are safe (slow, optional)
+        if frames_for_video is not None and len(frames_for_video) > 0:
+            video_output = Path(video_output)
+            video_output.parent.mkdir(parents=True, exist_ok=True)
+            
+            print(f"\nWriting labeled video...")
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            video_writer = cv2.VideoWriter(str(video_output), fourcc, fps, (width, height))
+            
+            if video_writer.isOpened():
+                for frame in tqdm(frames_for_video, desc="Encoding", disable=not show_progress):
+                    video_writer.write(frame)
+                video_writer.release()
+                print(f"✓ Saved labeled video: {video_output}")
+            else:
+                print(f"✗ Failed to create video writer for {video_output}")
         
         return trajectories
 
@@ -282,17 +281,3 @@ Examples:
 
 if __name__ == '__main__':
     main()
-
-
-# # Just trajectories (like original)
-# python -m yolo_tools.detection.videoDetectorWithOutput \
-#   --video_path video.mp4 \
-#   --yolo_weights best.pt \
-#   --output_file trajectories.npy
-
-# # Trajectories + labeled video
-# python -m yolo_tools.detection.videoDetectorWithOutput \
-#   --video_path video.mp4 \
-#   --yolo_weights best.pt \
-#   --output_file trajectories.npy \
-#   --save_video
