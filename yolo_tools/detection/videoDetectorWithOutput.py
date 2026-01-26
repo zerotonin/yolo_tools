@@ -282,3 +282,17 @@ Examples:
 
 if __name__ == '__main__':
     main()
+
+
+# # Just trajectories (like original)
+# python -m yolo_tools.detection.videoDetectorWithOutput \
+#   --video_path video.mp4 \
+#   --yolo_weights best.pt \
+#   --output_file trajectories.npy
+
+# # Trajectories + labeled video
+# python -m yolo_tools.detection.videoDetectorWithOutput \
+#   --video_path video.mp4 \
+#   --yolo_weights best.pt \
+#   --output_file trajectories.npy \
+#   --save_video
