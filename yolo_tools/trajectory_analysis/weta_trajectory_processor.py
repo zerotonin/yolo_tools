@@ -9,11 +9,11 @@ and optionally filters the trajectories.
 
 Arena real-world coordinate convention
 --------------------------------------
-    TL (0, 80) -------- TR (600, 80)
+    TL (0, 80) -------- TR (555, 80)
         |                    |
         |      arena         |
         |                    |
-    BL (0,  0) -------- BR (600,  0)
+    BL (0,  0) -------- BR (555,  0)
 
 Usage
 -----
@@ -39,8 +39,8 @@ from scipy import signal
 # ──────────────────────────────────────────────────────────────────────────────
 REAL_WORLD_CORNERS = {
     "TL": np.array([0.0, 80.0]),
-    "TR": np.array([600.0, 80.0]),
-    "BR": np.array([600.0, 0.0]),
+    "TR": np.array([555.0, 80.0]),
+    "BR": np.array([555.0, 0.0]),
     "BL": np.array([0.0, 0.0]),
 }
 
