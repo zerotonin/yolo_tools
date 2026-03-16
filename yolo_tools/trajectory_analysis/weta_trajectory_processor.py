@@ -418,3 +418,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# python weta_trajectory_processor.py --base_dir /home/geuba03p/weta_project/weta_videos_cropped --fps 25 --filter
