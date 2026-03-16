@@ -305,3 +305,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Example usage:  python weta_temperature_mapping.py --base_dir /home/geuba03p/weta_project/weta_videos_cropped

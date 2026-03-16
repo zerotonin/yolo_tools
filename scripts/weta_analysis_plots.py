@@ -494,3 +494,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Example usage: python weta_analysis_plots.py --base_dir /home/geuba03p/weta_project/weta_videos_cropped --fps 25
