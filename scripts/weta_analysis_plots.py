@@ -327,7 +327,7 @@ def plot_boxplots(trials: list, output_dir: str):
 def plot_heatmaps(trials: list, output_dir: str):
     """Positional (x, y) and thermal (T, y) filled contour plots per species.
 
-    Positional: 0–600 mm × 0–80 mm, one per species, shared colour scale.
+    Positional: 0–555 mm × 0–80 mm, one per species, shared colour scale.
     Thermal:    global T range × 0–80 mm, one per species, shared colour scale.
     """
     from scipy.ndimage import gaussian_filter
@@ -353,7 +353,7 @@ def plot_heatmaps(trials: list, output_dir: str):
         species_data[sp]["temp"].extend(t["temperature"][valid].tolist())
 
     # ── Bin settings (coarser to avoid sparsity) ──
-    x_bins = np.linspace(0, 600, 31)       # 20 mm resolution
+    x_bins = np.linspace(0, 555, 31)       # 20 mm resolution
     y_bins = np.linspace(0, 80, 9)         # 10 mm resolution
     t_bins = np.linspace(t_min, t_max, 31) # ~1 °C resolution
 
@@ -410,7 +410,7 @@ def plot_heatmaps(trials: list, output_dir: str):
                          levels=levels, cmap="hot", extend="max")
         cbar = fig.colorbar(cf, ax=ax, shrink=0.8, pad=0.02)
         cbar.set_label("Density")
-        ax.set_xlim(0, 600)
+        ax.set_xlim(0, 555)
         ax.set_ylim(0, 80)
         ax.set_xlabel("x position (mm)")
         ax.set_ylabel("y position (mm)")
