@@ -76,9 +76,7 @@ TRIAL_TO_TEMP = {
 
 # 10 sensors: index 0 at 600 mm (hot), index 9 at 0 mm (cold)
 N_SENSORS = 10
-SENSOR_POSITIONS_ASC = np.linspace(0, 600, N_SENSORS)  # [0, 66.7, ..., 600]
-
-
+SENSOR_POSITIONS_ASC = [-52, 11, 67, 135, 197, 262, 325, 385, 444, 504]
 # ──────────────────────────────────────────────────────────────────────────────
 # Temperature I/O and interpolation
 # ──────────────────────────────────────────────────────────────────────────────
